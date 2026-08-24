@@ -1,0 +1,133 @@
+/* ── RatanHR Theme System ──────────────────────────────────────────────── */
+:root {
+    --bg: #ffffff;
+    --surface: #f4f6f9;
+    --text: #1a1a2e;
+    --text-muted: #6c757d;
+    --primary: #3a86ff;
+    --primary-dark: #2563eb;
+    --border: #dee2e6;
+    --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --input-bg: #ffffff;
+    --navbar-bg: #1a1a2e;
+    --navbar-text: #ffffff;
+    --sidebar-bg: #f8f9fa;
+    --table-header: #f1f3f5;
+    --table-hover: #f8f9fa;
+    --success: #28a745;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --info: #17a2b8;
+}
+
+[data-theme="dark"] {
+    --bg: #0f0f1a;
+    --surface: #1a1a2e;
+    --text: #e8e8f0;
+    --text-muted: #9999b3;
+    --primary: #6fa3ff;
+    --primary-dark: #4d87ff;
+    --border: #2e2e4a;
+    --card-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    --input-bg: #16213e;
+    --navbar-bg: #0a0a18;
+    --navbar-text: #e8e8f0;
+    --sidebar-bg: #131325;
+    --table-header: #1e1e35;
+    --table-hover: #1a1a30;
+    --success: #4caf50;
+    --danger: #f44336;
+    --warning: #ff9800;
+    --info: #29b6f6;
+}
+
+/* ── Base transitions ─────────────────────────────────────────────────── */
+body {
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ── Cards ────────────────────────────────────────────────────────────── */
+.card, .panel, .box, .content-box, .stat-card, .dashboard-card {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+    box-shadow: var(--card-shadow) !important;
+    color: var(--text) !important;
+    transition: background-color 0.25s ease;
+}
+
+/* ── Tables ───────────────────────────────────────────────────────────── */
+table, .table {
+    color: var(--text) !important;
+}
+th, thead tr {
+    background-color: var(--table-header) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+td { border-color: var(--border) !important; }
+tr:hover { background-color: var(--table-hover) !important; }
+
+/* ── Inputs ───────────────────────────────────────────────────────────── */
+input, select, textarea, .form-control, .form-select {
+    background-color: var(--input-bg) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+input::placeholder, textarea::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* ── Navbar ───────────────────────────────────────────────────────────── */
+.navbar, nav, header, .top-bar, .topbar {
+    background-color: var(--navbar-bg) !important;
+    color: var(--navbar-text) !important;
+    border-bottom: 1px solid var(--border);
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────── */
+.sidebar, #sidebar, .side-nav {
+    background-color: var(--sidebar-bg) !important;
+    border-right: 1px solid var(--border);
+}
+
+/* ── Theme toggle button ──────────────────────────────────────────────── */
+#theme-toggle-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    padding: 4px 12px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--navbar-text);
+    transition: all 0.2s ease;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+#theme-toggle-btn:hover {
+    background: rgba(255,255,255,0.15);
+    transform: scale(1.05);
+}
+
+/* ── Modals & Dropdowns ───────────────────────────────────────────────── */
+.modal-content, .dropdown-menu, .popover {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+}
+
+/* ── Badges & Alerts ──────────────────────────────────────────────────── */
+[data-theme="dark"] .alert-info    { background-color: #0d2d3a !important; border-color: #29b6f6 !important; color: #29b6f6 !important; }
+[data-theme="dark"] .alert-success { background-color: #0d2d1a !important; border-color: #4caf50 !important; color: #4caf50 !important; }
+[data-theme="dark"] .alert-danger  { background-color: #2d0d0d !important; border-color: #f44336 !important; color: #f44336 !important; }
+[data-theme="dark"] .alert-warning { background-color: #2d1f0d !important; border-color: #ff9800 !important; color: #ff9800 !important; }
+
+/* ── Links ────────────────────────────────────────────────────────────── */
+a { color: var(--primary) !important; }
+a:hover { color: var(--primary-dark) !important; }
+
+/* ── Scrollbar (dark mode) ────────────────────────────────────────────── */
+[data-theme="dark"] ::-webkit-scrollbar { width: 8px; }
+[data-theme="dark"] ::-webkit-scrollbar-track { background: var(--bg); }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }

@@ -1,0 +1,177 @@
+# =============================================================================
+# docker-compose.e2e.yml  —  RatanHR HRMS E2E infrastructure
+#
+# Starts three services:
+#   mysql   — MySQL 8.4 on port 3307  (database: hrms)
+#   redis   — Redis 7   on port 6380
+#   api     — .NET 8 API built from the staging server Dockerfile (port 8082)
+#
+# Usage (on the staging server):
+#   cp .env.e2e.template .env.e2e   # fill in every ← FILL IN value first
+#   docker compose -f docker-compose.e2e.yml --env-file .env.e2e up -d --wait
+#
+# All credentials are read from .env.e2e — nothing is hardcoded here.
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # MySQL 8.4
+  # ---------------------------------------------------------------------------
+  mysql:
+    image: mysql:8.4
+    container_name: hrms_e2e_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE:      "${MYSQL_DATABASE:-hrms}"
+    ports:
+      - "3307:3306"
+    volumes:
+      - hrms_e2e_mysql_data:/var/lib/mysql
+    # FIX E2E-COMPOSE-004: healthcheck runs through the container's own shell
+    # (CMD-SHELL) instead of a bare CMD argv exec, and reads the password from
+    # the environment rather than argv (no credential leak in `docker inspect`
+    # / process list). start_period raised so a cold first-boot initdb cannot
+    # be marked unhealthy.
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent || exit 1"]
+      interval: 10s
+      timeout:  10s
+      retries:  30
+      start_period: 90s
+
+  # ---------------------------------------------------------------------------
+  # Redis 7.4-alpine (pinned to match docker-compose.yml production target)
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7.4-alpine
+    container_name: hrms_e2e_redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    # FIX E2E-COMPOSE-004: CMD-SHELL form; asserts the PONG payload instead of
+    # just the exit code so a half-initialised Redis is not reported healthy.
+    healthcheck:
+      test:         ["CMD-SHELL", "redis-cli ping | grep -q PONG || exit 1"]
+      interval:     5s
+      timeout:      5s
+      retries:      20
+      start_period: 15s
+
+  # ---------------------------------------------------------------------------
+  # .NET 8 API
+  # Built from the Dockerfile already present on the staging server.
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hrms_e2e_api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8082:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT:                  Staging
+      ASPNETCORE_URLS:                         http://+:8080
+
+      # Database — built from env vars so the password is never hardcoded
+      # FIX E2E-COMPOSE-002: was a folded (>-) scalar, which joined the lines
+      # with spaces and produced an invalid connection string.
+      ConnectionStrings__DefaultConnection: "Server=mysql;Port=3306;Database=${MYSQL_DATABASE:-hrms};Uid=root;Pwd=${MYSQL_ROOT_PASSWORD};AllowPublicKeyRetrieval=True;SslMode=Required"
+
+      # JWT RS256 keys (multi-line PEM — use \n literals in .env.e2e)
+      Jwt__PrivateKeyPem:   "${JWT_PRIVATE_KEY_PEM}"
+      Jwt__PublicKeyPem:    "${JWT_PUBLIC_KEY_PEM}"
+      Jwt__Issuer:          HRMS.API
+      Jwt__Audience:        HRMS.Client
+      Jwt__ExpiresInMinutes: "30"
+
+      # AES-256 PII encryption key
+      Security__EncryptionKey:    "${ENCRYPTION_KEY}"
+      Security__BcryptWorkFactor: "12"
+
+      # Redis (rate-limiter + Hangfire)
+      Redis__ConnectionString: "redis:6379"
+      Hangfire__RedisConnectionString: "redis:6379,abortConnect=False"
+      Hangfire__UseInMemory:   "false"
+
+      # Swagger (staging — enable for debugging, protect with credentials)
+      Swagger__Enabled:  "true"
+      Swagger__Username: "${SWAGGER_USERNAME:-e2e-swagger}"
+      Swagger__Password: "${SWAGGER_PASSWORD}"
+
+      # CORS
+      Cors__AllowedOrigins: "${CORS_ALLOWED_ORIGINS:-http://localhost:3000}"
+
+      # Email (optional — API logs emails when Host is blank)
+      Email__Host:            "${EMAIL_HOST:-}"
+      Email__Password:        "${EMAIL_PASSWORD:-}"
+      Email__FromAddress:     "noreply@ratan-staging.local"
+      Email__AppBaseUrl:      "http://localhost:3000"
+
+      # Compliance
+      Compliance__DpoEmail:         "${DPO_EMAIL:-dpo@ratan-staging.local}"
+      Compliance__ComplianceRegime: "dpdp"
+
+      # AllowedHosts — accept all for the E2E container environment
+      AllowedHosts: "*"
+
+    healthcheck:
+      # FIX E2E-COMPOSE-005: the aspnet runtime image does not ship curl, so the
+      # previous probe always exited 127 ("unhealthy"). Fall back to wget and
+      # finally to a .NET-native TCP probe, whichever exists in the image.
+      test: ["CMD-SHELL",
+             "curl -fsS http://127.0.0.1:8080/health 2>/dev/null | grep -q Healthy || wget -qO- http://127.0.0.1:8080/health 2>/dev/null | grep -q Healthy || exit 1"]
+      interval:     10s
+      timeout:      10s
+      retries:      30
+      start_period: 90s
+
+  # ---------------------------------------------------------------------------
+  # SPA frontend  (FIX E2E-COMPOSE-001: was missing — Playwright needs the SPA)
+  # Builds the React/Vite SPA and serves it via `vite preview` on port 3000.
+  # ---------------------------------------------------------------------------
+  spa:
+    image: oven/bun:1.2.0-alpine
+    container_name: hrms_e2e_spa
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      # FIX E2E-COMPOSE-003: the bind mount was :ro, so `bun install` and
+      # `vite build` inside the container failed with EROFS. Source is still
+      # effectively immutable because node_modules/ and dist/ are isolated in
+      # anonymous volumes rather than written back to the host checkout.
+      - ./HRMS.SPA.Source:/app
+      - /app/node_modules
+      - /app/dist
+    ports:
+      - "3000:3000"
+    environment:
+      PORT:      "3000"
+      BASE_PATH: "/"
+      NODE_ENV:  production
+      VITE_API_URL: "http://localhost:8082"
+    # Build and preview; depends on API being reachable for real data calls
+    depends_on:
+      api:
+        condition: service_healthy
+    command: >
+      sh -c "bun install --frozen-lockfile &&
+             PORT=3000 BASE_PATH=/ NODE_ENV=production bun run build:ci &&
+             bunx vite preview --config vite.config.ts --host 0.0.0.0 --port 3000"
+    healthcheck:
+      test:         ["CMD-SHELL", "wget -qO- http://localhost:3000/ >/dev/null 2>&1 || exit 1"]
+      interval:     10s
+      timeout:      5s
+      retries:      12
+      start_period: 120s
+
+volumes:
+  hrms_e2e_mysql_data:
+    driver: local

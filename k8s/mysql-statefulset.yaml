@@ -1,0 +1,108 @@
+# Phase 7: MySQL 8.4 StatefulSet — replaces postgres-statefulset.yaml.
+# postgres-statefulset.yaml has been renamed to postgres-statefulset.yaml.bak
+# and preserved for rollback reference only.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-svc
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+    app.kubernetes.io/component: mysql
+spec:
+  clusterIP: None   # Headless service for StatefulSet DNS
+  selector:
+    app: hrms-mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+      name: mysql
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hrms-mysql
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+    app.kubernetes.io/component: mysql
+spec:
+  serviceName: mysql-svc
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hrms-mysql
+  template:
+    metadata:
+      labels:
+        app: hrms-mysql
+        app.kubernetes.io/name: hrms
+        app.kubernetes.io/component: mysql
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999      # mysql user in official image
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mysql
+          image: mysql:8.4.6
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: MYSQL_PASSWORD
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: MYSQL_ROOT_PASSWORD
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "mysqladmin ping -h localhost -u ${MYSQL_USER} --password=${MYSQL_PASSWORD}"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "mysqladmin ping -h localhost -u ${MYSQL_USER} --password=${MYSQL_PASSWORD}"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+          volumeMounts:
+            - name: mysqldata
+              mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: mysqldata
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi

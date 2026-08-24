@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>My Attendance – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="emp-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">My Profile</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseEmp"><i class="bi bi-person-vcard"></i> Employees <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseEmp"><a href="add-emp-details.html" class="sub-link">Add Details</a><a href="view-emp-details.html" class="sub-link">View Details</a></div>
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#att"><i class="bi bi-clock"></i> Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="att">
+      <a href="emp-web-attendance.html" class="sub-link" style="color:#f7b731;">Web Attendance</a>
+    </div>
+    <div class="nav-label">Documents</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#docs"><i class="bi bi-folder"></i> Company Docs <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="docs"><a href="company-docs.html" class="sub-link">View</a></div>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">My Attendance</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="avatar-circle">E</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+<div class="main-panel">
+  <div class="row g-4">
+    <!-- Check In / Out Card -->
+    <div class="col-md-4">
+      <div class="checkin-card mb-4">
+        <div class="time" id="liveTime">--:--:--</div>
+        <div class="text-white-50 small mb-3" id="liveDate">Loading...</div>
+
+        <!-- BACKEND: Show employee selector only if user has multiple employees -->
+        <!-- {% if employees|length > 1 %} -->
+        <select class="form-select form-select-sm mb-3" id="employeeSelect"
+          style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2);">
+          <!-- {% for emp in employees %} -->
+          <option value="{{emp.employee_id}}">{{emp.fullname}} ({{emp.employee_id}})</option>
+          <!-- {% endfor %} -->
+        </select>
+        <!-- {% endif %} -->
+
+        <!-- BACKEND: Check-in POST /web-check-in -->
+        <form action="/web-check-in" method="POST" class="d-inline">
+          <input type="hidden" name="employee_id" value="{{employees[0].employee_id}}">
+          <button type="submit" class="btn-checkin me-2 mt-2">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Check In
+          </button>
+        </form>
+
+        <!-- BACKEND: Check-out POST /web-check-out -->
+        <form action="/web-check-out" method="POST" class="d-inline">
+          <input type="hidden" name="employee_id" value="{{employees[0].employee_id}}">
+          <button type="submit" class="btn-checkout mt-2">
+            <i class="bi bi-box-arrow-right me-1"></i>Check Out
+          </button>
+        </form>
+
+        <!-- BACKEND: Show result message -->
+        <!-- <div class="mt-3 small text-white-50">{{checkin_message}}</div> -->
+      </div>
+
+      <!-- Today's Status Card -->
+      <div class="card card-table">
+        <div class="card-header py-3">Today's Status</div>
+        <div class="card-body">
+          <!-- BACKEND: {{todays_record}} -->
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted small">Check In</span>
+            <strong class="small">{{todays_record.checkin_time | default('—')}}</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted small">Check Out</span>
+            <strong class="small">{{todays_record.checkout_time | default('—')}}</strong>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted small">Status</span>
+            <!-- BACKEND: Conditional badge -->
+            <span class="badge-present">{{todays_record.attendance_status | default('Pending')}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance History -->
+    <div class="col-md-8">
+      <div class="card card-table">
+        <div class="card-header d-flex justify-content-between align-items-center py-3">
+          <span>My Attendance History</span>
+          <!-- BACKEND: Filter GET params ?startDate=&endDate=&status= -->
+          <form class="d-flex gap-2" method="GET">
+            <input type="date" class="form-control form-control-sm" name="startDate" style="width:130px;" value="{{filter.startDate}}">
+            <input type="date" class="form-control form-control-sm" name="endDate" style="width:130px;" value="{{filter.endDate}}">
+            <select class="form-select form-select-sm" name="status" style="width:110px;">
+              <option value="">All</option>
+              <option value="Present">Present</option>
+              <option value="Half Day">Half Day</option>
+              <option value="Absent">Absent</option>
+            </select>
+            <button type="submit" class="btn btn-sm btn-warning px-3">Go</button>
+          </form>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <!-- BACKEND: {% for record in attendance_history %} -->
+                <tr>
+                  <td>{{record.date}}</td>
+                  <td>{{record.checkin_time | default('—')}}</td>
+                  <td>{{record.checkout_time | default('—')}}</td>
+                  <td>
+                    <!-- BACKEND: Conditional badge -->
+                    <span class="badge-present">{{record.attendance_status}}</span>
+                  </td>
+                </tr>
+                <!-- BACKEND: {% endfor %} -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+function tick() {
+  const now = new Date();
+  document.getElementById('liveTime').textContent = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  document.getElementById('liveDate').textContent = now.toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+}
+tick(); setInterval(tick, 1000);
+</script>
+</body>
+</html>

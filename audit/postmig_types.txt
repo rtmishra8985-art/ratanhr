@@ -1,0 +1,9 @@
+TABLE_NAME	COLUMN_TYPE
+appreciations	varchar(255)
+bonuses	varchar(255)
+deductions	varchar(255)
+employee_documents	varchar(255)
+employee_exits	varchar(255)
+employee_promotions	varchar(255)
+employee_transfers	varchar(255)
+training_enrollments	varchar(255)

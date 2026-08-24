@@ -1,0 +1,6 @@
+Command: curl http://127.0.0.1:8099/health ; /healthz/live ; /healthz/ready
+Date (UTC): Mon Aug 10 06:31:41 UTC 2026
+----
+HTTP 200 for all three
+{"status":"Healthy","checks":[{"name":"liveness","status":"Healthy","description":"Service is alive."},{"name":"email","status":"Healthy","description":"SMTP not configured (non-production)."},{"name":"database","status":"Healthy","description":null},{"name":"redis","status":"Healthy","description":null}]}
+NOTE: BiometricHostedService background poll fails: Unknown column 'b.CreatedAt' (schema/model drift)

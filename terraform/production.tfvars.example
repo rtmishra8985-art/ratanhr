@@ -1,0 +1,140 @@
+# ==============================================================================
+# production.tfvars - RatanHR HRMS Terraform Variables
+# ==============================================================================
+# INSTRUCTIONS:
+#   1. Copy this file to production.tfvars (or your-env.tfvars)
+#   2. Replace all placeholder values with actual values
+#   3. Run: terraform plan -var-file=production.tfvars
+#   4. Run: terraform apply -var-file=production.tfvars
+# ==============================================================================
+
+# ==============================================================================
+# AWS CONFIGURATION
+# ==============================================================================
+
+aws_region     = "ap-south-1"
+environment    = "production"
+project_name   = "ratanhr"
+
+# ==============================================================================
+# VPC CONFIGURATION
+# ==============================================================================
+
+vpc_cidr              = "10.0.0.0/16"
+public_subnet_1_cidr  = "10.0.1.0/24"
+public_subnet_2_cidr  = "10.0.2.0/24"
+private_subnet_1_cidr = "10.0.10.0/24"
+private_subnet_2_cidr = "10.0.11.0/24"
+
+# SECURITY: Replace with your IP address for SSH access
+ssh_cidr_blocks = ["203.0.113.0/32"] # CHANGE THIS to your IP
+
+# ==============================================================================
+# EC2 CONFIGURATION
+# ==============================================================================
+
+# t3.medium = 2 vCPU, 4 GB RAM (suitable for production)
+# t3.small  = 2 vCPU, 2 GB RAM (minimum, not recommended)
+# t3.large  = 2 vCPU, 8 GB RAM (recommended for 100+ employees)
+ec2_instance_type = "t3.medium"
+
+# ==============================================================================
+# RDS MYSQL CONFIGURATION
+# ==============================================================================
+
+# db.t3.micro  = 1 vCPU, 1 GB RAM (minimum)
+# db.t3.small  = 2 vCPU, 2 GB RAM (recommended)
+# db.t3.medium = 2 vCPU, 4 GB RAM (for large deployments)
+mysql_instance_class = "db.t3.small"
+
+mysql_database = "hrms_db"
+mysql_user     = "hrms_admin"
+
+# REQUIRED: Generate a secure password (min 16 chars)
+# Option 1: openssl rand -base64 16
+# Option 2: Generate using AWS Secrets Manager
+mysql_password = "REPLACE_WITH_SECURE_PASSWORD"
+
+backup_retention_days = 14
+
+# ==============================================================================
+# ELASTICACHE REDIS CONFIGURATION
+# ==============================================================================
+
+# cache.t3.micro    = 0.5 GB
+# cache.t3.small    = 1.5 GB (recommended)
+# cache.t3.medium   = 3.35 GB
+redis_node_type = "cache.t3.small"
+
+# ==============================================================================
+# DOMAIN & SSL
+# ==============================================================================
+
+# REQUIRED: Your domain name (e.g., hrms.company.com)
+# This domain MUST be registered before applying Terraform
+domain_name = "hrms.yourdomain.com"
+
+# ==============================================================================
+# JWT KEYS
+# ==============================================================================
+# Generate using: ./scripts/generate-rsa-keys.sh
+# Or from AWS Secrets Manager
+# Format: Base64-encoded PEM keys
+
+jwt_private_key = "REPLACE_WITH_PRIVATE_KEY_BASE64"
+jwt_public_key  = "REPLACE_WITH_PUBLIC_KEY_BASE64"
+
+# ==============================================================================
+# ENCRYPTION KEY
+# ==============================================================================
+# Generate using: openssl rand -base64 32
+# Store in AWS Secrets Manager in production
+
+encryption_key = "REPLACE_WITH_ENCRYPTION_KEY_BASE64"
+
+# ==============================================================================
+# SMTP CONFIGURATION
+# ==============================================================================
+# Examples:
+#   AWS SES: email-smtp.ap-south-1.amazonaws.com:587
+#   SendGrid: smtp.sendgrid.net:587
+#   Gmail: smtp.gmail.com:587
+#   Office365: smtp.office365.com:587
+
+smtp_host     = "smtp.youremailprovider.com"
+smtp_port     = 587
+smtp_user     = "your-email@yourdomain.com"
+smtp_password = "your-smtp-password"
+
+# ==============================================================================
+# S3 BACKUP BUCKET
+# ==============================================================================
+# REQUIRED: S3 bucket name must be GLOBALLY UNIQUE
+# Convention: ratanhr-backups-{company-name}-{random}
+
+backup_bucket = "ratanhr-backups-company-abc123xyz"
+
+# ==============================================================================
+# DEPLOYMENT NOTES
+# ==============================================================================
+#
+# Before applying:
+#   1. Ensure AWS credentials are configured
+#   2. Ensure domain is registered
+#   3. Generate JWT keys
+#   4. Generate encryption key
+#   5. Get SMTP credentials from email provider
+#
+# Apply Terraform:
+#   terraform init
+#   terraform plan -var-file=production.tfvars
+#   terraform apply -var-file=production.tfvars
+#
+# After deployment:
+#   1. Note the outputs (ALB DNS, Route53 nameservers)
+#   2. Update domain registrar with Route53 nameservers
+#   3. Wait 15-30 minutes for DNS propagation
+#   4. Access https://hrms.yourdomain.com
+#   5. Monitor CloudWatch logs
+#
+# ==============================================================================

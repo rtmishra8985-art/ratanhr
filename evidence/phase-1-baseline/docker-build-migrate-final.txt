@@ -1,0 +1,111 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.82kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/dotnet/sdk:8.0.416-alpine3.21
+#2 DONE 0.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 1.49kB done
+#3 DONE 0.0s
+
+#4 [build  1/16] FROM mcr.microsoft.com/dotnet/sdk:8.0.416-alpine3.21@sha256:e292b92e9f21bb98c75a528877ac9ed8121ab9d96ba3aba620d31c09affc80bd
+#4 DONE 0.0s
+
+#5 [build  2/16] WORKDIR /src
+#5 CACHED
+
+#6 [internal] load build context
+#6 transferring context: 253.05kB 0.1s done
+#6 DONE 0.1s
+
+#7 [build 13/16] COPY HRMS.Tests/packages.lock.json          HRMS.Tests/
+#7 CACHED
+
+#8 [build 10/16] COPY HRMS.Infrastructure/packages.lock.json HRMS.Infrastructure/
+#8 CACHED
+
+#9 [build  4/16] COPY HRMS.API/HRMS.API.csproj                       HRMS.API/
+#9 CACHED
+
+#10 [build 12/16] COPY HRMS.Domain/packages.lock.json         HRMS.Domain/
+#10 CACHED
+
+#11 [build  5/16] COPY HRMS.Infrastructure/HRMS.Infrastructure.csproj HRMS.Infrastructure/
+#11 CACHED
+
+#12 [build  3/16] COPY *.sln ./
+#12 CACHED
+
+#13 [build  7/16] COPY HRMS.Domain/HRMS.Domain.csproj                 HRMS.Domain/
+#13 CACHED
+
+#14 [build  9/16] COPY HRMS.API/packages.lock.json            HRMS.API/
+#14 CACHED
+
+#15 [build  6/16] COPY HRMS.Application/HRMS.Application.csproj       HRMS.Application/
+#15 CACHED
+
+#16 [build  8/16] COPY HRMS.Tests/HRMS.Tests.csproj                   HRMS.Tests/
+#16 CACHED
+
+#17 [build 11/16] COPY HRMS.Application/packages.lock.json    HRMS.Application/
+#17 CACHED
+
+#18 [build 14/16] RUN dotnet restore --locked-mode
+#18 CACHED
+
+#19 [build 15/16] COPY . .
+#19 DONE 0.4s
+
+#20 [build 16/16] RUN dotnet publish HRMS.API/HRMS.API.csproj       --configuration Release       --no-restore       --output /app/publish       -p:AssemblyVersion=1.0.0.0       -p:FileVersion=1.0.0.0       -p:InformationalVersion="unknown+unknown"
+#20 5.938   HRMS.Domain -> /src/HRMS.Domain/bin/Release/net8.0/HRMS.Domain.dll
+#20 9.772   HRMS.Application -> /src/HRMS.Application/bin/Release/net8.0/HRMS.Application.dll
+#20 15.54 /src/HRMS.Infrastructure/Biometric/ZKTecoProvider.cs(86,28): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread. [/src/HRMS.Infrastructure/HRMS.Infrastructure.csproj]
+#20 15.84   HRMS.Infrastructure -> /src/HRMS.Infrastructure/bin/Release/net8.0/HRMS.Infrastructure.dll
+#20 18.70   HRMS.API -> /src/HRMS.API/bin/Release/net8.0/HRMS.API.dll
+#20 19.03   HRMS.API -> /app/publish/
+#20 DONE 19.3s
+
+#21 [migrate 3/6] COPY --from=build /src .
+#21 DONE 0.4s
+
+#22 [migrate 4/6] RUN dotnet tool install --global dotnet-ef --version 8.0.* &&     apk add --no-cache mysql-client
+#22 4.994 Tools directory '/root/.dotnet/tools' is not currently on the PATH environment variable.
+#22 4.994 If you are using bash, you can add it to your profile by running the following command:
+#22 4.994 
+#22 4.994 cat << \EOF >> ~/.bash_profile
+#22 4.994 # Add .NET Core SDK tools
+#22 4.994 export PATH="$PATH:/root/.dotnet/tools"
+#22 4.994 EOF
+#22 4.994 
+#22 4.994 You can add it to the current session by running the following command:
+#22 4.994 
+#22 4.994 export PATH="$PATH:/root/.dotnet/tools"
+#22 4.994 
+#22 4.997 You can invoke the tool using the following command: dotnet-ef
+#22 4.997 Tool 'dotnet-ef' (version '8.0.29') was successfully installed.
+#22 5.028 fetch https://dl-cdn.alpinelinux.org/alpine/v3.21/main/x86_64/APKINDEX.tar.gz
+#22 5.374 fetch https://dl-cdn.alpinelinux.org/alpine/v3.21/community/x86_64/APKINDEX.tar.gz
+#22 5.958 (1/4) Installing mariadb-common (11.4.12-r0)
+#22 6.007 (2/4) Installing libncursesw (6.5_p20241006-r3)
+#22 6.034 (3/4) Installing mariadb-client (11.4.12-r0)
+#22 6.304 (4/4) Installing mysql-client (11.4.12-r0)
+#22 6.304 Executing busybox-1.37.0-r13.trigger
+#22 6.311 OK: 95 MiB in 38 packages
+#22 DONE 6.6s
+
+#23 [migrate 5/6] COPY docker/migrate-entrypoint.sh /migrate-entrypoint.sh
+#23 DONE 0.2s
+
+#24 [migrate 6/6] RUN chmod +x /migrate-entrypoint.sh
+#24 DONE 0.5s
+
+#25 exporting to image
+#25 exporting layers
+#25 exporting layers 2.1s done
+#25 writing image sha256:19071101ca33329ad900adeeb8710b7abb93a20312506137ed4d919d23a0bf3c done
+#25 naming to docker.io/library/ratanhr-phase1-migrate done
+#25 DONE 2.1s

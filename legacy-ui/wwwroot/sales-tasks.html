@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Tasks – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<div id="sidebarHolder"></div>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Sales Tasks</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-muted" id="navUserName"></span>
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <div class="card mb-3">
+    <div class="card-body py-2">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <select class="form-select form-select-sm" id="filterStatus">
+            <option value="">All Statuses</option>
+            <option>Pending</option><option>In Progress</option><option>Completed</option><option>Cancelled</option>
+          </select>
+        </div>
+        <div class="col-auto"><button class="btn btn-sm btn-outline-secondary" onclick="loadTasks()"><i class="bi bi-search"></i> Filter</button></div>
+        <div class="col-auto ms-auto"><button class="btn btn-sm btn-warning" onclick="openModal()"><i class="bi bi-plus-circle me-1"></i>New Task</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-table">
+    <div class="card-header fw-semibold py-3">All Tasks</div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Title</th><th>Lead / Customer</th><th>Assigned To</th><th>Priority</th><th>Status</th><th>Deadline</th><th>Reminder</th><th>Actions</th></tr></thead>
+          <tbody id="taskTbody"><tr><td colspan="8" class="text-center py-3 text-muted">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="taskModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title" id="modalTitle">New Task</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <form id="taskForm" class="row g-3">
+          <input type="hidden" id="taskId">
+          <div class="col-12"><label class="form-label">Title *</label><input type="text" class="form-control" id="fTitle" required></div>
+          <div class="col-md-6"><label class="form-label">Lead</label><select class="form-select" id="fLeadId"><option value="">None</option></select></div>
+          <div class="col-md-6"><label class="form-label">Customer</label><select class="form-select" id="fCustId"><option value="">None</option></select></div>
+          <div class="col-md-6"><label class="form-label">Assign To (Employee ID)</label><input type="text" class="form-control" id="fAssignee"></div>
+          <div class="col-md-3"><label class="form-label">Priority</label>
+            <select class="form-select" id="fPriority">
+              <option>Low</option><option selected>Medium</option><option>High</option><option>Critical</option>
+            </select>
+          </div>
+          <div class="col-md-3"><label class="form-label">Status</label>
+            <select class="form-select" id="fStatus">
+              <option>Pending</option><option>In Progress</option><option>Completed</option><option>Cancelled</option>
+            </select>
+          </div>
+          <div class="col-md-6"><label class="form-label">Deadline</label><input type="datetime-local" class="form-control" id="fDeadline"></div>
+          <div class="col-md-6"><label class="form-label">Reminder</label><input type="datetime-local" class="form-control" id="fReminder"></div>
+          <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" id="fDesc" rows="3"></textarea></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning" onclick="saveTask()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script>
+const role = sessionStorage.getItem('hrms_role') || localStorage.getItem('hrms_role');
+const name = sessionStorage.getItem('hrms_name') || localStorage.getItem('hrms_name') || 'User';
+if (!role) window.location.replace('/login.html');
+document.getElementById('navUserName').textContent = name;
+document.getElementById('navAvatar').textContent   = name.charAt(0).toUpperCase();
+
+let modal;
+const PRIORITY_BADGE = { Low:'secondary', Medium:'warning', High:'danger', Critical:'dark' };
+const STATUS_BADGE   = { Pending:'warning', 'In Progress':'primary', Completed:'success', Cancelled:'secondary' };
+
+function toLocal(dt) { return dt ? dt.substring(0,16) : ''; }
+
+async function populateRefs() {
+  const [lr, cr] = await Promise.all([HrmsApi.listLeads(1,200), HrmsApi.listCustomers(1,200)]);
+  const lSel = document.getElementById('fLeadId');
+  const cSel = document.getElementById('fCustId');
+  if (lr?.success) lr.data.forEach(l => { lSel.add(new Option(`${l.leadNo} – ${l.companyName}`, l.id)); });
+  if (cr?.success) cr.data.forEach(c => { cSel.add(new Option(c.companyName, c.id)); });
+}
+
+function openModal(t) {
+  document.getElementById('modalTitle').textContent   = t ? 'Edit Task' : 'New Task';
+  document.getElementById('taskId').value             = t ? t.id : '';
+  document.getElementById('fTitle').value             = t?.title ?? '';
+  document.getElementById('fLeadId').value            = t?.salesLeadId ?? '';
+  document.getElementById('fCustId').value            = t?.salesCustomerId ?? '';
+  document.getElementById('fAssignee').value          = t?.assignedToEmployeeId ?? '';
+  document.getElementById('fPriority').value          = t?.priority ?? 'Medium';
+  document.getElementById('fStatus').value            = t?.status ?? 'Pending';
+  document.getElementById('fDeadline').value          = toLocal(t?.deadline);
+  document.getElementById('fReminder').value          = toLocal(t?.reminderDate);
+  document.getElementById('fDesc').value              = t?.description ?? '';
+  modal.show();
+}
+
+async function saveTask() {
+  const form = document.getElementById('taskForm');
+  if (!form.checkValidity()) { form.reportValidity(); return; }
+  const id  = document.getElementById('taskId').value;
+  const dto = {
+    title: document.getElementById('fTitle').value.trim(),
+    salesLeadId: document.getElementById('fLeadId').value ? parseInt(document.getElementById('fLeadId').value) : null,
+    salesCustomerId: document.getElementById('fCustId').value ? parseInt(document.getElementById('fCustId').value) : null,
+    assignedToEmployeeId: document.getElementById('fAssignee').value.trim() || null,
+    priority: document.getElementById('fPriority').value,
+    status: document.getElementById('fStatus').value,
+    deadline: document.getElementById('fDeadline').value || null,
+    reminderDate: document.getElementById('fReminder').value || null,
+    description: document.getElementById('fDesc').value.trim(),
+  };
+  const res = id ? await HrmsApi.updateSalesTask(id, dto) : await HrmsApi.createSalesTask(dto);
+  if (res && res.success) { modal.hide(); loadTasks(); }
+  else alert((res && res.message) || 'Save failed.');
+}
+
+async function updateStatus(id, status) {
+  const res = await HrmsApi.updateSalesTaskStatus(id, status);
+  if (res && res.success) loadTasks();
+}
+
+async function deleteTask(id) {
+  if (!confirm('Delete task?')) return;
+  const res = await HrmsApi.deleteSalesTask(id);
+  if (res && res.success) loadTasks();
+}
+
+async function loadTasks() {
+  const tbody = document.getElementById('taskTbody');
+  tbody.innerHTML = '<tr><td colspan="8" class="text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</td></tr>';
+  const status = document.getElementById('filterStatus').value;
+  const res = await HrmsApi.listSalesTasks(null, null, status || null);
+  if (!res || !res.success) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-3">Failed.</td></tr>'; return; }
+  if (!res.data.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center py-3 text-muted">No tasks found.</td></tr>'; return; }
+  const today = new Date().toISOString();
+  tbody.innerHTML = res.data.map(t => {
+    const overdue = t.status !== 'Completed' && t.status !== 'Cancelled' && t.deadline && t.deadline < today;
+    return `<tr class="${overdue?'table-warning':''}">
+      <td><strong>${t.title}</strong>${overdue?'<span class="badge bg-danger ms-1">Overdue</span>':''}</td>
+      <td>${t.leadCompanyName || t.customerCompanyName || '—'}</td>
+      <td>${t.assigneeName || t.assignedToEmployeeId || 'Unassigned'}</td>
+      <td><span class="badge bg-${PRIORITY_BADGE[t.priority]||'secondary'}">${t.priority}</span></td>
+      <td><span class="badge bg-${STATUS_BADGE[t.status]||'secondary'} text-dark">${t.status}</span></td>
+      <td>${t.deadline ? new Date(t.deadline).toLocaleDateString('en-IN') : '—'}</td>
+      <td>${t.reminderDate ? new Date(t.reminderDate).toLocaleDateString('en-IN') : '—'}</td>
+      <td class="text-nowrap">
+        <button class="btn btn-xs btn-outline-warning py-0 px-1 me-1" onclick='openModal(${JSON.stringify(t).replace(/"/g,"&quot;")})'><i class="bi bi-pencil"></i></button>
+        <div class="btn-group">
+          <button class="btn btn-xs btn-outline-secondary py-0 px-1 dropdown-toggle" data-bs-toggle="dropdown"></button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" onclick="updateStatus(${t.id},'In Progress')">In Progress</a></li>
+            <li><a class="dropdown-item text-success" onclick="updateStatus(${t.id},'Completed')">Completed ✓</a></li>
+            <li><a class="dropdown-item text-danger" onclick="updateStatus(${t.id},'Cancelled')">Cancelled</a></li>
+          </ul>
+        </div>
+        <button class="btn btn-xs btn-outline-danger py-0 px-1 ms-1" onclick="deleteTask(${t.id})"><i class="bi bi-trash"></i></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+modal = new bootstrap.Modal(document.getElementById('taskModal'));
+populateRefs().then(loadTasks);
+</script>
+<script>
+fetch('includes/sidebar-admin.html').then(r => r.text()).then(html => {
+  document.getElementById('sidebarHolder').innerHTML = html;
+  document.querySelectorAll('#sidebar .sub-link').forEach(a => {
+    if (a.getAttribute('href') === 'sales-tasks.html') a.classList.add('active');
+  });
+  const salesMenu = document.getElementById('collapseSales');
+  if (salesMenu) salesMenu.classList.add('show');
+  document.querySelectorAll('#sidebar [href="#collapseSales"]').forEach(el => el.classList.remove('collapsed'));
+}).catch(() => {});
+</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+STATIC SOURCE INSPECTION — dotnet CLI NOT AVAILABLE IN THIS SANDBOX ENVIRONMENT
+(dotnet-sdk-8.0 apt packages 404 on security.ubuntu.com in this network; no access to dot.net CDN)
+
+Authoritative command that SHOULD be run instead (BLOCKED — see docs/phase-2-blocker-remediation.md item 1 & 2):
+  dotnet ef migrations list --project HRMS.Infrastructure/HRMS.Infrastructure.csproj --startup-project HRMS.API/HRMS.API.csproj --context ApplicationDbContext
+
+Proxy check performed instead: for each migration timestamp, locate its [Migration("...")]
+attribute wherever EF convention places it (main .cs file if no paired .Designer.cs exists,
+otherwise the paired .Designer.cs partial class).
+
+OK  20260726000001_MySqlInitialSchema.cs  ->  [Migration("20260726000001_MySqlInitialSchema")]  (found in 20260726000001_MySqlInitialSchema.Designer.cs)
+OK  20260728000001_AddTimesheetsTable.cs  ->  [Migration("20260728000001_AddTimesheetsTable")]  (found in 20260728000001_AddTimesheetsTable.cs)
+OK  20260728000002_AddPayslipStatusColumn.cs  ->  [Migration("20260728000002_AddPayslipStatusColumn")]  (found in 20260728000002_AddPayslipStatusColumn.cs)
+OK  20260728000003_FixWebAttendanceTimeColumns.cs  ->  [Migration("20260728000003_FixWebAttendanceTimeColumns")]  (found in 20260728000003_FixWebAttendanceTimeColumns.cs)
+OK  20260728000004_AddCheckConstraintsAndPayslipIndex.cs  ->  [Migration("20260728000004_AddCheckConstraintsAndPayslipIndex")]  (found in 20260728000004_AddCheckConstraintsAndPayslipIndex.Designer.cs)
+OK  20260729120000_EncryptPiiFields.cs  ->  [Migration("20260729120000_EncryptPiiFields")]  (found in 20260729120000_EncryptPiiFields.cs)
+OK  20260731000001_AddUserSoftDelete.cs  ->  [Migration("20260731000001_AddUserSoftDelete")]  (found in 20260731000001_AddUserSoftDelete.cs)
+OK  20260801000001_AddCompanyIdToLeaveTypes.cs  ->  [Migration("20260801000001_AddCompanyIdToLeaveTypes")]  (found in 20260801000001_AddCompanyIdToLeaveTypes.cs)
+OK  20260802000001_MySqlFullSchema.cs  ->  [Migration("20260802000001_MySqlFullSchema")]  (found in 20260802000001_MySqlFullSchema.Designer.cs)
+OK  20260803000001_AddCompanyIdToTenantEntities.cs  ->  [Migration("20260803000001_AddCompanyIdToTenantEntities")]  (found in 20260803000001_AddCompanyIdToTenantEntities.cs)
+OK  20260803000002_AddAssetSoftDelete.cs  ->  [Migration("20260803000002_AddAssetSoftDelete")]  (found in 20260803000002_AddAssetSoftDelete.cs)
+OK  20260803000003_AddCompanyIdToNotifications.cs  ->  [Migration("20260803000003_AddCompanyIdToNotifications")]  (found in 20260803000003_AddCompanyIdToNotifications.cs)
+OK  20260805000001_AddUniqueAttendanceConstraint.cs  ->  [Migration("20260805000001_AddUniqueAttendanceConstraint")]  (found in 20260805000001_AddUniqueAttendanceConstraint.cs)
+OK  20260805000002_AddOldRegimeTdsFields.cs  ->  [Migration("20260805000002_AddOldRegimeTdsFields")]  (found in 20260805000002_AddOldRegimeTdsFields.cs)
+OK  20260806000001_AddUniquePayslipConstraint.cs  ->  [Migration("20260806000001_AddUniquePayslipConstraint")]  (found in 20260806000001_AddUniquePayslipConstraint.cs)
+
+Total migration classes found: 15
+
+RESULT: 20260806000001_AddUniquePayslipConstraint.cs already carries
+  using Microsoft.EntityFrameworkCore.Migrations;
+  [DbContext(typeof(ApplicationDbContext))]
+  [Migration("20260806000001_AddUniquePayslipConstraint")]
+This contradicts the task brief's premise that the attribute is missing on this file in
+the uploaded source. No source change was needed or made for blocker #1 in this snapshot.

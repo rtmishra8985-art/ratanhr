@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>Edit Employee – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Registration</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseReg"><i class="bi bi-person-plus"></i> Registration <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseReg">
+      <a href="add-employee.html" class="sub-link">Register Employees</a>
+      <a href="view-employees.html" class="sub-link" style="color:#f7b731;">View All Employees</a>
+    </div>
+    <div class="nav-label">Company</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#c2"><i class="bi bi-building"></i> Company <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="c2"><a href="add-company.html" class="sub-link">Add</a><a href="view-company.html" class="sub-link">View</a></div>
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#c3"><i class="bi bi-globe"></i> Web Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="c3"><a href="web-attendance-admin.html" class="sub-link">View</a></div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#c4"><i class="bi bi-file-earmark-spreadsheet"></i> Excel Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="c4"><a href="upload-attendance.html" class="sub-link">Upload</a><a href="view-attendance.html" class="sub-link">View</a></div>
+
+    <div class="nav-label">Payroll</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapsePayroll"><i class="bi bi-cash-stack"></i> Payroll <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapsePayroll">
+      <a href="payroll.html" class="sub-link">View Payroll</a>
+      <a href="add-payroll.html" class="sub-link">Generate Payslip</a>
+    </div>
+    <div class="nav-label">Reports</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseReports"><i class="bi bi-bar-chart-line"></i> Reports <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseReports">
+      <a href="reports-attendance.html" class="sub-link">Attendance Report</a>
+      <a href="reports-employee.html" class="sub-link">Employee Report</a>
+    </div>
+    <div class="nav-label">Others</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#c5"><i class="bi bi-star"></i> Appreciation <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="c5"><a href="appreciation.html" class="sub-link">Appreciate</a></div>
+    <a href="admin-users.html" class="nav-link"><i class="bi bi-people"></i> Admin Users</a>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Edit Employee</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+<div class="main-panel">
+  
+  <!-- BACKEND: GET param ?employeeId=E00001 to fetch employee data -->
+  <div id="empBanner" class="alert alert-info small"><i class="bi bi-info-circle me-1"></i>Loading employee details…</div>
+  <form id="empForm" enctype="multipart/form-data">
+    <input type="hidden" name="employee_id" id="fEmpId">
+
+    <div class="card card-table mb-4">
+      <div class="card-header py-3"><p class="section-title mb-0">Personal Information</p></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label fw-semibold small">Gender</label>
+            <select class="form-select" name="gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Date of Birth</label>
+            <input type="date" class="form-control" name="dob" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Nationality</label>
+            <input class="form-control" name="nationality" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Marital Status</label>
+            <select class="form-select" name="marital_status"><option>Single</option><option>Married</option><option>Divorced</option></select></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Blood Group</label>
+            <select class="form-select" name="blood_group"><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Aadhaar</label>
+            <input class="form-control" name="aadhaar" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">PAN</label>
+            <input class="form-control" name="pan" ></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small">Permanent Address</label>
+            <textarea class="form-control" name="permanent_address" rows="2"></textarea></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small">Current Address</label>
+            <textarea class="form-control" name="current_address" rows="2"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-table mb-4">
+      <div class="card-header py-3"><p class="section-title mb-0">Employment Information</p></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label fw-semibold small">Date of Joining</label>
+            <input type="date" class="form-control" name="doj" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Designation</label>
+            <input class="form-control" name="designation" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Department</label>
+            <input class="form-control" name="department" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Skills</label>
+            <input class="form-control" name="skills" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Languages</label>
+            <input class="form-control" name="languages" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Hobbies</label>
+            <input class="form-control" name="hobbies" ></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-table mb-4">
+      <div class="card-header py-3"><p class="section-title mb-0">Bank Details</p></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label fw-semibold small">Account Holder</label><input class="form-control" name="bankAccountHolder" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Bank Name</label><input class="form-control" name="bankName" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Branch Name</label><input class="form-control" name="branchName" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Account Number</label><input class="form-control" name="accountNumber" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">IFSC Code</label><input class="form-control" name="ifsc_code" ></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">UAN</label><input class="form-control" name="uan" ></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-table mb-4">
+      <div class="card-header py-3"><p class="section-title mb-0">Emergency Contact</p></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3"><label class="form-label fw-semibold small">Name</label><input class="form-control" name="emergency_contact_name" ></div>
+          <div class="col-md-3"><label class="form-label fw-semibold small">Relationship</label><input class="form-control" name="emergency_contact_relationship" ></div>
+          <div class="col-md-3"><label class="form-label fw-semibold small">Phone</label><input class="form-control" name="emergency_contact_phone" ></div>
+          <div class="col-md-3"><label class="form-label fw-semibold small">Address</label><input class="form-control" name="emergency_contact_address" ></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center pb-4">
+      <button type="submit" class="btn btn-warning fw-bold px-5 py-2"><i class="bi bi-save me-2"></i>Update Employee</button>
+      <a href="view-employees.html" class="btn btn-outline-secondary ms-3 px-4 py-2">Cancel</a>
+    </div>
+  </form>
+</div>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script>
+requireAuth(['admin','superadmin']);
+populateTopnav();
+
+const params = new URLSearchParams(window.location.search);
+const employeeId = params.get('employeeId');
+if (!employeeId) { alert('No employee ID provided.'); window.location.href = 'view-employees.html'; }
+
+function setVal(name, val) {
+  const el = document.querySelector('[name="'+name+'"]');
+  if (!el || val == null) return;
+  if (el.tagName === 'SELECT') { el.value = val; }
+  else if (el.tagName === 'TEXTAREA') { el.textContent = val; }
+  else { el.value = val; }
+}
+
+async function loadEmployee() {
+  const res = await HrmsApi.getEmployee(employeeId);
+  if (!res || !res.success || !res.data) {
+    alert('Employee not found.');
+    window.location.href = 'view-employees.html';
+    return;
+  }
+  const e = res.data;
+  document.getElementById('fEmpId').value = employeeId;
+  document.getElementById('empBanner').innerHTML =
+    '<i class="bi bi-info-circle me-1"></i>Editing: <strong>' + (e.fullName||e.fullname||'') + '</strong> (' + employeeId + ')';
+
+  setVal('gender', e.gender);
+  setVal('dob', e.dob ? e.dob.substring(0,10) : '');
+  setVal('nationality', e.nationality);
+  setVal('marital_status', e.maritalStatus);
+  setVal('blood_group', e.bloodGroup);
+  setVal('aadhaar', e.aadhaar);
+  setVal('pan', e.pan);
+  setVal('permanent_address', e.permanentAddress);
+  setVal('current_address', e.currentAddress);
+  setVal('doj', e.doj ? e.doj.substring(0,10) : '');
+  setVal('designation', e.designation);
+  setVal('department', e.department);
+  setVal('skills', e.skills);
+  setVal('languages', e.languages);
+  setVal('hobbies', e.hobbies);
+  setVal('bankAccountHolder', e.bankAccountHolder);
+  setVal('bankName', e.bankName);
+  setVal('branchName', e.branchName);
+  setVal('accountNumber', e.accountNumber);
+  setVal('ifsc_code', e.ifscCode);
+  setVal('uan', e.uan);
+  setVal('emergency_contact_name', e.emergencyContactName);
+  setVal('emergency_contact_relationship', e.emergencyContactRelationship);
+  setVal('emergency_contact_phone', e.emergencyContactPhone);
+  setVal('emergency_contact_address', e.emergencyContactAddress);
+}
+
+document.getElementById('empForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.querySelector('#empForm [type="submit"]');
+  btn.disabled = true;
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving…';
+  const res = await HrmsApi.updateEmployee(employeeId, new FormData(e.target));
+  if (res && res.success) {
+    alert('✅ Employee updated successfully.');
+    window.location.href = 'view-employees.html';
+  } else {
+    alert('❌ ' + ((res && res.message) || 'Failed to update employee.'));
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+});
+
+loadEmployee();
+</script>
+</body>
+</html>

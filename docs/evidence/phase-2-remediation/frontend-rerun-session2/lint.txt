@@ -1,0 +1,2 @@
+Command: npx eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0
+Result: PASS (0 warnings/errors, exit 0)

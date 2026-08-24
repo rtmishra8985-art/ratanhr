@@ -1,0 +1,188 @@
+Test run for /home/runner/workspace/ratanhr-audit/HRMS.Tests/bin/Debug/net8.0/HRMS.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 17.11.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 8.0.18)
+[xUnit.net 00:00:00.16]   Discovering: HRMS.Tests
+[xUnit.net 00:00:00.41]   Discovered:  HRMS.Tests
+[xUnit.net 00:00:00.42]   Starting:    HRMS.Tests
+2026-08-12 05:52:13.683 +00:00 [INF]  HRMS API v1.0.0 starting.
+2026-08-12 05:52:13.746 +00:00 [INF]  EmailQueueWorker started.
+2026-08-12 05:52:13.777 +00:00 [ERR]  EmailQueueWorker encountered an error.
+System.InvalidOperationException: Cannot resolve scoped service 'HRMS.Infrastructure.Services.ITenantContext' from root provider.
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteValidator.ValidateResolution(ServiceCallSite callSite, IServiceScope scope, IServiceScope rootScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)
+   at lambda_method33(Closure, IServiceProvider, Object[])
+   at Microsoft.EntityFrameworkCore.Internal.DbContextFactorySource`1.<>c__DisplayClass4_0.<CreateActivator>b__1(IServiceProvider p, DbContextOptions`1 _)
+   at Microsoft.EntityFrameworkCore.Internal.DbContextFactory`1.CreateDbContext()
+   at Microsoft.EntityFrameworkCore.Internal.DbContextFactory`1.CreateDbContextAsync(CancellationToken cancellationToken)
+   at HRMS.Infrastructure.Services.EmailQueueService.ProcessPendingAsync(Int32 batchSize) in /home/runner/workspace/ratanhr-audit/HRMS.Infrastructure/Services/EmailQueueService.cs:line 41
+   at HRMS.Infrastructure.Services.EmailQueueWorker.ExecuteAsync(CancellationToken ct) in /home/runner/workspace/ratanhr-audit/HRMS.Infrastructure/Services/EmailQueueWorker.cs:line 28
+2026-08-12 05:52:13.779 +00:00 [INF]  [WebhookDispatcher] Background dispatcher started.
+2026-08-12 05:52:13.783 +00:00 [INF]  TokenCleanupService started. Will run every 24h.
+2026-08-12 05:52:13.784 +00:00 [INF]  BiometricLogCleanupService started. Will run every 24h.
+2026-08-12 05:52:13.787 +00:00 [INF]  [BiometricHostedService] Started. Implemented providers (will poll): [ZKTeco, eSSL, Matrix, Suprema, Hikvision, Anviz]. Stub providers (skipped — awaiting SDK integration): [Realtime].
+2026-08-12 05:52:13.823 +00:00 [WRN]  Rate limiter: in-memory counters (Redis not configured).
+2026-08-12 05:52:13.835 +00:00 [WRN]  Swagger is enabled without credentials (Swagger:Username / Swagger:Password not set). Unauthenticated access is permitted in Development only. Set credentials before deploying to any shared environment.
+2026-08-12 05:52:13.843 +00:00 [INF]  Starting Hangfire Server using job storage: 'In-Memory Storage'
+2026-08-12 05:52:13.844 +00:00 [INF]  Using the following options for Hangfire Server:
+    Worker count: 8
+    Listening queues: 'critical', 'default', 'low'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-12 05:52:13.848 +00:00 [DBG]  Execution loop BackgroundServerProcess:0ce769e2 has started in 2.1973 ms
+2026-08-12 05:52:13.859 +00:00 [INF]  Server repl:903:cfb6b984 successfully announced in 2.3504 ms
+2026-08-12 05:52:13.861 +00:00 [DBG]  Execution loop ServerHeartbeatProcess:88e58b61 has started in 1.1862 ms
+2026-08-12 05:52:13.862 +00:00 [INF]  Server repl:903:cfb6b984 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-12 05:52:13.863 +00:00 [DBG]  Execution loop ServerWatchdog:1fc17305 has started in 1.069 ms
+2026-08-12 05:52:13.864 +00:00 [DBG]  Execution loop ServerJobCancellationWatcher:f8672ed5 has started in 0.3823 ms
+2026-08-12 05:52:13.866 +00:00 [DBG]  Execution loop Worker:b6d1ad8d has started in 0.5771 ms
+2026-08-12 05:52:13.866 +00:00 [DBG]  Execution loop Worker:775cb4d4 has started in 1.2389 ms
+2026-08-12 05:52:13.867 +00:00 [DBG]  Execution loop Worker:dcfa5843 has started in 1.828 ms
+2026-08-12 05:52:13.868 +00:00 [DBG]  Execution loop Worker:dcac2518 has started in 3.0861 ms
+2026-08-12 05:52:13.869 +00:00 [DBG]  Execution loop Worker:f08b92a4 has started in 3.8688 ms
+2026-08-12 05:52:13.870 +00:00 [DBG]  Execution loop Worker:dfcc815b has started in 5.2619 ms
+2026-08-12 05:52:13.871 +00:00 [DBG]  Execution loop Worker:461f6bb3 has started in 6.3569 ms
+2026-08-12 05:52:13.874 +00:00 [DBG]  Execution loop Worker:7d81a811 has started in 9.3441 ms
+2026-08-12 05:52:13.875 +00:00 [DBG]  Execution loop DelayedJobScheduler:9cd574a9 has started in 0.3957 ms
+2026-08-12 05:52:13.875 +00:00 [DBG]  Execution loop RecurringJobScheduler:5a03532a has started in 0.274 ms
+2026-08-12 05:52:13.875 +00:00 [INF]  Server repl:903:cfb6b984 all the dispatchers started
+2026-08-12 05:52:14.449 +00:00 [WRN]  Entity 'Asset' has a global query filter defined and is the required end of a relationship with the entity 'AssetHistory'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-08-12 05:52:14.450 +00:00 [WRN]  Entity 'GeoFence' has a global query filter defined and is the required end of a relationship with the entity 'GeoFenceHistory'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-08-12 05:52:14.450 +00:00 [WRN]  Entity 'ExpenseClaim' has a global query filter defined and is the required end of a relationship with the entity 'ExpenseApproval'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-08-12 05:52:14.450 +00:00 [WRN]  Entity 'ExpenseClaim' has a global query filter defined and is the required end of a relationship with the entity 'ExpenseAttachment'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-08-12 05:52:14.450 +00:00 [WRN]  Entity 'ExpenseClaim' has a global query filter defined and is the required end of a relationship with the entity 'ExpenseHistory'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-08-12 05:52:14.450 +00:00 [WRN]  Entity 'ExpenseClaim' has a global query filter defined and is the required end of a relationship with the entity 'ExpenseItem'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-08-12 05:52:14.450 +00:00 [WRN]  Entity 'HelpdeskTicket' has a global query filter defined and is the required end of a relationship with the entity 'HelpdeskComment'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-08-12 05:52:14.450 +00:00 [WRN]  Entity 'HelpdeskTicket' has a global query filter defined and is the required end of a relationship with the entity 'HelpdeskHistory'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-08-12 05:52:14.450 +00:00 [WRN]  Entity 'OnboardingTemplate' has a global query filter defined and is the required end of a relationship with the entity 'OnboardingRecord'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-08-12 05:52:14.450 +00:00 [WRN]  Entity 'TrainingProgram' has a global query filter defined and is the required end of a relationship with the entity 'TrainingEnrollment'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-08-12 05:52:14.450 +00:00 [WRN]  Entity 'TravelRequest' has a global query filter defined and is the required end of a relationship with the entity 'TravelApproval'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-08-12 05:52:14.450 +00:00 [WRN]  Entity 'TravelRequest' has a global query filter defined and is the required end of a relationship with the entity 'TravelHistory'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-08-12 05:52:14.952 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:14.966 +00:00 [WRN] 12c6b905-052d-476d-9adb-b536facbf45e Failed to determine the https port for redirect.
+2026-08-12 05:52:14.976 +00:00 [DBG] 12c6b905-052d-476d-9adb-b536facbf45e AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.002 +00:00 [WRN] 12c6b905-052d-476d-9adb-b536facbf45e A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:15.171 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:15.173 +00:00 [DBG] 9dc69bbb-1ad5-44a7-a1ec-99bb35793ac2 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.179 +00:00 [WRN] 9dc69bbb-1ad5-44a7-a1ec-99bb35793ac2 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:15.315 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:15.318 +00:00 [DBG] 1e82df62-f552-4c2e-8020-d94c44b34ece AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.331 +00:00 [WRN] 1e82df62-f552-4c2e-8020-d94c44b34ece A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.EmployeeUpdate_DangerousExtension_Returns400_AndDoesNotPersist [2 s]
+2026-08-12 05:52:15.347 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:15.348 +00:00 [DBG] 6cd73536-ca70-473b-be59-c086f629b1ce AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.348 +00:00 [WRN] 6cd73536-ca70-473b-be59-c086f629b1ce A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:15.447 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:15.447 +00:00 [DBG] 5d2c5c29-23e5-4af7-ae3e-698ca770c695 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.447 +00:00 [WRN] 5d2c5c29-23e5-4af7-ae3e-698ca770c695 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:15.458 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:15.458 +00:00 [DBG] 161f50e7-8bf9-4050-ac8f-1883f973bc8d AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.462 +00:00 [WRN] 161f50e7-8bf9-4050-ac8f-1883f973bc8d A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:15.882 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:15.882 +00:00 [DBG] ba996a8a-c6f2-4029-984d-1c047c66768f AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.883 +00:00 [WRN] ba996a8a-c6f2-4029-984d-1c047c66768f A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:15.890 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:15.890 +00:00 [DBG] 19e776e2-fc21-4aac-b1dc-5d697a03b3e3 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.890 +00:00 [WRN] 19e776e2-fc21-4aac-b1dc-5d697a03b3e3 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:15.898 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:15.898 +00:00 [DBG] 77281804-5bdb-4f99-a686-ac4ceaddda2a AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.903 +00:00 [WRN] 77281804-5bdb-4f99-a686-ac4ceaddda2a A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:15.922 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:15.922 +00:00 [DBG] 0e973509-7fb6-4f35-9007-557128af01d2 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.931 +00:00 [WRN] 0e973509-7fb6-4f35-9007-557128af01d2 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:15.962 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:15.962 +00:00 [DBG] 6a0e9250-842c-4261-b119-deccec5d69fd AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.963 +00:00 [WRN] 6a0e9250-842c-4261-b119-deccec5d69fd A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.Appreciation_ValidPng_Succeeds [146 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.ExpenseLegacy_DangerousExtension_Returns400_AndDoesNotPersist [31 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.ExpenseLegacy_ValidPdf_Succeeds [98 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.ExpenseLegacy_Svg_Returns400_AndDoesNotPersist [10 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.EmployeeCreate_SpoofedMagicNumber_Returns400_AndDoesNotPersist [422 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.ExpenseLegacy_SpoofedMagicNumber_Returns400_AndDoesNotPersist [6 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.Appreciation_DangerousExtension_Returns400_AndDoesNotPersist [7 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.ExpenseCreate_DangerousExtension_Returns400_AndDoesNotPersist [19 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.EmployeeDocument_SpoofedMagicNumber_Returns400_AndDoesNotPersist [42 ms]
+2026-08-12 05:52:15.982 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:15.982 +00:00 [DBG] 5b2dba37-1c51-454a-a131-d6a3054327ae AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.983 +00:00 [WRN] 5b2dba37-1c51-454a-a131-d6a3054327ae A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:15.996 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:15.997 +00:00 [DBG] e74a064c-455a-4386-b8e0-15811597004d AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:15.997 +00:00 [WRN] e74a064c-455a-4386-b8e0-15811597004d A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:16.296 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:16.296 +00:00 [DBG] 5f68045b-a38a-4565-9499-c66b0913e32f AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:16.296 +00:00 [WRN] 5f68045b-a38a-4565-9499-c66b0913e32f A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:16.306 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:16.307 +00:00 [DBG] 39e1d504-fa87-4952-bec0-9cab0d8e247c AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:16.307 +00:00 [WRN] 39e1d504-fa87-4952-bec0-9cab0d8e247c A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:16.314 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:16.314 +00:00 [DBG] c3530e67-66f8-48ac-bb50-5d6a35407722 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:16.315 +00:00 [WRN] c3530e67-66f8-48ac-bb50-5d6a35407722 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:16.594 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:16.594 +00:00 [DBG] d39f181a-3e28-4a2b-bf35-b0d84ec7c982 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:16.595 +00:00 [WRN] d39f181a-3e28-4a2b-bf35-b0d84ec7c982 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:16.604 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:16.604 +00:00 [DBG] 42188a78-cb14-4b54-856d-2fed49cbdeb8 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:16.604 +00:00 [WRN] 42188a78-cb14-4b54-856d-2fed49cbdeb8 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:16.616 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:16.617 +00:00 [DBG] 874dbc63-c4a2-4d2c-8346-1ea5463ac786 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:16.617 +00:00 [WRN] 874dbc63-c4a2-4d2c-8346-1ea5463ac786 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.Appreciation_Svg_Returns400_AndDoesNotPersist [9 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.EmployeeUpdate_Svg_Returns400_AndDoesNotPersist [13 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.EmployeeCreate_DangerousExtension_Returns400_AndDoesNotPersist [299 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.EmployeeDocument_DangerousExtension_Returns400_AndDoesNotPersist [12 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.EmployeeDocument_Svg_Returns400_AndDoesNotPersist [8 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.EmployeeCreate_Svg_Returns400_AndDoesNotPersist [277 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.EmployeeUpdate_SpoofedMagicNumber_Returns400_AndDoesNotPersist [9 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.EmployeeUpdate_ValidDocument_Succeeds [10 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.EmployeeDocument_ValidPdf_Succeeds [45 ms]
+2026-08-12 05:52:16.661 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:16.661 +00:00 [DBG] 1661178e-8105-493e-b932-9eb356945fd3 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:16.662 +00:00 [WRN] 1661178e-8105-493e-b932-9eb356945fd3 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:16.668 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:16.668 +00:00 [DBG] b179854c-4037-4daa-9c4d-eefabba3f456 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:16.668 +00:00 [WRN] b179854c-4037-4daa-9c4d-eefabba3f456 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:16.698 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:16.699 +00:00 [DBG] 6137bed7-62bb-4532-aebd-c3515aec0315 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:16.699 +00:00 [WRN] 6137bed7-62bb-4532-aebd-c3515aec0315 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:16.704 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:16.705 +00:00 [DBG] acb37a28-86c2-478c-ae64-82108a75f131 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:16.705 +00:00 [WRN] acb37a28-86c2-478c-ae64-82108a75f131 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:17.010 +00:00 [WRN]  A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+2026-08-12 05:52:17.011 +00:00 [DBG] 7ae2d51a-a5cc-4896-8cb5-b8af350483b5 AuthenticationScheme: Test was successfully authenticated.
+2026-08-12 05:52:17.011 +00:00 [WRN] 7ae2d51a-a5cc-4896-8cb5-b8af350483b5 A request body size limit could not be applied. This server does not support the IHttpRequestBodySizeFeature.
+2026-08-12 05:52:17.019 +00:00 [DBG]  Hangfire Server is stopping...
+2026-08-12 05:52:17.019 +00:00 [INF]  Server repl:903:cfb6b984 caught stopping signal...
+2026-08-12 05:52:17.020 +00:00 [DBG]  Execution loop ServerWatchdog:1fc17305 stopped in 0.3483 ms
+2026-08-12 05:52:17.020 +00:00 [DBG]  Execution loop Worker:dfcc815b stopped in 0.5288 ms
+2026-08-12 05:52:17.020 +00:00 [DBG]  Execution loop Worker:f08b92a4 stopped in 0.6277 ms
+2026-08-12 05:52:17.020 +00:00 [DBG]  Execution loop Worker:dcfa5843 stopped in 0.6456 ms
+2026-08-12 05:52:17.020 +00:00 [DBG]  Execution loop Worker:b6d1ad8d stopped in 0.6906 ms
+2026-08-12 05:52:17.020 +00:00 [DBG]  Execution loop Worker:dcac2518 stopped in 0.8353 ms
+2026-08-12 05:52:17.020 +00:00 [DBG]  Execution loop Worker:7d81a811 stopped in 0.9723 ms
+2026-08-12 05:52:17.020 +00:00 [DBG]  Execution loop Worker:775cb4d4 stopped in 1.0598 ms
+2026-08-12 05:52:17.021 +00:00 [DBG]  Execution loop Worker:461f6bb3 stopped in 1.2189 ms
+2026-08-12 05:52:17.021 +00:00 [DBG]  Hangfire Server is stopping...
+2026-08-12 05:52:17.023 +00:00 [DBG]  Hangfire Server is stopping...
+2026-08-12 05:52:17.023 +00:00 [DBG]  Execution loop ServerJobCancellationWatcher:f8672ed5 stopped in 3.6922 ms
+2026-08-12 05:52:17.023 +00:00 [DBG]  Execution loop DelayedJobScheduler:9cd574a9 stopped in 3.7034 ms
+2026-08-12 05:52:17.023 +00:00 [DBG]  Execution loop RecurringJobScheduler:5a03532a stopped in 3.9589 ms
+2026-08-12 05:52:17.026 +00:00 [INF]  Server repl:903:cfb6b984 All dispatchers stopped
+2026-08-12 05:52:17.027 +00:00 [DBG]  Execution loop ServerHeartbeatProcess:88e58b61 stopped in 0.0792 ms
+2026-08-12 05:52:17.029 +00:00 [INF]  Server repl:903:cfb6b984 successfully reported itself as stopped in 0.6464 ms
+2026-08-12 05:52:17.029 +00:00 [INF]  Server repl:903:cfb6b984 has been stopped in total 9.4592 ms
+2026-08-12 05:52:17.029 +00:00 [DBG]  Execution loop BackgroundServerProcess:0ce769e2 stopped in 9.5731 ms
+2026-08-12 05:52:17.040 +00:00 [DBG]  Query dispatcher has been gracefully stopped.
+[xUnit.net 00:00:04.68]   Finished:    HRMS.Tests
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.ExpenseCreate_Svg_Returns400_AndDoesNotPersist [6 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.ExpenseCreate_ValidPdf_Succeeds [30 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.Appreciation_SpoofedMagicNumber_Returns400_AndDoesNotPersist [5 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.EmployeeCreate_ValidDocument_Succeeds [305 ms]
+  Passed HRMS.Tests.Security.UploadEndpointIntegrationTestsRemaining.ExpenseCreate_SpoofedMagicNumber_Returns400_AndDoesNotPersist [5 ms]
+
+Test Run Successful.
+Total tests: 24
+     Passed: 24
+ Total time: 5.2004 Seconds

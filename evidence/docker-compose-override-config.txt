@@ -1,0 +1,9 @@
+$ docker compose -f docker-compose.override.yml config
+
+--- STDOUT ---
+
+--- STDERR ---
+service "api" has neither an image nor a build context specified: invalid compose project
+
+--- EXIT CODE ---
+1

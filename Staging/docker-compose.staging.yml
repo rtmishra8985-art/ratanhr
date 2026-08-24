@@ -1,0 +1,261 @@
+# =============================================================
+# docker-compose.staging.yml — RatanHR HRMS Staging Stack
+#
+# USAGE:
+#   # 1. Populate secrets:
+#   cp Staging/staging.env.template Staging/.env.staging
+#   #    Fill every <REPLACE_...> value in .env.staging
+#   #    Run: bash scripts/validate-staging.sh --env-file Staging/.env.staging
+#
+#   # 2. Start the stack (migrate runs automatically before the API):
+#   docker compose -f Staging/docker-compose.staging.yml --env-file Staging/.env.staging up -d
+#
+#   # 3. Tail logs:
+#   docker compose -f Staging/docker-compose.staging.yml logs -f
+#
+#   # 4. Tear down (removes containers, network, and volumes):
+#   docker compose -f Staging/docker-compose.staging.yml --env-file Staging/.env.staging down -v
+#
+# PORTS (isolated from production):
+#   MySQL:    3307  (production: 3306)
+#   Redis:    6380  (production: 6379)
+#   API:      8081  (production: 8080)
+#   MailHog:  8025  (web UI) / 1025 (SMTP)
+#   Frontend: 3001  (production: 3000)
+#
+# NEVER point this file at production volumes or secrets.
+# =============================================================
+
+networks:
+  hrms_staging_net:
+    driver: bridge
+    name: hrms_staging_net
+
+volumes:
+  hrms_staging_mysql_data:
+    driver: local
+    name: hrms_staging_mysql_data
+  hrms_staging_redis_data:
+    driver: local
+    name: hrms_staging_redis_data
+  hrms_staging_uploads:
+    driver: local
+    name: hrms_staging_uploads
+  hrms_staging_uploads_wwwroot:
+    driver: local
+    name: hrms_staging_uploads_wwwroot
+
+services:
+
+  # ── One-shot EF Core migration job (Staging) ────────────────
+  # Runs the dedicated migrate Dockerfile target against the staging DB.
+  # Exits 0 on success; the API service starts only after this completes.
+  # FIX-STAGING-MIGRATE: Added missing migrate service — previously the
+  # staging stack had no mechanism to apply EF Core migrations, so the
+  # API would start against an empty schema. This mirrors the migrate
+  # service in the production docker-compose.yml.
+  hrms_staging_migrate:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: migrate
+    container_name: hrms_staging_migrate
+    restart: "no"
+    environment:
+      ConnectionStrings__DefaultConnection: >-
+        Server=hrms_staging_db;Port=3306;Database=${STAGING_DB_NAME:-hrms_staging};
+        Uid=${STAGING_DB_USER:-hrms_staging};Pwd=${STAGING_DB_PASSWORD};CharSet=utf8mb4;
+      # The EF design-time host loads the API service registrations while
+      # creating ApplicationDbContext. Supply the same staging-only
+      # cryptographic configuration required by that host; this does not
+      # enable runtime auto-migration.
+      Jwt__PrivateKeyPem: ${JWT_PRIVATE_KEY_PEM}
+      Jwt__PublicKeyPem: ${JWT_PUBLIC_KEY_PEM}
+      Jwt__Issuer: hrms-staging
+      Jwt__Audience: hrms-staging-client
+      Security__EncryptionKey: ${ENCRYPTION_KEY_STAGING}
+      Redis__ConnectionString: >-
+        hrms_staging_redis:6379,password=${STAGING_REDIS_PASSWORD},defaultDatabase=1
+      Hangfire__UseInMemory: "false"
+      Database__AutoMigrate: "false"
+      AllowedHosts: ${ALLOWED_HOSTS:-localhost;127.0.0.1}
+      Cors__AllowedOrigins: ${CORS_ALLOWED_ORIGINS:-http://localhost:3001}
+      Compliance__DpoEmail: ${COMPLIANCE_DPO_EMAIL:-dpo@hrms-staging.local}
+      Compliance__ComplianceRegime: ${COMPLIANCE_REGIME:-dpdp}
+    depends_on:
+      hrms_staging_db:
+        condition: service_healthy
+    networks:
+      - hrms_staging_net
+
+  # ── MySQL 8.0 (Staging) ─────────────────────────────────────
+  hrms_staging_db:
+    image: mysql:8.4
+    container_name: hrms_staging_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "${STAGING_DB_ROOT_PASSWORD:?STAGING_DB_ROOT_PASSWORD must be set. Generate: openssl rand -base64 32}"
+      MYSQL_DATABASE: ${STAGING_DB_NAME:-hrms_staging}
+      MYSQL_USER: ${STAGING_DB_USER:-hrms_staging}
+      MYSQL_PASSWORD: ${STAGING_DB_PASSWORD}
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-time-zone=+05:30
+      --max_connections=200
+      --innodb_buffer_pool_size=256M
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - hrms_staging_mysql_data:/var/lib/mysql
+      - ./db-init/staging-init.sql:/docker-entrypoint-initdb.d/00-staging-init.sql:ro
+    networks:
+      - hrms_staging_net
+    healthcheck:
+      # Use TCP and MYSQL_PWD rather than a password-bearing argv entry.
+      # This avoids socket/hostname differences across Docker hosts and keeps
+      # special characters in staging passwords from being parsed by a shell.
+      test: ["CMD-SHELL",
+             "MYSQL_PWD=\"$${MYSQL_ROOT_PASSWORD}\" mysqladmin ping
+             --protocol=TCP -h 127.0.0.1 -u root --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── Redis 7 (Staging) ───────────────────────────────────────
+  hrms_staging_redis:
+    image: redis:7-alpine
+    container_name: hrms_staging_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${STAGING_REDIS_PASSWORD}
+      --appendonly yes
+      --maxmemory 128mb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "127.0.0.1:6380:6379"
+    volumes:
+      - hrms_staging_redis_data:/data
+    networks:
+      - hrms_staging_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-h", "127.0.0.1", "-a", "${STAGING_REDIS_PASSWORD}", "PING"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # ── ASP.NET Core API (Staging) ──────────────────────────────
+  hrms_staging_api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: hrms_staging_api
+    restart: unless-stopped
+    depends_on:
+      hrms_staging_db:
+        condition: service_healthy
+      hrms_staging_redis:
+        condition: service_healthy
+      hrms_staging_mailhog:
+        condition: service_healthy
+      hrms_staging_migrate:
+        condition: service_completed_successfully
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+      ASPNETCORE_URLS: http://+:8081
+      ConnectionStrings__DefaultConnection: >-
+        Server=hrms_staging_db;Port=3306;Database=${STAGING_DB_NAME:-hrms_staging};
+        Uid=${STAGING_DB_USER:-hrms_staging};Pwd=${STAGING_DB_PASSWORD};CharSet=utf8mb4;
+      Redis__ConnectionString: >-
+        hrms_staging_redis:6379,password=${STAGING_REDIS_PASSWORD},defaultDatabase=1
+      Redis__KeyPrefix: "hrms:staging:"
+      Jwt__PrivateKeyPem: ${JWT_PRIVATE_KEY_PEM}
+      Jwt__PublicKeyPem: ${JWT_PUBLIC_KEY_PEM}
+      Jwt__Issuer: hrms-staging
+      Jwt__Audience: hrms-staging-client
+      Security__EncryptionKey: ${ENCRYPTION_KEY_STAGING}
+      Email__Host: ${SMTP_HOST:-hrms_staging_mailhog}
+      Email__Port: ${SMTP_PORT:-1025}
+      Email__UseSsl: ${SMTP_USE_SSL:-false}
+      Email__Username: ${SMTP_USERNAME:-}
+      Email__Password: ${SMTP_PASSWORD:-}
+      Email__FromAddress: ${SMTP_FROM_ADDRESS:-noreply@hrms-staging.local}
+      Email__FromName: ${SMTP_FROM_NAME:-RatanHR Staging}
+      Cors__AllowedOrigins: ${CORS_ALLOWED_ORIGINS:-http://localhost:3001}
+      AllowedHosts: ${ALLOWED_HOSTS:-localhost;127.0.0.1}
+      Compliance__DpoEmail: ${COMPLIANCE_DPO_EMAIL:-dpo@hrms-staging.local}
+      Compliance__ComplianceRegime: ${COMPLIANCE_REGIME:-dpdp}
+      Hangfire__UseInMemory: "false"
+      Biometric__EnableLiveSync: "false"
+      Database__AutoMigrate: "false"
+      AppSettings__Environment: Staging
+      SUPERADMIN_INITIAL_PASSWORD: ${SUPERADMIN_INITIAL_PASSWORD}
+      AppSettings__EnableSwagger: "true"
+    ports:
+      - "127.0.0.1:8081:8081"
+    volumes:
+      # BUGFIX: /app/staging-uploads matched neither actual write path used by
+      # the application - FileStorageService falls back to AppContext.BaseDirectory
+      # + "uploads" (= /app/uploads) when FileStorage:RootPath is unset (it is
+      # unset here), and PayslipPdfJob writes to IWebHostEnvironment.WebRootPath
+      # + "/uploads" (= /app/wwwroot/uploads). Every resume/photo/document/receipt
+      # upload and every generated payslip PDF was written to the container's
+      # ephemeral filesystem and lost on every restart/redeploy.
+      - hrms_staging_uploads:/app/uploads
+      - hrms_staging_uploads_wwwroot:/app/wwwroot/uploads
+    networks:
+      - hrms_staging_net
+    healthcheck:
+      test: ["CMD-SHELL",
+              "curl -sf http://localhost:8081/healthz | grep -q Healthy || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 6
+      start_period: 60s
+
+  # ── MailHog (Staging SMTP — no credentials required) ────────
+  # Provides a local SMTP sink for testing email delivery without
+  # any external email service or credentials. All mail is captured
+  # in the MailHog web UI — nothing is delivered to real recipients.
+  #
+  # SMTP endpoint (used by the API):  hrms_staging_mailhog:1025
+  # Web inbox (for test inspection):  http://127.0.0.1:8025
+  hrms_staging_mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: hrms_staging_mailhog
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1025:1025"   # SMTP — accessible inside Docker network
+      - "127.0.0.1:8025:8025"   # Web UI — accessible from host for inbox inspection
+    networks:
+      - hrms_staging_net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8025/api/v1/messages"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ── Frontend (Staging build served by Nginx) ────────────────
+  hrms_staging_frontend:
+    build:
+      context: ../HRMS.SPA
+      dockerfile: Dockerfile.staging
+    container_name: hrms_staging_frontend
+    restart: unless-stopped
+    depends_on:
+      hrms_staging_api:
+        condition: service_started
+    ports:
+      - "127.0.0.1:3001:80"
+    networks:
+      - hrms_staging_net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/index.html"]
+      interval: 15s
+      timeout: 5s
+      retries: 3

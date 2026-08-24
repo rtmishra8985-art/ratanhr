@@ -1,0 +1,45 @@
+  HRMS.Domain -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Domain/bin/Debug/net8.0/HRMS.Domain.dll
+  HRMS.Application -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Application/bin/Debug/net8.0/HRMS.Application.dll
+  HRMS.Infrastructure -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Infrastructure/bin/Debug/net8.0/HRMS.Infrastructure.dll
+  HRMS.API -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/bin/Debug/net8.0/HRMS.API.dll
+  HRMS.Tests -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/bin/Debug/net8.0/HRMS.Tests.dll
+Test run for /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/bin/Debug/net8.0/HRMS.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 17.11.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:06.30]     HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests.GetMyProfile_SameTenant_ValidEmployeeId_Returns200 [FAIL]
+[xUnit.net 00:00:06.39]     HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests.GetMyProfile_CrossTenant_Manipulated_EmployeeId_Returns404 [FAIL]
+  Failed HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests.GetMyProfile_SameTenant_ValidEmployeeId_Returns200 [5 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   InternalServerError
+  Stack Trace:
+     at HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests.GetMyProfile_SameTenant_ValidEmployeeId_Returns200() in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/Security/EmployeeSelfControllerIdorIntegrationTests.cs:line 243
+--- End of stack trace from previous location ---
+  Failed HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests.GetMyProfile_CrossTenant_Manipulated_EmployeeId_Returns404 [59 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: NotFound
+Actual:   InternalServerError
+  Stack Trace:
+     at HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests.GetMyProfile_CrossTenant_Manipulated_EmployeeId_Returns404() in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/Security/EmployeeSelfControllerIdorIntegrationTests.cs:line 225
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:10.26]     HRMS.Tests.RoleBasedAccessTests.Swagger_NoBasicAuth_Returns401 [FAIL]
+  Failed HRMS.Tests.RoleBasedAccessTests.Swagger_NoBasicAuth_Returns401 [340 ms]
+  Error Message:
+   Expected response.StatusCode to be one of {HttpStatusCode.Unauthorized {value: 401}, HttpStatusCode.Found {value: 302}} because Swagger UI must be protected, but found HttpStatusCode.OK {value: 200}.
+  Stack Trace:
+     at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+   at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+   at FluentAssertions.Primitives.EnumAssertions`2.BeOneOf(IEnumerable`1 validValues, String because, Object[] becauseArgs)
+   at HRMS.Tests.RoleBasedAccessTests.Swagger_NoBasicAuth_Returns401() in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 191
+--- End of stack trace from previous location ---
+Results File: /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/TestResults/di-http-after-fix-4.trx
+
+Failed!  - Failed:     3, Passed:    20, Skipped:     0, Total:    23, Duration: 5 s - HRMS.Tests.dll (net8.0)

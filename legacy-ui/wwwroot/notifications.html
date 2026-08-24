@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications | HRMS</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/theme.css">
+<script src="/js/theme.js"></script>
+<style>
+  .notif-item { border-left: 4px solid transparent; transition: background .15s; }
+  .notif-item.unread { background: #f0f6ff; border-left-color: #0d6efd; }
+  .notif-item.unread:hover { background: #e5f0ff; }
+  .notif-item.read { border-left-color: #dee2e6; }
+  .notif-item.read:hover { background: #f8f9fa; }
+  .type-info    { border-left-color: #0dcaf0 !important; }
+  .type-success { border-left-color: #198754 !important; }
+  .type-warning { border-left-color: #ffc107 !important; }
+  .type-error   { border-left-color: #dc3545 !important; }
+  .badge-info    { background: #cff4fc; color: #055160; }
+  .badge-success { background: #d1e7dd; color: #0a3622; }
+  .badge-warning { background: #fff3cd; color: #664d03; }
+  .badge-error   { background: #f8d7da; color: #58151c; }
+  .notif-time { font-size: 0.78rem; color: #6c757d; }
+  .unread-dot  { width: 8px; height: 8px; border-radius: 50%; background: #0d6efd; flex-shrink: 0; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div id="sidebarHolder"></div>
+<div class="main-content">
+  <div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h4 class="fw-bold mb-0">
+          <i class="bi bi-bell me-2 text-primary"></i>Notifications
+          <span id="unreadBadge" class="badge bg-danger ms-2 d-none" style="font-size:.65rem;vertical-align:middle"></span>
+        </h4>
+        <small class="text-muted">Your in-app notification inbox</small>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-primary" onclick="markAllRead()">
+          <i class="bi bi-check2-all me-1"></i>Mark All Read
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="refresh()">
+          <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+        </button>
+      </div>
+    </div>
+
+    <div id="alertBox" class="alert d-none mb-3"></div>
+
+    <!-- Filters row -->
+    <div class="card shadow-sm border-0 mb-3">
+      <div class="card-body py-2">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <!-- Search -->
+          <div style="max-width:280px">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input id="searchInput" type="text" class="form-control" placeholder="Search notifications…" oninput="debouncedLoad()">
+            </div>
+          </div>
+          <!-- Type filter -->
+          <select id="typeFilter" class="form-select form-select-sm" style="max-width:150px" onchange="currentPage=1; loadNotifications()">
+            <option value="">All Types</option>
+            <option value="info">Info</option>
+            <option value="success">Success</option>
+            <option value="warning">Warning</option>
+            <option value="error">Error</option>
+          </select>
+          <!-- Read filter -->
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="unreadOnly" onchange="currentPage=1; loadNotifications()">
+            <label class="form-check-label small" for="unreadOnly">Unread only</label>
+          </div>
+          <!-- Sort -->
+          <div class="ms-auto d-flex gap-2 align-items-center">
+            <select id="sortBy" class="form-select form-select-sm" style="max-width:130px" onchange="currentPage=1; loadNotifications()">
+              <option value="CreatedAt">Date</option>
+              <option value="Title">Title</option>
+              <option value="Type">Type</option>
+            </select>
+            <select id="sortDir" class="form-select form-select-sm" style="max-width:100px" onchange="currentPage=1; loadNotifications()">
+              <option value="desc">Newest</option>
+              <option value="asc">Oldest</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification list -->
+    <div id="notifList">
+      <div class="text-center py-5 text-muted">
+        <div class="spinner-border spinner-border-sm me-2"></div>Loading…
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <small class="text-muted" id="pageInfo"></small>
+      <nav><ul class="pagination pagination-sm mb-0" id="pagination"></ul></nav>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ──────────────────────────────────────────────
+   State
+────────────────────────────────────────────── */
+let currentPage   = 1;
+const PAGE_SIZE   = 20;
+let totalCount    = 0;
+let debounceTimer = null;
+
+const token   = () => localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+const authHdr = () => ({ 'Authorization': `Bearer ${token()}` });
+
+/* ──────────────────────────────────────────────
+   Init
+────────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  loadSidebar();
+  loadUnreadCount();
+  loadNotifications();
+});
+
+function loadSidebar() {
+  const role = (localStorage.getItem('userRole') || '').toLowerCase();
+  const file = role === 'employee' ? '/includes/sidebar-employee.html' : '/includes/sidebar-admin.html';
+  fetch(file).then(r => r.text()).then(h => { document.getElementById('sidebarHolder').innerHTML = h; }).catch(() => {});
+}
+
+/* ──────────────────────────────────────────────
+   Debounced search
+────────────────────────────────────────────── */
+function debouncedLoad() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => { currentPage = 1; loadNotifications(); }, 350);
+}
+
+/* ──────────────────────────────────────────────
+   Load notifications from API
+────────────────────────────────────────────── */
+async function loadNotifications() {
+  const search     = document.getElementById('searchInput').value.trim();
+  const typeF      = document.getElementById('typeFilter').value;
+  const unreadOnly = document.getElementById('unreadOnly').checked;
+  const sortBy     = document.getElementById('sortBy').value;
+  const sortDir    = document.getElementById('sortDir').value;
+
+  document.getElementById('notifList').innerHTML =
+    '<div class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Loading…</div>';
+
+  const params = new URLSearchParams({
+    page: currentPage, pageSize: PAGE_SIZE,
+    unreadOnly, sortBy, sortDirection: sortDir
+  });
+  if (search)  params.set('search', search);
+  if (typeF)   params.set('type', typeF);
+
+  try {
+    const res  = await fetch(`/api/notifications?${params}`, { headers: authHdr() });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    const data = json.data;
+    totalCount = data.totalCount || 0;
+    renderList(data.items || []);
+    renderPagination(data.totalPages || 1);
+    document.getElementById('pageInfo').textContent =
+      `Showing ${(data.items||[]).length} of ${totalCount} notification${totalCount !== 1 ? 's' : ''}`;
+  } catch (err) {
+    document.getElementById('notifList').innerHTML =
+      `<div class="alert alert-danger">Failed to load notifications: ${escHtml(err.message)}</div>`;
+  }
+}
+
+/* ──────────────────────────────────────────────
+   Render notification cards
+────────────────────────────────────────────── */
+function renderList(items) {
+  const el = document.getElementById('notifList');
+  if (!items.length) {
+    el.innerHTML = `
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-bell-slash fs-1 d-block mb-2"></i>
+        No notifications found
+        <div class="small mt-1">Change filters or check back later.</div>
+      </div>`;
+    return;
+  }
+  el.innerHTML = items.map(n => `
+    <div class="card shadow-sm border-0 mb-2 notif-item ${n.isRead ? 'read' : 'unread'} type-${n.type || 'info'}" id="notif-${n.id}">
+      <div class="card-body py-3">
+        <div class="d-flex align-items-start gap-3">
+          ${!n.isRead ? '<div class="unread-dot"></div>' : '<div style="width:8px;flex-shrink:0"></div>'}
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <span class="badge badge-${n.type || 'info'} small">${escHtml(n.type || 'info')}</span>
+              <span class="fw-semibold text-truncate" style="max-width:500px">${escHtml(n.title || '')}</span>
+              <span class="notif-time ms-auto text-nowrap">${formatRelTime(n.createdAt)}</span>
+            </div>
+            <div class="text-muted small text-wrap">${escHtml(n.message || '')}</div>
+            ${n.entityType ? `<div class="mt-1"><span class="badge bg-light text-secondary small"><i class="bi bi-link-45deg"></i> ${escHtml(n.entityType)}${n.entityId ? ' #' + escHtml(n.entityId) : ''}</span></div>` : ''}
+          </div>
+          <div class="d-flex flex-column gap-1 ms-2 flex-shrink-0">
+            ${!n.isRead ? `<button class="btn btn-sm btn-outline-primary" title="Mark as read" onclick="markRead(${n.id})"><i class="bi bi-check-lg"></i></button>` : ''}
+            <button class="btn btn-sm btn-outline-danger" title="Delete" onclick="deleteNotif(${n.id})"><i class="bi bi-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* ──────────────────────────────────────────────
+   Pagination
+────────────────────────────────────────────── */
+function renderPagination(pages) {
+  const ul = document.getElementById('pagination');
+  if (pages <= 1) { ul.innerHTML = ''; return; }
+  let html = `<li class="page-item ${currentPage===1?'disabled':''}">
+    <a class="page-link" href="#" onclick="goPage(${currentPage-1});return false;">«</a></li>`;
+  const start = Math.max(1, currentPage - 2);
+  const end   = Math.min(pages, currentPage + 2);
+  if (start > 1) html += `<li class="page-item disabled"><span class="page-link">…</span></li>`;
+  for (let p = start; p <= end; p++)
+    html += `<li class="page-item ${p===currentPage?'active':''}">
+      <a class="page-link" href="#" onclick="goPage(${p});return false;">${p}</a></li>`;
+  if (end < pages) html += `<li class="page-item disabled"><span class="page-link">…</span></li>`;
+  html += `<li class="page-item ${currentPage===pages?'disabled':''}">
+    <a class="page-link" href="#" onclick="goPage(${currentPage+1});return false;">»</a></li>`;
+  ul.innerHTML = html;
+}
+
+function goPage(p) { currentPage = p; loadNotifications(); window.scrollTo(0, 0); }
+
+/* ──────────────────────────────────────────────
+   Unread count badge
+────────────────────────────────────────────── */
+async function loadUnreadCount() {
+  try {
+    const res  = await fetch('/api/notifications/count', { headers: authHdr() });
+    const json = await res.json();
+    const c    = json.data?.unreadCount ?? 0;
+    const badge = document.getElementById('unreadBadge');
+    if (c > 0) { badge.textContent = c > 99 ? '99+' : c; badge.classList.remove('d-none'); }
+    else { badge.classList.add('d-none'); }
+  } catch { /* swallow */ }
+}
+
+/* ──────────────────────────────────────────────
+   Mark Read
+────────────────────────────────────────────── */
+async function markRead(id) {
+  try {
+    const res = await fetch(`/api/notifications/${id}/read`, { method: 'POST', headers: authHdr() });
+    if (!res.ok) throw new Error((await res.json()).message || `HTTP ${res.status}`);
+    // Optimistic UI update
+    const card = document.getElementById(`notif-${id}`);
+    if (card) { card.classList.remove('unread'); card.classList.add('read'); }
+    await loadUnreadCount();
+  } catch (err) {
+    showAlert('danger', `Could not mark as read: ${err.message}`);
+  }
+}
+
+async function markAllRead() {
+  try {
+    const res = await fetch('/api/notifications/read-all', { method: 'POST', headers: authHdr() });
+    if (!res.ok) throw new Error((await res.json()).message || `HTTP ${res.status}`);
+    showAlert('success', 'All notifications marked as read.');
+    loadUnreadCount();
+    loadNotifications();
+  } catch (err) {
+    showAlert('danger', `Failed: ${err.message}`);
+  }
+}
+
+/* ──────────────────────────────────────────────
+   Delete
+────────────────────────────────────────────── */
+async function deleteNotif(id) {
+  if (!confirm('Delete this notification?')) return;
+  try {
+    const res = await fetch(`/api/notifications/${id}`, { method: 'DELETE', headers: authHdr() });
+    if (!res.ok) throw new Error((await res.json()).message || `HTTP ${res.status}`);
+    // Optimistic remove
+    const card = document.getElementById(`notif-${id}`);
+    if (card) card.remove();
+    totalCount = Math.max(0, totalCount - 1);
+    document.getElementById('pageInfo').textContent =
+      `${totalCount} notification${totalCount !== 1 ? 's' : ''}`;
+    loadUnreadCount();
+  } catch (err) {
+    showAlert('danger', `Delete failed: ${err.message}`);
+  }
+}
+
+/* ──────────────────────────────────────────────
+   Refresh
+────────────────────────────────────────────── */
+function refresh() { currentPage = 1; loadNotifications(); loadUnreadCount(); }
+
+/* ──────────────────────────────────────────────
+   Helpers
+────────────────────────────────────────────── */
+function formatRelTime(isoStr) {
+  if (!isoStr) return '';
+  const diff = Date.now() - new Date(isoStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1)  return 'Just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 7)  return `${d}d ago`;
+  return new Date(isoStr).toLocaleDateString();
+}
+
+function showAlert(type, msg) {
+  const el = document.getElementById('alertBox');
+  el.className = `alert alert-${type} alert-dismissible`;
+  el.innerHTML = `${escHtml(msg)}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+  el.classList.remove('d-none');
+  if (type === 'success') setTimeout(() => el.classList.add('d-none'), 4000);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

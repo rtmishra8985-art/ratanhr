@@ -1,0 +1,9 @@
+$ docker compose version
+
+--- STDOUT ---
+Docker Compose version 2.36.0
+
+--- STDERR ---
+
+--- EXIT CODE ---
+0

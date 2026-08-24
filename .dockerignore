@@ -1,0 +1,43 @@
+# ── Secrets — MUST NEVER be copied into the image ─────────────────────────
+.env
+.env.*
+secrets/
+*.pem
+*.key
+*.crt
+*.pfx
+
+# ── Build artifacts (rebuilt inside Docker) ────────────────────────────────
+**/bin/
+**/obj/
+**/TestResults/
+**/coverage/
+
+# ── Node / SPA (not needed for backend image) ─────────────────────────────
+HRMS.SPA.Source/node_modules/
+HRMS.SPA.Source/dist/
+HRMS.SPA.Source/playwright-report/
+HRMS.SPA.Source/test-results/
+
+# ── VCS and tooling ────────────────────────────────────────────────────────
+.git/
+.gitignore
+.github/
+.vs/
+.idea/
+.vscode/
+
+# ── Documentation (reduces image context size) ────────────────────────────
+Documentation/
+Architecture/
+*.md
+!README.md
+
+# ── Backups and logs (runtime data) ───────────────────────────────────────
+backups/
+Logs/
+*.log
+
+# ── OS artifacts ──────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

@@ -1,0 +1,3 @@
+- [Production configuration names](production-config-names.md) — startup validation and service consumers must resolve the same hierarchical keys as deployment environment aliases.
+- [Payroll migration safety](payroll-migration-safety.md) — uniqueness migrations must fail on duplicates, never silently delete payroll rows.
+- [Verification runtime requirements](verification-runtime-requirements.md) — backend and release-gate evidence requires a .NET-capable runtime plus disposable MySQL, Redis, scanner, and staging services.

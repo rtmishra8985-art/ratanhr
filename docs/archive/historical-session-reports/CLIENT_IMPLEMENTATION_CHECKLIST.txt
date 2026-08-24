@@ -1,0 +1,403 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║              RATANHR SMTP EMAIL - CLIENT IMPLEMENTATION CHECKLIST            ║
+║                                                                               ║
+║                         Copy & Paste This Checklist                          ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+IMPLEMENTATION DATE: _________________
+CLIENT: _________________
+PREPARED BY: _________________
+
+═══════════════════════════════════════════════════════════════════════════════
+                    PHASE 1: ACCOUNT SETUP
+═══════════════════════════════════════════════════════════════════════════════
+
+BREVO ACCOUNT CREATION
+═════════════════════
+
+☐ Go to: https://www.brevo.com/
+☐ Click: "Sign Up Free"
+☐ Enter email: _________________
+☐ Enter password: _________________
+☐ Company name: RatanHR
+☐ Verify email (check inbox)
+☐ Login successful
+
+BREVO CREDENTIALS
+═════════════════
+
+☐ Login to Brevo dashboard
+☐ Find SMTP settings
+☐ Record values:
+
+   SMTP Host: smtp-relay.brevo.com
+   SMTP Port: 587
+   SMTP Username: _________________________________
+   SMTP Password: _________________________________
+   (Save these securely!)
+
+═══════════════════════════════════════════════════════════════════════════════
+                    PHASE 2: CONFIGURATION
+═══════════════════════════════════════════════════════════════════════════════
+
+.ENV FILE SETUP
+═══════════════
+
+☐ Find .env file at:
+   C:\Users\[YourUser]\Downloads\RatanHR_Run8_Final\RatanHR\.env
+
+☐ Open with Notepad
+
+☐ Find EMAIL section
+
+☐ Replace with Brevo values:
+   EMAIL_HOST=smtp-relay.brevo.com
+   EMAIL_PORT=587
+   EMAIL_USE_SSL=false
+   EMAIL_USERNAME=[Your Brevo Username]
+   EMAIL_PASSWORD=[Your Brevo Password]
+   EMAIL_FROM_ADDRESS=[Your Company Email]
+   EMAIL_FROM_NAME=RatanHR HRMS
+
+☐ Also add .NET format (same values):
+   Email__Host=smtp-relay.brevo.com
+   Email__Port=587
+   Email__UseSsl=false
+   Email__Username=[Your Brevo Username]
+   Email__Password=[Your Brevo Password]
+   Email__FromAddress=[Your Company Email]
+   Email__FromName=RatanHR HRMS
+
+☐ Save file (Ctrl+S)
+
+═══════════════════════════════════════════════════════════════════════════════
+                    PHASE 3: LOCAL TESTING
+═══════════════════════════════════════════════════════════════════════════════
+
+MAILHOG SETUP
+═════════════
+
+☐ Download MailHog:
+   https://github.com/mailhog/MailHog/releases
+   File: mailhog_windows_amd64.exe
+
+☐ Run: Double-click mailhog_windows_amd64.exe
+
+☐ Wait for: "MailHog v1.x.x"
+
+☐ MailHog running on:
+   - SMTP: localhost:1025
+   - Web: http://localhost:8025
+
+☐ Open browser: http://localhost:8025
+☐ See MailHog inbox (empty is OK)
+
+SEND TEST EMAIL
+═══════════════
+
+☐ Find: SEND_TEST_EMAIL_TO_MAILHOG.bat
+☐ Double-click it
+☐ Wait for: "✅ SUCCESS"
+☐ Go to: http://localhost:8025
+☐ Refresh page
+☐ See email in inbox
+☐ Click email to view content
+☐ Verify:
+   - From: rtmishra8985@gmail.com
+   - To: rtmishra7040@gmail.com
+   - Subject: RatanHR Test
+   - Body visible
+
+RESULT:
+☐ Email system works locally ✓
+
+═══════════════════════════════════════════════════════════════════════════════
+                    PHASE 4: DEPLOYMENT SETUP
+═══════════════════════════════════════════════════════════════════════════════
+
+CHOOSE DEPLOYMENT TYPE:
+═══════════════════════
+
+☐ On-Premise Server (Your own hardware)
+  
+  OR
+
+☐ Cloud (AWS / Azure / Google Cloud)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+IF ON-PREMISE:
+──────────────
+
+SERVER PREPARATION
+═══════════════════
+
+☐ Get server:
+   Type: ___________________
+   OS: ___________________
+   IP Address: ___________________
+
+☐ Install Docker:
+   ☐ Windows: Download & install Docker Desktop
+   ☐ Linux: sudo apt-get install docker.io
+
+☐ Verify Docker: docker --version
+
+APPLICATION BUILD
+═════════════════
+
+☐ Go to: C:\Users\[YourUser]\Downloads\RatanHR_Run8_Final\RatanHR
+
+☐ Build image:
+   docker build -t ratanhr:1.0.4 .
+
+☐ Wait for completion (5-10 minutes)
+
+☐ Verify build: docker images (should see ratanhr:1.0.4)
+
+DEPLOYMENT
+═════════
+
+☐ Copy .env to server
+
+☐ On server, run:
+   docker run -d --env-file .env -p 8080:80 --name ratanhr-app ratanhr:1.0.4
+
+☐ Verify running: docker ps (should show ratanhr-app)
+
+☐ Test access: http://[SERVER_IP]:8080
+   ☐ RatanHR login page appears
+
+═══════════════════════════════════════════════════════════════════════════════
+
+IF CLOUD (AWS/AZURE/GCP):
+─────────────────────────
+
+CREATE CLOUD ACCOUNT
+════════════════════
+
+☐ Choose provider:
+   ☐ AWS: https://aws.amazon.com/
+   ☐ Azure: https://azure.microsoft.com/
+   ☐ GCP: https://cloud.google.com/
+
+☐ Create account
+☐ Verify email
+☐ Choose Free Tier
+
+BUILD & PUSH IMAGE
+═══════════════════
+
+☐ Build Docker image:
+   docker build -t ratanhr:1.0.4 .
+
+☐ Create registry account (ECR, ACR, GCR)
+
+☐ Tag image:
+   [For AWS]
+   docker tag ratanhr:1.0.4 ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/ratanhr:1.0.4
+
+☐ Push image:
+   docker push ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/ratanhr:1.0.4
+
+DEPLOY ON CLOUD
+═══════════════
+
+☐ Create service:
+   ☐ AWS ECS: Create task definition & service
+   ☐ Azure: Create container instance
+   ☐ GCP: Create Cloud Run service
+
+☐ Set environment variables:
+   EMAIL_HOST=smtp-relay.brevo.com
+   EMAIL_PORT=587
+   EMAIL_USERNAME=[Your Brevo Username]
+   EMAIL_PASSWORD=[Your Brevo Password]
+   [Etc - all .env variables]
+
+☐ Set port: 8080
+
+☐ Deploy
+
+☐ Get URL: _________________________________
+
+☐ Test access: http://[YOUR_URL]
+   ☐ RatanHR login page appears
+
+═══════════════════════════════════════════════════════════════════════════════
+                    PHASE 5: PRODUCTION TESTING
+═══════════════════════════════════════════════════════════════════════════════
+
+TEST 1: PASSWORD RESET
+══════════════════════
+
+☐ Go to: http://[APP_URL]/login
+☐ Click: "Forgot Password?"
+☐ Enter: [Test Email]
+☐ Click: "Send Reset Link"
+☐ Check email inbox
+☐ Email received? ☐ YES ☐ NO
+☐ Wait time: _______ minutes
+☐ Click reset link
+☐ Set new password
+☐ Can login with new password? ☐ YES ☐ NO
+
+TEST 2: WELCOME EMAIL (New Employee)
+═════════════════════════════════════
+
+☐ Go to: HR > Employees
+☐ Create new employee:
+   Name: Test Employee
+   Email: [Test Email]
+☐ Save
+☐ Check email inbox
+☐ Welcome email received? ☐ YES ☐ NO
+☐ Wait time: _______ minutes
+☐ Contains login credentials? ☐ YES ☐ NO
+
+TEST 3: LEAVE NOTIFICATION
+═══════════════════════════
+
+☐ Employee submits leave request
+☐ Manager approves/rejects
+☐ Check employee email
+☐ Notification received? ☐ YES ☐ NO
+☐ Wait time: _______ minutes
+☐ Contains decision? ☐ YES ☐ NO
+
+TEST 4: HEALTH CHECK
+════════════════════
+
+☐ Go to: http://[APP_URL]/health
+☐ Look for: "Email": "Healthy"
+☐ Status shows healthy? ☐ YES ☐ NO
+
+═══════════════════════════════════════════════════════════════════════════════
+                    PHASE 6: MONITORING SETUP
+═══════════════════════════════════════════════════════════════════════════════
+
+DAILY MONITORING
+════════════════
+
+☐ Check health endpoint daily:
+   http://[APP_URL]/health
+
+☐ Check Brevo dashboard:
+   https://www.brevo.com/
+   Review: Today's stats
+
+☐ Check logs for errors
+
+☐ If errors found → Troubleshoot
+
+MONITORING SCHEDULE
+════════════════════
+
+☐ Daily: 9:00 AM - Check health endpoint
+☐ Daily: 5:00 PM - Check email stats
+☐ Weekly: Monday - Review delivery rate
+☐ Monthly: Create report
+
+═══════════════════════════════════════════════════════════════════════════════
+                    PHASE 7: CLIENT TRAINING
+═══════════════════════════════════════════════════════════════════════════════
+
+TRAINING TOPICS
+════════════════
+
+☐ Demo: How to send password reset
+☐ Demo: View sent emails (Brevo dashboard)
+☐ Demo: How to handle bounce/errors
+☐ Training: Daily monitoring checklist
+☐ Training: Troubleshooting basics
+
+TRAINING MATERIALS
+═════════════════
+
+☐ Print: SMTP_EMAIL_SIMPLE_LAYMAN_GUIDE.txt
+☐ Print: Troubleshooting section
+☐ Create: Video walkthrough (optional)
+☐ Create: FAQ document
+
+CLIENT SIGN-OFF
+════════════════
+
+☐ Client understands setup
+☐ Client understands monitoring
+☐ Client knows who to contact for support
+☐ Client signature: _________________________________
+☐ Date: _________________________________
+
+═══════════════════════════════════════════════════════════════════════════════
+                    FINAL VERIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+BEFORE GOING LIVE:
+═══════════════════
+
+☐ All tests passed ✓
+☐ Email delivery working ✓
+☐ Health endpoint healthy ✓
+☐ Monitoring set up ✓
+☐ Client trained ✓
+☐ Support documented ✓
+☐ Backup credentials stored (securely) ✓
+
+ISSUES FOUND (if any):
+═══════════════════════
+
+Issue 1: _________________________________________
+Status: ☐ Resolved ☐ Pending
+
+Issue 2: _________________________________________
+Status: ☐ Resolved ☐ Pending
+
+Issue 3: _________________________________________
+Status: ☐ Resolved ☐ Pending
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SIGN-OFF
+═════════
+
+Implementation Team: _________________________________
+Date: _________________________________
+Status: ☐ COMPLETE ☐ IN PROGRESS ☐ ON HOLD
+
+Client Acceptance: _________________________________
+Date: _________________________________
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SUPPORT CONTACT INFORMATION
+═════════════════════════════
+
+Technical Support Email: _________________________________
+Support Phone: _________________________________
+Support Hours: _________________________________
+Escalation Contact: _________________________________
+
+Client Contact (Primary): _________________________________
+Phone: _________________ Email: _________________________________
+
+Client Contact (Secondary): _________________________________
+Phone: _________________ Email: _________________________________
+
+═══════════════════════════════════════════════════════════════════════════════
+
+ADDITIONAL NOTES
+════════════════
+
+_________________________________________________________________
+
+_________________________________________________________________
+
+_________________________________________________________________
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    IMPLEMENTATION COMPLETE ✓
+
+═══════════════════════════════════════════════════════════════════════════════

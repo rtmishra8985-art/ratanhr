@@ -1,0 +1,669 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║              RATANHR PHASE 9: FULL REGRESSION & RELEASE CANDIDATE            ║
+║                                                                               ║
+║                        CLEAN FINAL REGRESSION TEST                           ║
+║                                                                               ║
+║                   DO NOT TRUST EARLIER RESULTS - VERIFY ALL                  ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+                    PHASE 9 REGRESSION TEST PLAN
+═══════════════════════════════════════════════════════════════════════════════
+
+Test Date: 2026-08-19
+Version: 1.0.4
+Build Status: PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 1: BUILD VERIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1.1: Backend Build
+─────────────────────────
+
+Location: C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR\
+
+Expected:
+  • Solution compiles without errors
+  • No warnings (or approved warnings only)
+  • All dependencies resolved
+  • Build time < 5 minutes
+
+Test Command:
+  dotnet clean
+  dotnet build --configuration Release
+
+Status: ⏳ PENDING
+
+STEP 1.2: Frontend Build
+────────────────────────
+
+Location: C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR\HRMS.SPA\
+
+Expected:
+  • React/Vue builds without errors
+  • No critical warnings
+  • All dependencies resolved
+  • Build time < 3 minutes
+
+Test Command:
+  npm run build
+  OR
+  yarn build
+  OR
+  npm run build:prod
+
+Status: ⏳ PENDING
+
+STEP 1.3: Docker Build
+──────────────────────
+
+Location: C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR\
+
+Expected:
+  • Docker image builds successfully
+  • No build errors
+  • Image size reasonable
+  • Build time < 10 minutes
+
+Test Command:
+  docker build -t ratanhr:1.0.4 .
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 2: UNIT TESTS
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 2.1: Run Unit Tests
+────────────────────────
+
+Expected:
+  • All tests pass
+  • No failures
+  • Coverage > 70%
+  • Run time < 2 minutes
+
+Test Command:
+  dotnet test HRMS.Tests --configuration Release
+
+Test Areas:
+  ☐ Authentication tests
+  ☐ Authorization tests
+  ☐ Encryption tests
+  ☐ Validation tests
+  ☐ Utility tests
+  ☐ Service tests
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 3: INTEGRATION TESTS
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 3.1: Database Integration
+───────────────────────────────
+
+Test:
+  ☐ Database connection works
+  ☐ Connection string correct
+  ☐ Can query database
+  ☐ No connection errors
+
+Status: ⏳ PENDING
+
+STEP 3.2: API Integration
+─────────────────────────
+
+Test:
+  ☐ API endpoints respond
+  ☐ Proper HTTP status codes
+  ☐ Response format correct
+  ☐ No 500 errors
+
+Status: ⏳ PENDING
+
+STEP 3.3: Email Integration
+───────────────────────────
+
+Test:
+  ☐ Email service initializes
+  ☐ Can send test email
+  ☐ Error handling works
+  ☐ Logging works
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 4: DATABASE & MIGRATIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 4.1: Database Migrations
+──────────────────────────────
+
+Test:
+  ☐ All migrations apply
+  ☐ Database schema correct
+  ☐ No migration errors
+  ☐ Rollback works
+
+Status: ⏳ PENDING
+
+STEP 4.2: Seed Data
+───────────────────
+
+Test:
+  ☐ Seed data loads
+  ☐ All tables populated
+  ☐ Data integrity OK
+  ☐ No duplicate data
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 5: STARTUP VERIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 5.1: Application Startup
+──────────────────────────────
+
+Test Command:
+  dotnet run --project HRMS.API
+
+Expected:
+  ☐ Application starts without errors
+  ☐ No fatal exceptions
+  ☐ Database connections ready
+  ☐ API listening on port 5000/8080
+  ☐ Health endpoint responds
+  ☐ Startup time < 10 seconds
+
+Status: ⏳ PENDING
+
+STEP 5.2: Frontend Startup
+──────────────────────────
+
+Test Command:
+  npm start
+  OR
+  yarn start
+
+Expected:
+  ☐ Frontend starts without errors
+  ☐ No console errors
+  ☐ Application loads at localhost:3000
+  ☐ Can access login page
+  ☐ Startup time < 5 seconds
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 6: FUNCTIONAL TESTING
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 6.1: Authentication Flow
+──────────────────────────────
+
+Test Login:
+  ☐ Can access login page
+  ☐ Can enter credentials
+  ☐ Can submit login form
+  ☐ Login succeeds with valid credentials
+  ☐ Login fails with invalid credentials
+  ☐ Error messages display correctly
+
+Status: ⏳ PENDING
+
+Test Logout:
+  ☐ Logout button visible
+  ☐ Logout successful
+  ☐ Redirected to login page
+  ☐ Session cleared
+
+Status: ⏳ PENDING
+
+Test JWT Token:
+  ☐ Token generated on login
+  ☐ Token stored correctly
+  ☐ Token sent with requests
+  ☐ Token validation works
+  ☐ Invalid token rejected
+
+Status: ⏳ PENDING
+
+Test Refresh Token:
+  ☐ Refresh token generated
+  ☐ Refresh endpoint works
+  ☐ New token issued
+  ☐ Old token invalidated
+  ☐ Expiry handling correct
+
+Status: ⏳ PENDING
+
+STEP 6.2: Authorization (RBAC)
+───────────────────────────────
+
+Test Role-Based Access:
+  ☐ Admin role has full access
+  ☐ Manager role has limited access
+  ☐ Employee role restricted correctly
+  ☐ HR role has appropriate access
+  ☐ Unauthorized access denied
+  ☐ 403 error for forbidden resources
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 7: MODULE TESTING
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 7.1: Employee Module
+──────────────────────────
+
+Test:
+  ☐ Can view employee list
+  ☐ Can create employee
+  ☐ Can edit employee
+  ☐ Can delete employee
+  ☐ Validation works
+  ☐ Data persists
+  ☐ Search/filter works
+  ☐ Pagination works
+
+Status: ⏳ PENDING
+
+STEP 7.2: Attendance Module
+────────────────────────────
+
+Test:
+  ☐ Can mark attendance
+  ☐ Can view attendance report
+  ☐ Can edit attendance
+  ☐ Calculations correct
+  ☐ Date validation works
+  ☐ Status tracking works
+
+Status: ⏳ PENDING
+
+STEP 7.3: Leave Module
+──────────────────────
+
+Test:
+  ☐ Can apply leave
+  ☐ Can approve leave
+  ☐ Can reject leave
+  ☐ Can view leave balance
+  ☐ Notifications sent
+  ☐ Leave deductions work
+  ☐ Approval workflow works
+
+Status: ⏳ PENDING
+
+STEP 7.4: Holiday Module
+─────────────────────────
+
+Test:
+  ☐ Can create holiday
+  ☐ Can view holidays
+  ☐ Holiday calculations correct
+  ☐ Leave deduction includes holidays
+
+Status: ⏳ PENDING
+
+STEP 7.5: Shift Module
+──────────────────────
+
+Test:
+  ☐ Can create shift
+  ☐ Can assign shift
+  ☐ Can view shift
+  ☐ Shift calculations correct
+
+Status: ⏳ PENDING
+
+STEP 7.6: Department Module
+────────────────────────────
+
+Test:
+  ☐ Can create department
+  ☐ Can edit department
+  ☐ Can view departments
+  ☐ Employee assignment works
+
+Status: ⏳ PENDING
+
+STEP 7.7: Designation Module
+─────────────────────────────
+
+Test:
+  ☐ Can create designation
+  ☐ Can assign designation
+  ☐ Can view designations
+  ☐ Hierarchy correct
+
+Status: ⏳ PENDING
+
+STEP 7.8: Payroll Module
+─────────────────────────
+
+Test:
+  ☐ Can create payroll
+  ☐ Calculations correct
+  ☐ Deductions applied
+  ☐ Allowances applied
+  ☐ Tax calculations work
+  ☐ Can process payroll
+  ☐ Lock/unlock works
+
+Status: ⏳ PENDING
+
+STEP 7.9: Payslip Module
+────────────────────────
+
+Test:
+  ☐ Can generate payslip
+  ☐ Can view payslip
+  ☐ PDF generation works
+  ☐ Email delivery works
+  ☐ Download works
+  ☐ Archive works
+
+Status: ⏳ PENDING
+
+STEP 7.10: Recruitment Module
+──────────────────────────────
+
+Test:
+  ☐ Can create job posting
+  ☐ Can manage applications
+  ☐ Can change candidate status
+  ☐ Can track pipeline
+
+Status: ⏳ PENDING
+
+STEP 7.11: Performance Module
+──────────────────────────────
+
+Test:
+  ☐ Can create appraisal
+  ☐ Can set goals
+  ☐ Can rate performance
+  ☐ Can generate report
+
+Status: ⏳ PENDING
+
+STEP 7.12: CRM Module
+──────────────────────
+
+Test:
+  ☐ Can manage customers
+  ☐ Can track leads
+  ☐ Can manage opportunities
+  ☐ Pipeline working
+
+Status: ⏳ PENDING
+
+STEP 7.13: Assets Module
+─────────────────────────
+
+Test:
+  ☐ Can register asset
+  ☐ Can assign asset
+  ☐ Can track depreciation
+  ☐ Can retire asset
+
+Status: ⏳ PENDING
+
+STEP 7.14: Notifications
+─────────────────────────
+
+Test:
+  ☐ Email notifications sent
+  ☐ In-app notifications work
+  ☐ Notification preferences work
+  ☐ Unread count correct
+
+Status: ⏳ PENDING
+
+STEP 7.15: Documents
+─────────────────────
+
+Test:
+  ☐ Can upload document
+  ☐ Can download document
+  ☐ Can view document
+  ☐ Can delete document
+  ☐ Virus scan works (if enabled)
+
+Status: ⏳ PENDING
+
+STEP 7.16: Reports & Dashboard
+───────────────────────────────
+
+Test:
+  ☐ Dashboard loads
+  ☐ Widgets display correctly
+  ☐ Reports generate
+  ☐ Filtering works
+  ☐ Export works
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 8: SECURITY TESTS
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 8.1: Company A vs Company B Test
+──────────────────────────────────────
+
+Multi-Tenant Security Test:
+
+Test Case:
+  1. Create Company A with Users A1, A2
+  2. Create Company B with Users B1, B2
+  3. User A1 tries to access Company B data
+  4. User B1 tries to access Company A data
+
+Expected Results:
+  ☐ User A1 cannot see Company B employees
+  ☐ User A1 cannot see Company B payroll
+  ☐ User B1 cannot see Company A employees
+  ☐ User B1 cannot see Company A payroll
+  ☐ Data completely isolated
+  ☐ No cross-tenant data leakage
+  ☐ SQL injection attempts fail
+  ☐ XSS attempts fail
+
+Status: ⏳ PENDING
+
+STEP 8.2: Encryption Verification
+───────────────────────────────────
+
+Test:
+  ☐ Password hashing works (bcrypt)
+  ☐ PII encryption works (AES-256)
+  ☐ JWT tokens signed (RS256)
+  ☐ HTTPS enforced
+  ☐ No plain-text sensitive data in logs
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 9: WORKFLOW TESTING
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 9.1: Admin Workflow
+─────────────────────────
+
+Scenario:
+  1. Admin logs in
+  2. Creates new employee
+  3. Assigns department & designation
+  4. Creates shift
+  5. Runs payroll
+  6. Generates reports
+
+Expected:
+  ☐ All steps complete successfully
+  ☐ Data persists
+  ☐ Calculations correct
+  ☐ No errors
+
+Status: ⏳ PENDING
+
+STEP 9.2: Employee Workflow
+────────────────────────────
+
+Scenario:
+  1. Employee logs in
+  2. Marks attendance
+  3. Applies leave
+  4. Views payslip
+  5. Downloads payslip
+
+Expected:
+  ☐ All steps complete successfully
+  ☐ Data correct
+  ☐ No permission errors
+  ☐ Email notifications sent
+
+Status: ⏳ PENDING
+
+STEP 9.3: Payroll Workflow
+──────────────────────────
+
+Scenario:
+  1. Payroll manager logs in
+  2. Runs payroll for month
+  3. Applies bonuses/deductions
+  4. Locks payroll
+  5. Generates payslips
+  6. Sends payslips to employees
+
+Expected:
+  ☐ All calculations correct
+  ☐ All payslips generated
+  ☐ All emails sent
+  ☐ Data locked correctly
+
+Status: ⏳ PENDING
+
+STEP 9.4: Sales Workflow
+─────────────────────────
+
+Scenario:
+  1. Sales manager logs in
+  2. Creates lead
+  3. Converts to opportunity
+  4. Closes deal
+  5. Generates invoice
+
+Expected:
+  ☐ All steps complete
+  ☐ Pipeline updated
+  ☐ Revenue recognized
+  ☐ Notifications sent
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 10: ERROR CHECKING
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 10.1: Browser Console Check
+─────────────────────────────────
+
+Open browser developer tools (F12)
+Go to Console tab
+
+Expected:
+  ☐ No JavaScript errors
+  ☐ No TypeScript errors
+  ☐ No 404 errors
+  ☐ No warning messages about missing resources
+  ☐ No console.error logs
+
+Status: ⏳ PENDING
+
+STEP 10.2: Server Logs Check
+─────────────────────────────
+
+Run application and check logs:
+  dotnet run --project HRMS.API
+
+Expected:
+  ☐ No error messages
+  ☐ No exception traces
+  ☐ No warning messages
+  ☐ Only info/debug messages
+  ☐ Clean startup log
+
+Status: ⏳ PENDING
+
+STEP 10.3: Database Errors
+───────────────────────────
+
+Check database logs:
+
+Expected:
+  ☐ No SQL errors
+  ☐ No connection errors
+  ☐ No transaction errors
+  ☐ No constraint violations
+
+Status: ⏳ PENDING
+
+STEP 10.4: Runtime Crashes
+───────────────────────────
+
+Expected:
+  ☐ No unhandled exceptions
+  ☐ No null reference errors
+  ☐ No out of memory errors
+  ☐ No timeout errors
+  ☐ Application stable for 1 hour
+
+Status: ⏳ PENDING
+
+STEP 10.5: API Errors
+──────────────────────
+
+Test endpoints:
+
+Expected:
+  ☐ No 500 errors
+  ☐ No 502 errors
+  ☐ Proper error responses
+  ☐ Error messages helpful
+  ☐ Status codes correct
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    REGRESSION TEST SUMMARY
+═══════════════════════════════════════════════════════════════════════════════
+
+Test Category                    Status       Issues Found
+─────────────────────────────────────────────────────────────
+1. Build Verification            ⏳ PENDING        0
+2. Unit Tests                    ⏳ PENDING        0
+3. Integration Tests             ⏳ PENDING        0
+4. Database & Migrations         ⏳ PENDING        0
+5. Startup Verification          ⏳ PENDING        0
+6. Functional Testing            ⏳ PENDING        0
+7. Module Testing                ⏳ PENDING        0
+8. Security Tests                ⏳ PENDING        0
+9. Workflow Testing              ⏳ PENDING        0
+10. Error Checking               ⏳ PENDING        0
+
+OVERALL STATUS: ⏳ IN PROGRESS
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    TESTING FRAMEWORK COMPLETE
+
+      Next Step: Execute all tests and update status
+      
+═══════════════════════════════════════════════════════════════════════════════

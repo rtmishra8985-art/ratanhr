@@ -1,0 +1,24 @@
+# =============================================================
+# Grafana Dashboard Provisioning Configuration
+# FIX 11: Auto-imports the HRMS dashboard JSON on first start.
+# Mounted at /etc/grafana/provisioning/dashboards/ in docker-compose.yml.
+#
+# Grafana reads this file at startup and imports all *.json files
+# found in the configured path — no manual import step required.
+# =============================================================
+apiVersion: 1
+
+providers:
+  - name: HRMS Dashboards
+    orgId: 1
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      # Path inside the Grafana container where dashboard JSON files live.
+      # docker-compose.yml mounts ./monitoring/grafana-dashboard.json here
+      # via the existing volume, and this provisioning dir is mounted at
+      # /etc/grafana/provisioning.
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

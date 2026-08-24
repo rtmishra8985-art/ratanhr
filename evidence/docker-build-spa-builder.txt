@@ -1,0 +1,255 @@
+$ docker build --target spa-builder -t ratanhr-spa .
+
+--- STDOUT ---
+
+--- STDERR ---
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.82kB done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/oven/bun:1.2-alpine
+#2 DONE 2.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 1.49kB done
+#3 DONE 0.0s
+
+#4 [spa-builder 1/6] FROM docker.io/oven/bun:1.2-alpine@sha256:0841c588f6304300baf1d395ae339ce09a6e18c4b6a7cdd4fddcbdb87a2f096a
+#4 resolve docker.io/oven/bun:1.2-alpine@sha256:0841c588f6304300baf1d395ae339ce09a6e18c4b6a7cdd4fddcbdb87a2f096a 0.0s done
+#4 ...
+
+#5 [internal] load build context
+#5 transferring context: 1.18MB 0.1s done
+#5 DONE 0.2s
+
+#4 [spa-builder 1/6] FROM docker.io/oven/bun:1.2-alpine@sha256:0841c588f6304300baf1d395ae339ce09a6e18c4b6a7cdd4fddcbdb87a2f096a
+#4 sha256:0841c588f6304300baf1d395ae339ce09a6e18c4b6a7cdd4fddcbdb87a2f096a 1.61kB / 1.61kB done
+#4 sha256:5ecd5dcc8138e00024ca1163e97b07de0a841e906efc5eb5cf36d717aea797ad 1.43kB / 1.43kB done
+#4 sha256:01d036902a3ca86e8793073c8094cba44d83a38953a489ac0641f3de017fe2d2 0B / 3.62MB 0.2s
+#4 sha256:5ad0d997b45760ea567d2253cd6d8d136f06823bfdaa583ec233118469f32a79 0B / 38.05MB 0.2s
+#4 sha256:70a70f81779add32c21fbc4cdd24aa07dc1c5b0b314d27f633f05c91f9018ee4 0B / 297B 0.2s
+#4 sha256:18541ff8daed5b1a5103125ee3f05b45136b2789cc6012046cfed4ab2835b7da 4.03kB / 4.03kB done
+#4 sha256:01d036902a3ca86e8793073c8094cba44d83a38953a489ac0641f3de017fe2d2 2.10MB / 3.62MB 0.3s
+#4 sha256:01d036902a3ca86e8793073c8094cba44d83a38953a489ac0641f3de017fe2d2 3.62MB / 3.62MB 0.4s
+#4 extracting sha256:01d036902a3ca86e8793073c8094cba44d83a38953a489ac0641f3de017fe2d2
+#4 sha256:01d036902a3ca86e8793073c8094cba44d83a38953a489ac0641f3de017fe2d2 3.62MB / 3.62MB 0.4s done
+#4 sha256:5e04afe5c27fb50017211e2a6fb4f6324869983635a422c187879363d320016c 0B / 185B 0.5s
+#4 sha256:70a70f81779add32c21fbc4cdd24aa07dc1c5b0b314d27f633f05c91f9018ee4 297B / 297B 0.5s done
+#4 extracting sha256:01d036902a3ca86e8793073c8094cba44d83a38953a489ac0641f3de017fe2d2 0.2s done
+#4 sha256:1534a191d85bcbfaaae37ee76b2bc8ca2555f5f27588a372223bfbb95c0e1ffd 0B / 3.35MB 0.7s
+#4 sha256:5ad0d997b45760ea567d2253cd6d8d136f06823bfdaa583ec233118469f32a79 38.05MB / 38.05MB 0.9s
+#4 sha256:5e04afe5c27fb50017211e2a6fb4f6324869983635a422c187879363d320016c 185B / 185B 0.7s done
+#4 sha256:1534a191d85bcbfaaae37ee76b2bc8ca2555f5f27588a372223bfbb95c0e1ffd 3.35MB / 3.35MB 0.8s done
+#4 sha256:b3aa21b6a2b97e440d422d4f9a7daa05999d85b1a49acd7b7271509305beacc5 0B / 143B 0.9s
+#4 sha256:5ad0d997b45760ea567d2253cd6d8d136f06823bfdaa583ec233118469f32a79 38.05MB / 38.05MB 1.0s done
+#4 sha256:b3aa21b6a2b97e440d422d4f9a7daa05999d85b1a49acd7b7271509305beacc5 143B / 143B 1.0s done
+#4 extracting sha256:5ad0d997b45760ea567d2253cd6d8d136f06823bfdaa583ec233118469f32a79
+#4 extracting sha256:5ad0d997b45760ea567d2253cd6d8d136f06823bfdaa583ec233118469f32a79 1.0s done
+#4 extracting sha256:70a70f81779add32c21fbc4cdd24aa07dc1c5b0b314d27f633f05c91f9018ee4 0.0s done
+#4 extracting sha256:5e04afe5c27fb50017211e2a6fb4f6324869983635a422c187879363d320016c 0.0s done
+#4 extracting sha256:1534a191d85bcbfaaae37ee76b2bc8ca2555f5f27588a372223bfbb95c0e1ffd
+#4 extracting sha256:1534a191d85bcbfaaae37ee76b2bc8ca2555f5f27588a372223bfbb95c0e1ffd 0.0s done
+#4 extracting sha256:b3aa21b6a2b97e440d422d4f9a7daa05999d85b1a49acd7b7271509305beacc5 done
+#4 DONE 2.8s
+
+#6 [spa-builder 2/6] WORKDIR /spa
+#6 DONE 0.2s
+
+#7 [spa-builder 3/6] COPY HRMS.SPA.Source/package.json HRMS.SPA.Source/bun.lock ./
+#7 DONE 0.2s
+
+#8 [spa-builder 4/6] RUN bun install --frozen-lockfile
+#8 1.731 bun install v1.2.23 (cf136713)
+#8 21.45 
+#8 21.45 + @hookform/resolvers@3.10.0
+#8 21.45 + @playwright/test@1.62.1
+#8 21.45 + @radix-ui/react-accordion@1.2.20
+#8 21.45 + @radix-ui/react-alert-dialog@1.1.23
+#8 21.45 + @radix-ui/react-aspect-ratio@1.1.15
+#8 21.45 + @radix-ui/react-avatar@1.2.6
+#8 21.45 + @radix-ui/react-checkbox@1.3.11
+#8 21.45 + @radix-ui/react-collapsible@1.1.20
+#8 21.45 + @radix-ui/react-context-menu@2.3.7
+#8 21.45 + @radix-ui/react-dialog@1.1.23
+#8 21.45 + @radix-ui/react-dropdown-menu@2.1.24
+#8 21.45 + @radix-ui/react-hover-card@1.1.23
+#8 21.45 + @radix-ui/react-label@2.1.15
+#8 21.45 + @radix-ui/react-menubar@1.1.24
+#8 21.45 + @radix-ui/react-navigation-menu@1.2.22
+#8 21.45 + @radix-ui/react-popover@1.1.23
+#8 21.45 + @radix-ui/react-progress@1.1.16
+#8 21.45 + @radix-ui/react-radio-group@1.4.7
+#8 21.45 + @radix-ui/react-scroll-area@1.2.18
+#8 21.45 + @radix-ui/react-select@2.3.7
+#8 21.45 + @radix-ui/react-separator@1.1.15
+#8 21.45 + @radix-ui/react-slider@1.4.7
+#8 21.45 + @radix-ui/react-slot@1.3.3
+#8 21.45 + @radix-ui/react-switch@1.3.7
+#8 21.45 + @radix-ui/react-tabs@1.1.21
+#8 21.45 + @radix-ui/react-toast@1.2.23
+#8 21.45 + @radix-ui/react-toggle@1.1.18
+#8 21.45 + @radix-ui/react-toggle-group@1.1.19
+#8 21.45 + @radix-ui/react-tooltip@1.2.16
+#8 21.45 + @replit/vite-plugin-cartographer@0.2.8
+#8 21.45 + @replit/vite-plugin-dev-banner@0.1.2
+#8 21.45 + @replit/vite-plugin-runtime-error-modal@0.0.3
+#8 21.45 + @sentry/react@8.55.2
+#8 21.45 + @tailwindcss/typography@0.5.20
+#8 21.45 + @tailwindcss/vite@4.3.3
+#8 21.45 + @tanstack/react-query@5.101.4
+#8 21.45 + @tanstack/react-query-devtools@5.101.4
+#8 21.45 + @testing-library/dom@10.4.1
+#8 21.45 + @testing-library/jest-dom@6.10.0
+#8 21.45 + @testing-library/react@16.3.2
+#8 21.45 + @testing-library/user-event@14.6.1
+#8 21.45 + @types/dotenv@8.2.3
+#8 21.45 + @types/node@20.19.43
+#8 21.45 + @types/qrcode@1.5.6
+#8 21.45 + @types/react@18.3.31
+#8 21.45 + @types/react-dom@18.3.7
+#8 21.45 + @typescript-eslint/eslint-plugin@8.65.0
+#8 21.45 + @typescript-eslint/parser@8.65.0
+#8 21.45 + @vitejs/plugin-react@4.7.0
+#8 21.45 + @vitest/coverage-v8@3.2.7
+#8 21.45 + class-variance-authority@0.7.1
+#8 21.45 + clsx@2.1.1
+#8 21.45 + cmdk@1.1.1
+#8 21.45 + date-fns@3.6.0
+#8 21.45 + dotenv@16.6.1
+#8 21.45 + embla-carousel-react@8.6.0
+#8 21.45 + eslint@9.39.5
+#8 21.45 + eslint-plugin-react-hooks@5.2.0
+#8 21.45 + eslint-plugin-react-refresh@0.4.26
+#8 21.45 + framer-motion@11.18.2
+#8 21.45 + i18next@23.16.8
+#8 21.45 + input-otp@1.4.2
+#8 21.45 + jsdom@25.0.1
+#8 21.45 + lucide-react@0.447.0
+#8 21.45 + next-themes@0.4.6
+#8 21.45 + qrcode@1.5.4
+#8 21.45 + react@18.3.1
+#8 21.45 + react-day-picker@9.14.0
+#8 21.45 + react-dom@18.3.1
+#8 21.45 + react-hook-form@7.84.0
+#8 21.45 + react-i18next@14.1.3
+#8 21.45 + react-icons@5.7.0
+#8 21.45 + react-organizational-chart@2.2.1
+#8 21.45 + react-resizable-panels@2.1.9
+#8 21.45 + recharts@2.15.4
+#8 21.45 + sonner@2.0.7
+#8 21.45 + tailwind-merge@2.6.1
+#8 21.45 + tailwindcss@4.3.3
+#8 21.45 + tw-animate-css@1.4.0
+#8 21.45 + vaul@1.1.2
+#8 21.45 + vite@6.4.3
+#8 21.45 + vitest@3.2.7
+#8 21.45 + wouter@3.10.0
+#8 21.45 + zod@3.25.76
+#8 21.45 
+#8 21.45 553 packages installed [19.72s]
+#8 DONE 21.8s
+
+#9 [spa-builder 5/6] COPY HRMS.SPA.Source/ .
+#9 DONE 0.2s
+
+#10 [spa-builder 6/6] RUN bun run build:ci
+#10 0.237 $ tsc -p tsconfig.json --noEmit && PORT=3000 BASE_PATH=/ NODE_ENV=production vite build --config vite.config.ts
+#10 9.364 vite v6.4.3 building for production...
+#10 9.553 transforming...
+#10 13.72 src/components/ui/tooltip.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+#10 14.24 src/components/ui/dropdown-menu.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+#10 14.24 src/components/ui/sidebar.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+#10 14.26 src/components/ui/progress.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+#10 14.26 src/components/ui/select.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+#10 14.27 src/components/ui/label.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+#10 14.32 src/components/ui/sheet.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+#10 18.86 ✓ 2735 modules transformed.
+#10 19.61 rendering chunks...
+#10 20.05 computing gzip size...
+#10 20.11 dist/public/index.html                                  3.96 kB │ gzip:   1.55 kB
+#10 20.11 dist/public/assets/index-DB_nDRVF.css                 121.31 kB │ gzip:  19.98 kB
+#10 20.11 dist/public/assets/skeleton-CHcEWvdr.js                 0.18 kB │ gzip:   0.16 kB
+#10 20.11 dist/public/assets/chevron-down-CoFQ6hvQ.js             0.30 kB │ gzip:   0.24 kB
+#10 20.11 dist/public/assets/chevron-left-CNRV2Fcc.js             0.30 kB │ gzip:   0.25 kB
+#10 20.11 dist/public/assets/plus-CBAw8Xa1.js                     0.32 kB │ gzip:   0.25 kB
+#10 20.11 dist/public/assets/filter-JHxP4KMT.js                   0.33 kB │ gzip:   0.26 kB
+#10 20.11 dist/public/assets/arrow-left-kqxpfPdu.js               0.33 kB │ gzip:   0.27 kB
+#10 20.11 dist/public/assets/search-MHdQ7vRc.js                   0.34 kB │ gzip:   0.27 kB
+#10 20.11 dist/public/assets/circle-check-big-DBAqZ6NJ.js         0.36 kB │ gzip:   0.28 kB
+#10 20.11 dist/public/assets/ellipsis-C9nOg6MA.js                 0.39 kB │ gzip:   0.26 kB
+#10 20.11 dist/public/assets/eye-C5qKrClW.js                      0.42 kB │ gzip:   0.30 kB
+#10 20.11 dist/public/assets/usePermissions-CXuCpthg.js           0.42 kB │ gzip:   0.30 kB
+#10 20.11 dist/public/assets/calendar-9z02pf1E.js                 0.43 kB │ gzip:   0.30 kB
+#10 20.11 dist/public/assets/download-DaMu-yWa.js                 0.43 kB │ gzip:   0.32 kB
+#10 20.11 dist/public/assets/pencil-C8npHlnK.js                   0.45 kB │ gzip:   0.33 kB
+#10 20.11 dist/public/assets/textarea-D2vu8owd.js                 0.46 kB │ gzip:   0.32 kB
+#10 20.11 dist/public/assets/refresh-cw-CUDaksm9.js               0.49 kB │ gzip:   0.32 kB
+#10 20.11 dist/public/assets/trash-2-EIi5NGf7.js                  0.53 kB │ gzip:   0.35 kB
+#10 20.11 dist/public/assets/PageHeader-C286LZkG.js               0.56 kB │ gzip:   0.31 kB
+#10 20.11 dist/public/assets/SafeAvatar-D4ZHFXi6.js               0.58 kB │ gzip:   0.41 kB
+#10 20.11 dist/public/assets/SkeletonTable-d1brYKFs.js            0.61 kB │ gzip:   0.33 kB
+#10 20.11 dist/public/assets/label-BoAtddeo.js                    0.62 kB │ gzip:   0.43 kB
+#10 20.11 dist/public/assets/badge-D163BCVF.js                    0.74 kB │ gzip:   0.41 kB
+#10 20.11 dist/public/assets/not-found-CnKA16qd.js                0.93 kB │ gzip:   0.50 kB
+#10 20.11 dist/public/assets/card-DEJlyEAG.js                     0.99 kB │ gzip:   0.36 kB
+#10 20.11 dist/public/assets/send-Dp9uNFEI.js                     1.10 kB │ gzip:   0.47 kB
+#10 20.11 dist/public/assets/phone-DNEou9DX.js                    1.35 kB │ gzip:   0.55 kB
+#10 20.11 dist/public/assets/table-D_qaLzwW.js                    1.56 kB │ gzip:   0.54 kB
+#10 20.11 dist/public/assets/EmptyState-CP5Q9z26.js               1.73 kB │ gzip:   0.80 kB
+#10 20.11 dist/public/assets/StatusBadge-D5bZZsh3.js              1.75 kB │ gzip:   0.64 kB
+#10 20.11 dist/public/assets/dialog-CFPq4ce5.js                   2.15 kB │ gzip:   0.85 kB
+#10 20.11 dist/public/assets/progress-C6Gvt2bW.js                 2.16 kB │ gzip:   1.06 kB
+#10 20.11 dist/public/assets/usePaginationState-B-IJnfla.js       2.31 kB │ gzip:   0.81 kB
+#10 20.11 dist/public/assets/tabs-DWzSAy7Z.js                     3.34 kB │ gzip:   1.43 kB
+#10 20.11 dist/public/assets/alert-dialog-DSH6rLrK.js             3.70 kB │ gzip:   1.24 kB
+#10 20.11 dist/public/assets/BiometricPage-DJCc0MTr.js            4.08 kB │ gzip:   1.61 kB
+#10 20.11 dist/public/assets/PerformancePage-Dcs2tPdg.js          4.69 kB │ gzip:   1.67 kB
+#10 20.11 dist/public/assets/TrainingPage-BNquLbLM.js             4.98 kB │ gzip:   2.11 kB
+#10 20.11 dist/public/assets/HelpdeskPage-DnScnZ8H.js             5.01 kB │ gzip:   1.72 kB
+#10 20.11 dist/public/assets/EmployeeTransferPage-8PQrrqQ8.js     5.02 kB │ gzip:   1.87 kB
+#10 20.11 dist/public/assets/EmployeePromotionPage-BQr21ikD.js    5.05 kB │ gzip:   1.91 kB
+#10 20.11 dist/public/assets/AttendancePage-Ds7SvHM7.js           5.18 kB │ gzip:   1.59 kB
+#10 20.11 dist/public/assets/RecruitmentPage-BujsIL9Z.js          5.43 kB │ gzip:   1.79 kB
+#10 20.11 dist/public/assets/AuditLogPage-DrNCSfT7.js             5.72 kB │ gzip:   2.34 kB
+#10 20.11 dist/public/assets/AnalyticsPage-BCoaj7MJ.js            6.09 kB │ gzip:   1.96 kB
+#10 20.11 dist/public/assets/PayrollPage-DjR4V533.js              6.32 kB │ gzip:   2.33 kB
+#10 20.11 dist/public/assets/AssetsPage-IaQ7bhUg.js               6.47 kB │ gzip:   2.24 kB
+#10 20.11 dist/public/assets/DepartmentPage-BVjLg6lA.js           6.54 kB │ gzip:   2.43 kB
+#10 20.11 dist/public/assets/EmployeeExitPage-N_YldspA.js         6.56 kB │ gzip:   2.19 kB
+#10 20.11 dist/public/assets/ReportsPage-DcMdMQWf.js              6.69 kB │ gzip:   2.41 kB
+#10 20.11 dist/public/assets/LoginPage-CcRBHn8P.js                6.91 kB │ gzip:   2.69 kB
+#10 20.11 dist/public/assets/DesignationPage-BEJ6NZLC.js          6.98 kB │ gzip:   2.46 kB
+#10 20.11 dist/public/assets/HolidayPage-C5fbWOLY.js              7.16 kB │ gzip:   2.63 kB
+#10 20.11 dist/public/assets/EmployeeDetailPage-CiApQ1ZR.js       7.20 kB │ gzip:   1.99 kB
+#10 20.11 dist/public/assets/LeavePage-BS2lOXkF.js                7.86 kB │ gzip:   2.84 kB
+#10 20.11 dist/public/assets/BiometricDevicesPage-DUN7SHZS.js     8.69 kB │ gzip:   2.98 kB
+#10 20.11 dist/public/assets/EmployeesPage-B-9EPSqO.js            9.76 kB │ gzip:   3.45 kB
+#10 20.11 dist/public/assets/TimesheetPage-NKyNdgxk.js           10.31 kB │ gzip:   3.22 kB
+#10 20.11 dist/public/assets/ShiftPage-zdojP66s.js               10.80 kB │ gzip:   3.97 kB
+#10 20.11 dist/public/assets/BonusDeductionPage-CxRT7y8j.js      12.11 kB │ gzip:   2.83 kB
+#10 20.11 dist/public/assets/OnboardingPage-DFK89Qcx.js          12.54 kB │ gzip:   4.29 kB
+#10 20.11 dist/public/assets/ExpensesPage-Duc9-OSm.js            16.06 kB │ gzip:   4.45 kB
+#10 20.11 dist/public/assets/TravelPage-BMedjydB.js              18.44 kB │ gzip:   5.60 kB
+#10 20.11 dist/public/assets/index-1VkT_btZ.js                   18.98 kB │ gzip:   4.43 kB
+#10 20.11 dist/public/assets/OrgChartPage-CpP4YReT.js            19.58 kB │ gzip:   7.63 kB
+#10 20.11 dist/public/assets/select-CHOBb5zw.js                  22.81 kB │ gzip:   7.92 kB
+#10 20.11 dist/public/assets/SalesPage-BC5Vw0CN.js               23.30 kB │ gzip:   5.72 kB
+#10 20.11 dist/public/assets/SettingsPage-B6pEyWnY.js            37.85 kB │ gzip:  14.39 kB
+#10 20.11 dist/public/assets/DashboardPage-BPe5_3hw.js           44.96 kB │ gzip:  11.66 kB
+#10 20.11 dist/public/assets/form-5TSKEr-4.js                    94.57 kB │ gzip:  26.57 kB
+#10 20.11 dist/public/assets/BarChart-BAgbIUDq.js               384.52 kB │ gzip: 106.18 kB
+#10 20.11 dist/public/assets/index-R3NqrZ0S.js                  461.89 kB │ gzip: 146.62 kB
+#10 20.11 ✓ built in 10.63s
+#10 DONE 20.3s
+
+#11 exporting to image
+#11 exporting layers
+#11 exporting layers 5.3s done
+#11 writing image sha256:f622bea0c7aa47f8dc84651a0360efc90361d64957b4bb0fe6ac053d617323a9 done
+#11 naming to docker.io/library/ratanhr-spa done
+#11 DONE 5.3s
+
+--- EXIT CODE ---
+0

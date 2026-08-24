@@ -1,0 +1,16 @@
+20260726000001_MySqlInitialSchema
+20260728000001_AddTimesheetsTable
+20260728000002_AddPayslipStatusColumn
+20260728000003_FixWebAttendanceTimeColumns
+20260728000004_AddCheckConstraintsAndPayslipIndex
+20260729120000_EncryptPiiFields
+20260731000001_AddUserSoftDelete
+20260801000001_AddCompanyIdToLeaveTypes
+20260802000001_MySqlFullSchema
+20260803000001_AddCompanyIdToTenantEntities
+20260803000002_AddAssetSoftDelete
+20260803000003_AddCompanyIdToNotifications
+20260805000001_AddUniqueAttendanceConstraint
+20260805000002_AddOldRegimeTdsFields
+20260806000001_AddUniquePayslipConstraint
+Pending status not shown. Unable to determine which migrations have been applied. This can happen when your project uses a version of Entity Framework Core lower than 5.0.0 or when an error occurs while accessing the database.

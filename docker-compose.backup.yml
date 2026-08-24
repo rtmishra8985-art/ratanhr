@@ -1,0 +1,78 @@
+# =============================================================================
+# docker-compose.backup.yml — Off-site Backup Service Overlay
+#
+# Phase 4: Replaced pg_dump backup overlay with mysqldump (MySQL 8.4).
+#
+# Adds an automated off-site backup service that:
+#   1. Runs mysqldump daily at 02:00 UTC (local encrypted backup)
+#   2. Uploads the dump to S3 / S3-compatible storage at 02:30 UTC
+#   3. Prunes remote objects older than S3_RETAIN_DAYS (default 90 days)
+#   4. Validates latest backup via test-restore.sh every Sunday at 03:00 UTC
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.backup.yml up -d
+#
+# Required additional .env variables (see .env.example):
+#   S3_BUCKET, S3_PREFIX, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,
+#   AWS_DEFAULT_REGION, S3_RETAIN_DAYS
+#
+# Optional:
+#   AWS_ENDPOINT_URL   — set for Backblaze B2, MinIO, Cloudflare R2
+# =============================================================================
+
+services:
+  # ── Off-site backup scheduler ──────────────────────────────────────────────
+  # busybox crond fires at exact scheduled times, unlike the previous sleep-loop
+  # approach which would skip a backup if the container restarted mid-cycle.
+  backup:
+    image: amazon/aws-cli:2.17.0
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        apk add --no-cache bash mysql-client gzip > /dev/null 2>&1 || true;
+        echo '0 2 * * * /scripts/mysql-backup.sh >> /var/log/hrms-backup.log 2>&1' > /etc/crontabs/root;
+        echo '30 2 * * * /scripts/backup-s3.sh >> /var/log/hrms-backup-s3.log 2>&1' >> /etc/crontabs/root;
+        echo '0 3 * * 0 /scripts/test-restore.sh >> /var/log/hrms-restore-test.log 2>&1' >> /etc/crontabs/root;
+        crond -f -l 6
+      "
+    environment:
+      # MySQL connection (for mysql-backup.sh)
+      MYSQL_DATABASE:        ${MYSQL_DATABASE:-hrms_db}
+      MYSQL_USER:            ${MYSQL_USER:-hrms}
+      MYSQL_PASSWORD:        ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+      BACKUP_ENCRYPTION_KEY: ${BACKUP_ENCRYPTION_KEY:?set BACKUP_ENCRYPTION_KEY in .env}
+      BACKUP_RETAIN_DAYS:    ${BACKUP_RETAIN_DAYS:-14}
+      BACKUP_DIR:            /backups
+
+      # S3 off-site upload (for backup-s3.sh)
+      S3_BUCKET:             ${S3_BUCKET:?set S3_BUCKET in .env}
+      S3_PREFIX:             ${S3_PREFIX:-hrms/mysql}
+      AWS_ACCESS_KEY_ID:     ${AWS_ACCESS_KEY_ID:?set AWS_ACCESS_KEY_ID in .env}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?set AWS_SECRET_ACCESS_KEY in .env}
+      AWS_DEFAULT_REGION:    ${AWS_DEFAULT_REGION:-ap-south-1}
+      S3_RETAIN_DAYS:        ${S3_RETAIN_DAYS:-90}
+      # Optional: Backblaze B2 / MinIO / Cloudflare R2
+      AWS_ENDPOINT_URL:      ${AWS_ENDPOINT_URL:-}
+
+      # MySQL host on Docker internal network
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+    volumes:
+      - hrms_backups:/backups
+      - ./scripts/mysql-backup.sh:/scripts/mysql-backup.sh:ro
+      - ./scripts/backup-s3.sh:/scripts/backup-s3.sh:ro
+      - ./scripts/test-restore.sh:/scripts/test-restore.sh:ro
+    networks:
+      - hrms_internal
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+
+volumes:
+  hrms_backups:
+    driver: local

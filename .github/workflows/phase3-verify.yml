@@ -1,0 +1,133 @@
+name: Phase 3 Verification (real Docker daemon)
+
+# Purpose: remove the "BLOCKED — no real Docker daemon" blocker.
+# GitHub's ubuntu-latest runners use a real runc/containerd Docker daemon
+# (not gVisor), so scripts/verify-phase3.sh clears its preflight check here.
+#
+# Run it manually: Actions -> "Phase 3 Verification (real Docker daemon)" -> Run workflow.
+# Full unabridged logs are printed to the job log AND uploaded as the
+# "phase3-evidence" artifact (evidence/phase3/*.txt).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, develop]
+    paths:
+      - "Dockerfile"
+      - "docker-compose*.yml"
+      - "docker/**"
+      - "scripts/verify-phase3.sh"
+      - ".github/workflows/phase3-verify.yml"
+
+concurrency:
+  group: phase3-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  DOCKER_BUILDKIT: "1"
+
+jobs:
+  phase3:
+    name: Phase 3 runtime & container verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET SDK (pinned by global.json = 8.0.416)
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Assert toolchain preconditions (real Docker, correct SDK)
+        run: |
+          set -uo pipefail
+          echo "== kernel =="
+          cat /proc/version
+          if grep -qi gvisor /proc/version; then
+            echo "::error::Runner kernel is gVisor — verify-phase3.sh requires runc/containerd"
+            exit 1
+          fi
+          echo "== docker version =="
+          docker version
+          echo "== docker info =="
+          docker info
+          if docker info 2>/dev/null | grep -qi 'runsc\|gvisor'; then
+            echo "::error::Docker daemon is backed by gVisor (runsc)"
+            exit 1
+          fi
+          echo "== dotnet =="
+          dotnet --version
+          INSTALLED=$(dotnet --version)
+          EXPECTED=$(node -e "console.log(require('./global.json').sdk.version)")
+          if [ "$INSTALLED" != "$EXPECTED" ]; then
+            echo "::error::.NET SDK mismatch: installed $INSTALLED, global.json requires $EXPECTED"
+            exit 1
+          fi
+          docker run --rm hello-world
+
+      - name: Make scripts executable
+        run: chmod +x scripts/*.sh docker/*.sh || true
+
+      # Standalone builds, run separately and logged in full, exactly as
+      # required by the Phase 3 evidence checklist.
+      - name: docker build --target spa-builder .
+        id: build_spa
+        run: |
+          set -o pipefail
+          mkdir -p evidence/phase3
+          docker build --target spa-builder --progress=plain -t hrms:spa-builder . 2>&1 \
+            | tee evidence/phase3/manual-build-spa-builder.txt
+
+      - name: docker build .
+        id: build_full
+        run: |
+          set -o pipefail
+          docker build --progress=plain -t hrms:phase3-manual . 2>&1 \
+            | tee evidence/phase3/manual-build-full.txt
+
+      - name: ./scripts/verify-phase3.sh (full unabridged output)
+        id: verify
+        run: |
+          set -o pipefail
+          ./scripts/verify-phase3.sh 2>&1 | tee evidence/phase3/verify-phase3-console.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Dump every evidence file (unabridged)
+        if: always()
+        run: |
+          for f in evidence/phase3/*; do
+            echo "════════════════════════════════════════════════════════════"
+            echo "FILE: $f"
+            echo "════════════════════════════════════════════════════════════"
+            cat "$f"
+            echo
+          done
+
+      - name: Upload Phase 3 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase3-evidence
+          path: evidence/phase3/**
+          retention-days: 30
+
+      - name: Tear down compose stacks
+        if: always()
+        run: ./scripts/verify-phase3.sh --down || true
+
+      - name: Scrub throwaway secrets
+        if: always()
+        run: rm -f .env.phase3 .env.e2e || true
+
+      - name: Report PHASE 3 STATUS
+        if: always()
+        run: |
+          STATUS=$(grep -h "PHASE 3 STATUS" evidence/phase3/verify-phase3-console.txt 2>/dev/null | tail -1)
+          echo "${STATUS:-PHASE 3 STATUS: BLOCKED (verify-phase3.sh produced no status line)}" | tee -a "$GITHUB_STEP_SUMMARY"
+          case "$STATUS" in
+            *PASS*) exit 0 ;;
+            *) exit 1 ;;
+          esac

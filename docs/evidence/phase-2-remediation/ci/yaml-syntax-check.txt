@@ -1,0 +1,2 @@
+YAML syntax: OK
+Top-level jobs: ['secret-scan', 'backend', 'frontend', 'docker', 'e2e']

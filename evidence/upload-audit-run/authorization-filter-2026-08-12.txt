@@ -1,0 +1,80 @@
+Test run for /home/runner/workspace/ratanhr-audit/HRMS.Tests/bin/Debug/net8.0/HRMS.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 17.11.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 8.0.18)
+[xUnit.net 00:00:00.22]   Discovering: HRMS.Tests
+[xUnit.net 00:00:00.54]   Discovered:  HRMS.Tests
+[xUnit.net 00:00:00.55]   Starting:    HRMS.Tests
+2026-08-12 05:53:09.962 +00:00 [INF]  HRMS API v1.0.0 starting.
+2026-08-12 05:53:10.038 +00:00 [INF]  EmailQueueWorker started.
+2026-08-12 05:53:10.070 +00:00 [ERR]  EmailQueueWorker encountered an error.
+System.InvalidOperationException: Cannot resolve scoped service 'HRMS.Infrastructure.Services.ITenantContext' from root provider.
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteValidator.ValidateResolution(ServiceCallSite callSite, IServiceScope scope, IServiceScope rootScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)
+   at lambda_method41(Closure, IServiceProvider, Object[])
+   at Microsoft.EntityFrameworkCore.Internal.DbContextFactorySource`1.<>c__DisplayClass4_0.<CreateActivator>b__1(IServiceProvider p, DbContextOptions`1 _)
+   at Microsoft.EntityFrameworkCore.Internal.DbContextFactory`1.CreateDbContext()
+   at Microsoft.EntityFrameworkCore.Internal.DbContextFactory`1.CreateDbContextAsync(CancellationToken cancellationToken)
+   at HRMS.Infrastructure.Services.EmailQueueService.ProcessPendingAsync(Int32 batchSize) in /home/runner/workspace/ratanhr-audit/HRMS.Infrastructure/Services/EmailQueueService.cs:line 41
+   at HRMS.Infrastructure.Services.EmailQueueWorker.ExecuteAsync(CancellationToken ct) in /home/runner/workspace/ratanhr-audit/HRMS.Infrastructure/Services/EmailQueueWorker.cs:line 28
+2026-08-12 05:53:10.072 +00:00 [INF]  [WebhookDispatcher] Background dispatcher started.
+2026-08-12 05:53:10.076 +00:00 [INF]  TokenCleanupService started. Will run every 24h.
+2026-08-12 05:53:10.077 +00:00 [INF]  BiometricLogCleanupService started. Will run every 24h.
+2026-08-12 05:53:10.081 +00:00 [INF]  [BiometricHostedService] Started. Implemented providers (will poll): [ZKTeco, eSSL, Matrix, Suprema, Hikvision, Anviz]. Stub providers (skipped — awaiting SDK integration): [Realtime].
+2026-08-12 05:53:10.142 +00:00 [WRN]  Rate limiter: in-memory counters (Redis not configured).
+2026-08-12 05:53:10.166 +00:00 [INF]  Starting Hangfire Server using job storage: 'In-Memory Storage'
+2026-08-12 05:53:10.167 +00:00 [INF]  Using the following options for Hangfire Server:
+    Worker count: 8
+    Listening queues: 'critical', 'default', 'low'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-12 05:53:10.173 +00:00 [DBG]  Execution loop BackgroundServerProcess:a068238d has started in 3.1357 ms
+2026-08-12 05:53:10.177 +00:00 [INF]  Server repl:2506:e768e486 successfully announced in 1.9769 ms
+2026-08-12 05:53:10.180 +00:00 [DBG]  Execution loop ServerHeartbeatProcess:f1e7eba1 has started in 1.4797 ms
+2026-08-12 05:53:10.181 +00:00 [INF]  Server repl:2506:e768e486 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-12 05:53:10.182 +00:00 [DBG]  Execution loop ServerWatchdog:45d3e2c7 has started in 0.5779 ms
+2026-08-12 05:53:10.183 +00:00 [DBG]  Execution loop ServerJobCancellationWatcher:732b2db8 has started in 0.5761 ms
+2026-08-12 05:53:10.185 +00:00 [DBG]  Execution loop Worker:9ab34c49 has started in 0.8914 ms
+2026-08-12 05:53:10.186 +00:00 [DBG]  Execution loop Worker:564fbdce has started in 1.6261 ms
+2026-08-12 05:53:10.188 +00:00 [DBG]  Execution loop Worker:df01b57a has started in 3.1354 ms
+2026-08-12 05:53:10.189 +00:00 [DBG]  Execution loop Worker:0442d0e7 has started in 4.377 ms
+2026-08-12 05:53:10.190 +00:00 [DBG]  Execution loop Worker:4a7d0559 has started in 5.8349 ms
+2026-08-12 05:53:10.192 +00:00 [DBG]  Execution loop Worker:27e31525 has started in 7.4309 ms
+2026-08-12 05:53:10.193 +00:00 [DBG]  Execution loop Worker:826b1e10 has started in 8.4617 ms
+2026-08-12 05:53:10.194 +00:00 [DBG]  Execution loop Worker:9b9947e4 has started in 9.691 ms
+2026-08-12 05:53:10.196 +00:00 [DBG]  Execution loop DelayedJobScheduler:2a53eaf0 has started in 1.269 ms
+2026-08-12 05:53:10.197 +00:00 [INF]  Server repl:2506:e768e486 all the dispatchers started
+2026-08-12 05:53:10.198 +00:00 [DBG]  Execution loop RecurringJobScheduler:33adc973 has started in 1.7124 ms
+2026-08-12 05:53:10.322 +00:00 [WRN] 9c220965-48c4-4ad5-bfb5-05074f7a472e Failed to determine the https port for redirect.
+2026-08-12 05:53:10.397 +00:00 [DBG]  Hangfire Server is stopping...
+2026-08-12 05:53:10.398 +00:00 [INF]  Server repl:2506:e768e486 caught stopping signal...
+2026-08-12 05:53:10.398 +00:00 [DBG]  Execution loop ServerWatchdog:45d3e2c7 stopped in 0 ms
+2026-08-12 05:53:10.398 +00:00 [DBG]  Execution loop ServerJobCancellationWatcher:732b2db8 stopped in 0 ms
+2026-08-12 05:53:10.399 +00:00 [DBG]  Execution loop RecurringJobScheduler:33adc973 stopped in 0.0964 ms
+2026-08-12 05:53:10.399 +00:00 [DBG]  Execution loop Worker:4a7d0559 stopped in 0.2425 ms
+2026-08-12 05:53:10.399 +00:00 [DBG]  Execution loop Worker:564fbdce stopped in 0.433 ms
+2026-08-12 05:53:10.399 +00:00 [DBG]  Execution loop Worker:df01b57a stopped in 0.6721 ms
+2026-08-12 05:53:10.399 +00:00 [DBG]  Execution loop Worker:826b1e10 stopped in 0.9242 ms
+2026-08-12 05:53:10.399 +00:00 [DBG]  Execution loop Worker:0442d0e7 stopped in 0.872 ms
+2026-08-12 05:53:10.400 +00:00 [DBG]  Execution loop Worker:9b9947e4 stopped in 1.1212 ms
+2026-08-12 05:53:10.400 +00:00 [DBG]  Execution loop Worker:27e31525 stopped in 1.0923 ms
+2026-08-12 05:53:10.400 +00:00 [DBG]  Execution loop Worker:9ab34c49 stopped in 1.273 ms
+2026-08-12 05:53:10.400 +00:00 [DBG]  Execution loop DelayedJobScheduler:2a53eaf0 stopped in 1.5287 ms
+2026-08-12 05:53:10.400 +00:00 [DBG]  Hangfire Server is stopping...
+2026-08-12 05:53:10.400 +00:00 [DBG]  Hangfire Server is stopping...
+2026-08-12 05:53:10.402 +00:00 [INF]  Server repl:2506:e768e486 All dispatchers stopped
+2026-08-12 05:53:10.402 +00:00 [DBG]  Execution loop ServerHeartbeatProcess:f1e7eba1 stopped in 0.1086 ms
+2026-08-12 05:53:10.406 +00:00 [INF]  Server repl:2506:e768e486 successfully reported itself as stopped in 1.4237 ms
+2026-08-12 05:53:10.406 +00:00 [INF]  Server repl:2506:e768e486 has been stopped in total 7.6055 ms
+2026-08-12 05:53:10.406 +00:00 [DBG]  Execution loop BackgroundServerProcess:a068238d stopped in 7.7211 ms
+2026-08-12 05:53:10.418 +00:00 [DBG]  Query dispatcher has been gracefully stopped.
+[xUnit.net 00:00:01.86]   Finished:    HRMS.Tests
+  Passed HRMS.Tests.Security.AuthorizationEndpointRuntimeAuditTests.RuntimeEndpointMetadata_UsesExactAnonymousAllowList_AndRateLimits [1 s]
+
+Test Run Successful.
+Total tests: 1
+     Passed: 1
+ Total time: 2.4262 Seconds

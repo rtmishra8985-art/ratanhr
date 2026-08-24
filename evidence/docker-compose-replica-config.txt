@@ -1,0 +1,9 @@
+$ docker compose -f docker-compose.replica.yml config
+
+--- STDOUT ---
+
+--- STDERR ---
+empty compose file
+
+--- EXIT CODE ---
+1

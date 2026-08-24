@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-data-pvc
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+    app.kubernetes.io/component: redis
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard   # ← replace with your cloud provider class:
+                                #   AWS: gp3  |  GCP: standard  |  Azure: managed-premium
+  resources:
+    requests:
+      storage: 5Gi             # AOF + RDB snapshots; scale up if Hangfire queue grows

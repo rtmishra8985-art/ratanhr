@@ -1,0 +1,208 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hrms-api-svc
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+    app.kubernetes.io/component: api
+spec:
+  type: ClusterIP
+  selector:
+    app: hrms-api
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hrms-api
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+    app.kubernetes.io/component: api
+spec:
+  replicas: 2    # Two replicas for HA; scale up with HPA (see hpa.yaml)
+  selector:
+    matchLabels:
+      app: hrms-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0   # Zero-downtime rolling deploys
+  template:
+    metadata:
+      labels:
+        app: hrms-api
+        app.kubernetes.io/name: hrms
+        app.kubernetes.io/component: api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path:   "/metrics"
+        prometheus.io/port:   "8080"
+    spec:
+      serviceAccountName: hrms-api-sa
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # Phase 7: Wait for MySQL to be reachable before the API process starts.
+      # Replaced wait-for-postgres (pg_isready) with wait-for-mysql (mysqladmin ping).
+      initContainers:
+        - name: wait-for-mysql
+          image: mysql:8.4.6
+          command:
+            - sh
+            - -c
+            - |
+              until mysqladmin ping -h mysql-svc -u $MYSQL_USER --password=$MYSQL_PASSWORD --silent; do
+                echo "Waiting for mysql..."; sleep 2;
+              done
+          env:
+            - name: MYSQL_USER
+              valueFrom: { secretKeyRef: { name: hrms-secrets, key: MYSQL_USER } }
+            - name: MYSQL_PASSWORD
+              valueFrom: { secretKeyRef: { name: hrms-secrets, key: MYSQL_PASSWORD } }
+      containers:
+        - name: api
+          # Replace this immutable release tag with the image built from this
+          # source before applying the overlay. Never deploy a mutable alias.
+          image: hrms-api:0.0.0
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: hrms-config
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: ConnectionStrings__DefaultConnection
+            # FIX: App uses RS256 asymmetric signing — requires PEM key pair, NOT a symmetric Jwt__Key.
+            # EnvironmentValidator.Validate() will throw at startup if these are absent or not valid PEM blobs.
+            # Generate the key pair:  ./scripts/generate-rsa-keys.sh
+            - name: Jwt__PrivateKeyPem
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: Jwt__PrivateKeyPem
+            - name: Jwt__PublicKeyPem
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: Jwt__PublicKeyPem
+            - name: Security__EncryptionKey
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: Security__EncryptionKey
+            - name: Cors__AllowedOrigins
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: Cors__AllowedOrigins
+            - name: Redis__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: Redis__ConnectionString
+            - name: Email__Host
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: Email__Host
+            - name: Email__Username
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: Email__Username
+            - name: Email__Password
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: Email__Password
+            - name: Email__FromAddress
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: Email__FromAddress
+            # Must be set to the actual production hostname(s).
+            # EnvironmentValidator.cs rejects the wildcard "*" at startup in Production.
+            - name: AllowedHosts
+              valueFrom:
+                configMapKeyRef:
+                  name: hrms-config
+                  key: APP_HOST
+          # startupProbe: allows up to 60 s for the app to finish starting
+          # (initialDelaySeconds × failureThreshold). Only after startup succeeds
+          # do readiness and liveness probes take over.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 12    # 10 + (12 × 5) = up to 70 s to start
+            successThreshold: 1
+            timeoutSeconds: 3
+          # readinessProbe: removes pod from LB when it cannot serve traffic
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 0   # startupProbe guards early phase
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 3
+          # livenessProbe: restarts pod if it becomes permanently stuck
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 0   # startupProbe guards early phase
+            periodSeconds: 20
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          volumeMounts:
+            - name: uploads
+              mountPath: /app/wwwroot/uploads
+      volumes:
+        - name: uploads
+          persistentVolumeClaim:
+            claimName: hrms-uploads-pvc
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hrms-api-sa
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hrms-uploads-pvc
+  namespace: hrms
+spec:
+  accessModes: ["ReadWriteMany"]   # RWX needed for multi-replica access
+  resources:
+    requests:
+      storage: 10Gi

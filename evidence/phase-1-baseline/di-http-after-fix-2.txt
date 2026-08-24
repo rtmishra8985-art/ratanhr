@@ -1,0 +1,895 @@
+  HRMS.Domain -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Domain/bin/Debug/net8.0/HRMS.Domain.dll
+  HRMS.Application -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Application/bin/Debug/net8.0/HRMS.Application.dll
+  HRMS.Infrastructure -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Infrastructure/bin/Debug/net8.0/HRMS.Infrastructure.dll
+  HRMS.API -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/bin/Debug/net8.0/HRMS.API.dll
+  HRMS.Tests -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/bin/Debug/net8.0/HRMS.Tests.dll
+Test run for /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/bin/Debug/net8.0/HRMS.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 17.11.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.89]     HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests.GetMyProfile_SameTenant_ValidEmployeeId_Returns200 [FAIL]
+[xUnit.net 00:00:00.90]     HRMS.Tests.RoleBasedAccessTests.ProfileEndpoint_AuthenticatedUser_Returns200 [FAIL]
+[xUnit.net 00:00:00.91]     HRMS.Tests.RoleBasedAccessTests.HealthEndpoint_NoToken_Returns200(path: "/healthz/live") [FAIL]
+[xUnit.net 00:00:00.91]     HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests.GetMyProfile_UnauthenticatedRequest_Returns401 [FAIL]
+[xUnit.net 00:00:00.94]     HRMS.Tests.RoleBasedAccessTests.HealthEndpoint_NoToken_Returns200(path: "/healthz") [FAIL]
+[xUnit.net 00:00:00.97]     HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests.GetMyProfile_CrossTenant_Manipulated_EmployeeId_Returns404 [FAIL]
+[xUnit.net 00:00:00.98]     HRMS.Tests.RoleBasedAccessTests.HealthEndpoint_NoToken_Returns200(path: "/health") [FAIL]
+[xUnit.net 00:00:01.00]     HRMS.Tests.RoleBasedAccessTests.HealthEndpoint_NoToken_Returns200(path: "/healthz/ready") [FAIL]
+[xUnit.net 00:00:01.02]     HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(method: "POST", path: "/api/companies") [FAIL]
+  Failed HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests.GetMyProfile_SameTenant_ValidEmployeeId_Returns200 [1 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests..ctor(HrmsTestWebAppFactory factory) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/Security/EmployeeSelfControllerIdorIntegrationTests.cs:line 181
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.ProfileEndpoint_AuthenticatedUser_Returns200 [407 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.CreateClientWithRole(String role, Nullable`1 companyId) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 242
+   at HRMS.Tests.RoleBasedAccessTests.ProfileEndpoint_AuthenticatedUser_Returns200() in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 169
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.HealthEndpoint_NoToken_Returns200(path: "/healthz/live") [24 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.HealthEndpoint_NoToken_Returns200(String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 206
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests.GetMyProfile_UnauthenticatedRequest_Returns401 [1 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests..ctor(HrmsTestWebAppFactory factory) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/Security/EmployeeSelfControllerIdorIntegrationTests.cs:line 181
+   at InvokeStub_EmployeeSelfControllerIdorIntegrationTests..ctor(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.HealthEndpoint_NoToken_Returns200(path: "/healthz") [20 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.HealthEndpoint_NoToken_Returns200(String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 206
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests.GetMyProfile_CrossTenant_Manipulated_EmployeeId_Returns404 [1 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.Security.EmployeeSelfControllerIdorIntegrationTests..ctor(HrmsTestWebAppFactory factory) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/Security/EmployeeSelfControllerIdorIntegrationTests.cs:line 181
+   at InvokeStub_EmployeeSelfControllerIdorIntegrationTests..ctor(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.HealthEndpoint_NoToken_Returns200(path: "/health") [49 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.HealthEndpoint_NoToken_Returns200(String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 206
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.HealthEndpoint_NoToken_Returns200(path: "/healthz/ready") [17 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.HealthEndpoint_NoToken_Returns200(String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 206
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(method: "POST", path: "/api/companies") [18 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.CreateClientWithRole(String role, Nullable`1 companyId) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 242
+   at HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(String method, String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 119
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+[xUnit.net 00:00:01.07]     HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(method: "DELETE", path: "/api/admin-users/some-id") [FAIL]
+[xUnit.net 00:00:01.07]     HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(method: "POST", path: "/api/departments") [FAIL]
+[xUnit.net 00:00:01.08]     HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(method: "POST", path: "/api/payroll/generate") [FAIL]
+[xUnit.net 00:00:01.09]     HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(method: "POST", path: "/api/admin-users") [FAIL]
+[xUnit.net 00:00:01.11]     HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(method: "GET", path: "/api/payroll") [FAIL]
+[xUnit.net 00:00:01.13]     HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(method: "GET", path: "/api/leave") [FAIL]
+[xUnit.net 00:00:01.15]     HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(method: "GET", path: "/api/admin-users") [FAIL]
+[xUnit.net 00:00:01.17]     HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(method: "GET", path: "/api/employees") [FAIL]
+[xUnit.net 00:00:01.19]     HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(method: "GET", path: "/api/departments") [FAIL]
+  Failed HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(method: "DELETE", path: "/api/admin-users/some-id") [22 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.CreateClientWithRole(String role, Nullable`1 companyId) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 242
+   at HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(String method, String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 119
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(method: "POST", path: "/api/departments") [16 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.CreateClientWithRole(String role, Nullable`1 companyId) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 242
+   at HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(String method, String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 119
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(method: "POST", path: "/api/payroll/generate") [16 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.CreateClientWithRole(String role, Nullable`1 companyId) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 242
+   at HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(String method, String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 119
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(method: "POST", path: "/api/admin-users") [15 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.CreateClientWithRole(String role, Nullable`1 companyId) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 242
+   at HRMS.Tests.RoleBasedAccessTests.Endpoint_EmployeeToken_Returns403(String method, String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 119
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(method: "GET", path: "/api/payroll") [17 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(String method, String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 97
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(method: "GET", path: "/api/leave") [18 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(String method, String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 97
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(method: "GET", path: "/api/admin-users") [17 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(String method, String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 97
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(method: "GET", path: "/api/employees") [17 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(String method, String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 97
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(method: "GET", path: "/api/departments") [17 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(String method, String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 97
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+[xUnit.net 00:00:01.21]     HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(method: "GET", path: "/api/reports/dashboard") [FAIL]
+[xUnit.net 00:00:01.23]     HRMS.Tests.RoleBasedAccessTests.CompanyEndpoint_SuperAdminToken_Succeeds [FAIL]
+[xUnit.net 00:00:01.25]     HRMS.Tests.RoleBasedAccessTests.PayrollGenerate_HrAdminToken_ReturnsNotForbidden [FAIL]
+[xUnit.net 00:00:01.27]     HRMS.Tests.RoleBasedAccessTests.Login_RateLimited_AfterThreshold_Returns429 [FAIL]
+[xUnit.net 00:00:01.29]     HRMS.Tests.RoleBasedAccessTests.Swagger_NoBasicAuth_Returns401 [FAIL]
+  Failed HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(method: "GET", path: "/api/reports/dashboard") [21 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.Endpoint_NoToken_Returns401(String method, String path) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 97
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.CompanyEndpoint_SuperAdminToken_Succeeds [20 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.CreateClientWithRole(String role, Nullable`1 companyId) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 242
+   at HRMS.Tests.RoleBasedAccessTests.CompanyEndpoint_SuperAdminToken_Succeeds() in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 153
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.PayrollGenerate_HrAdminToken_ReturnsNotForbidden [19 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.CreateClientWithRole(String role, Nullable`1 companyId) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 242
+   at HRMS.Tests.RoleBasedAccessTests.PayrollGenerate_HrAdminToken_ReturnsNotForbidden() in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 136
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.Login_RateLimited_AfterThreshold_Returns429 [19 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.Login_RateLimited_AfterThreshold_Returns429() in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 222
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed HRMS.Tests.RoleBasedAccessTests.Swagger_NoBasicAuth_Returns401 [19 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 443
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at HRMS.Tests.RoleBasedAccessTests.Swagger_NoBasicAuth_Returns401() in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/RoleBasedAccessTests.cs:line 185
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+Results File: /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/TestResults/di-http-after-fix-2.trx
+
+Failed!  - Failed:    23, Passed:     0, Skipped:     0, Total:    23, Duration: 388 ms - HRMS.Tests.dll (net8.0)

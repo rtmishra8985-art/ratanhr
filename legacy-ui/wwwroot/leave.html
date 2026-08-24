@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>My Leave – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<div id="sidebarHolder"></div>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">My Leave</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="avatar-circle" id="navAvatar">E</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<div class="main-panel">
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card card-table mb-4">
+        <div class="card-header py-3">Apply for Leave</div>
+        <div class="card-body">
+          <div id="alertBox" class="alert d-none py-2 small"></div>
+          <form id="applyForm">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Leave Type</label>
+              <select class="form-select form-select-sm" id="leaveTypeId" required></select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Start Date</label>
+              <input type="date" class="form-control form-control-sm" id="startDate" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">End Date</label>
+              <input type="date" class="form-control form-control-sm" id="endDate" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Reason</label>
+              <textarea class="form-control form-control-sm" id="reason" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-sm btn-warning w-100 fw-semibold">Submit Request</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card card-table">
+        <div class="card-header py-3">Leave Balance</div>
+        <div class="card-body p-0">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Type</th><th>Quota</th><th>Used</th><th>Pending</th><th>Left</th></tr></thead>
+            <tbody id="balanceBody"><tr><td colspan="5" class="text-center text-muted small py-3">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card card-table">
+        <div class="card-header py-3">My Leave Requests</div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead><tr><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th>Remarks</th><th></th></tr></thead>
+              <tbody id="requestsBody"><tr><td colspan="7" class="text-center text-muted small py-3">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+if (!requireAuth(['employee'])) throw new Error('unauthorized');
+
+// Set avatar
+const name = localStorage.getItem('hrms_name') || sessionStorage.getItem('hrms_name') || '';
+const av = document.getElementById('navAvatar');
+if (name && av) av.textContent = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+
+const statusBadge = (s) => ({
+  Pending:   'badge bg-warning-subtle text-warning-emphasis',
+  Approved:  'badge bg-success-subtle text-success-emphasis',
+  Rejected:  'badge bg-danger-subtle text-danger-emphasis',
+  Cancelled: 'badge bg-secondary-subtle text-secondary-emphasis'
+}[s] || 'badge bg-secondary');
+
+async function loadTypes() {
+  const res = await HrmsApi.listLeaveTypes();
+  const sel = document.getElementById('leaveTypeId');
+  const types = res.data || [];
+  sel.innerHTML = types.length
+    ? types.map(t => `<option value="${t.id}">${t.name} (${t.annualQuotaDays} days/yr)</option>`).join('')
+    : '<option value="" disabled>No leave types configured</option>';
+}
+
+async function loadBalance() {
+  const res = await HrmsApi.myLeaveBalance();
+  const body = document.getElementById('balanceBody');
+  const rows = res.data || [];
+  body.innerHTML = rows.length
+    ? rows.map(b =>
+        `<tr>
+          <td class="small">${b.leaveTypeName}</td>
+          <td class="small">${b.annualQuotaDays}</td>
+          <td class="small">${b.usedDays}</td>
+          <td class="small">${b.pendingDays}</td>
+          <td class="small fw-semibold ${b.remainingDays <= 2 ? 'text-danger' : 'text-success'}">${b.remainingDays}</td>
+        </tr>`).join('')
+    : '<tr><td colspan="5" class="text-center text-muted small py-3">No leave types configured.</td></tr>';
+}
+
+async function loadRequests() {
+  const res = await HrmsApi.myLeaveRequests();
+  const body = document.getElementById('requestsBody');
+  const rows = res.data || [];
+  body.innerHTML = rows.length
+    ? rows.map(r => `
+      <tr>
+        <td class="small">${r.leaveTypeName}</td>
+        <td class="small">${r.startDate}</td>
+        <td class="small">${r.endDate}</td>
+        <td class="small">${r.totalDays}</td>
+        <td><span class="${statusBadge(r.status)}">${r.status}</span></td>
+        <td class="small text-muted">${r.approverRemarks || '—'}</td>
+        <td>${r.status === 'Pending'
+          ? `<button class="btn btn-sm btn-outline-danger py-0" onclick="cancelRequest(${r.id})"><i class="bi bi-x me-1"></i>Cancel</button>`
+          : ''}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" class="text-center text-muted small py-3">No leave requests yet.</td></tr>';
+}
+
+async function cancelRequest(id) {
+  if (!confirm('Cancel this leave request?')) return;
+  const res = await HrmsApi.cancelLeave(id);
+  if (res && res.success) {
+    await Promise.all([loadRequests(), loadBalance()]);
+  } else {
+    alert((res && res.message) || 'Could not cancel the request.');
+  }
+}
+
+document.getElementById('applyForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const box = document.getElementById('alertBox');
+  box.className = 'alert d-none';
+  const startDate = document.getElementById('startDate').value;
+  const endDate   = document.getElementById('endDate').value;
+  if (endDate < startDate) {
+    box.className = 'alert alert-danger py-2 small';
+    box.textContent = 'End date cannot be before start date.';
+    return;
+  }
+  const res = await HrmsApi.applyLeave({
+    leaveTypeId: parseInt(document.getElementById('leaveTypeId').value, 10),
+    startDate,
+    endDate,
+    reason: document.getElementById('reason').value
+  });
+  box.className = res && res.success ? 'alert alert-success py-2 small' : 'alert alert-danger py-2 small';
+  box.textContent = (res && res.message) || 'Something went wrong.';
+  if (res && res.success) {
+    document.getElementById('applyForm').reset();
+    await Promise.all([loadRequests(), loadBalance()]);
+  }
+});
+
+fetch('includes/sidebar-employee.html').then(r => r.text()).then(html => {
+  document.getElementById('sidebarHolder').innerHTML = html;
+  document.querySelectorAll('#sidebar .nav-link').forEach(a => {
+    if (a.getAttribute('href') === 'leave.html') a.classList.add('active');
+  });
+});
+loadTypes();
+loadBalance();
+loadRequests();
+</script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

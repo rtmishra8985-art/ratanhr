@@ -1,0 +1,549 @@
+$ docker compose -f docker-compose.yml config
+
+--- STDOUT ---
+name: ratanhr-work-fixed-updated
+services:
+  alertmanager:
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+      - --web.listen-address=:9093
+    image: prom/alertmanager:v0.27.0
+    networks:
+      hrms_internal: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 9093
+        published: "9093"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/monitoring/alertmanager.yml
+        target: /etc/alertmanager/alertmanager.yml
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: volume
+        source: hrms_alertmanager
+        target: /alertmanager
+        volume: {}
+  api:
+    build:
+      context: /home/runner/workspace/RatanHR-work-fixed-updated
+      dockerfile: Dockerfile
+      target: runtime
+    depends_on:
+      clamav:
+        condition: service_healthy
+        required: true
+      migrate:
+        condition: service_completed_successfully
+        required: true
+      mysql:
+        condition: service_healthy
+        required: true
+      redis:
+        condition: service_healthy
+        required: true
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: "536870912"
+        reservations:
+          cpus: 0.25
+          memory: "134217728"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      AllowedHosts: audit.local
+      App__CompanyName: HRMS System
+      App__SupportEmail: support@yourdomain.com
+      App__SupportName: HRMS Support
+      Compliance__ComplianceRegime: dpdp
+      Compliance__DpoEmail: audit@example.invalid
+      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=hrms_audit;User ID=audit;Password=[REDACTED-VALUE]-PASSWORD];AllowPublicKeyRetrieval=True;SslMode=None
+      Cors__AllowedOrigins: http://audit.local
+      Database__AutoMigrate: "false"
+      Email__AppBaseUrl: ""
+      Email__FromAddress: noreply@hrms.com
+      Email__FromName: HRMS System
+      Email__Host: ""
+      Email__Password: ""
+      Email__Port: "587"
+      Email__UseSsl: "false"
+      Email__Username: ""
+      Jwt__Audience: HRMS.Client
+      Jwt__Issuer: HRMS.API
+      Jwt__PrivateKeyPem: [REDACTED-VALUE]-PRIVATE-KEY]
+      Jwt__PublicKeyPem: [REDACTED-VALUE]-PUBLIC-KEY]
+      Monitoring__SeqUrl: ""
+      Network__KnownProxyCidrs: 172.18.0.0/16
+      OpenTelemetry__JaegerEndpoint: ""
+      OpenTelemetry__OtlpEndpoint: ""
+      OpenTelemetry__ServiceName: hrms-api
+      OpenTelemetry__ServiceVersion: 1.0.0
+      OpenTelemetry__ZipkinEndpoint: ""
+      Redis__ConnectionString: redis:6379,password=[REDACTED-VALUE]-REDIS-PASSWORD],abortConnect=false
+      Security__EncryptionKey: [REDACTED-VALUE]-ENCRYPTION-KEY]
+      Webhook__AllowedDomainSuffixes: ""
+    expose:
+      - "8080"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://localhost:8080/health || exit 1
+      timeout: 10s
+      interval: 30s
+      retries: 5
+      start_period: 1m0s
+    networks:
+      default: null
+    restart: unless-stopped
+    stop_grace_period: 30s
+    volumes:
+      - type: volume
+        source: hrms_uploads
+        target: /app/wwwroot/uploads
+        volume: {}
+      - type: volume
+        source: hrms_logs
+        target: /app/Logs
+        volume: {}
+  backfill:
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        export MYSQL_PWD="$${MYSQL_PASSWORD}"
+        has_table() {
+          [ "$$(mysql --protocol=TCP -hmysql -u"$${MYSQL_USER}" -Nse \
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$${MYSQL_DATABASE}' AND table_name='$$1'")" = "1" ]
+        }
+        if has_table companies && has_table employees; then
+          has_column="$$(mysql --protocol=TCP -hmysql -u"$${MYSQL_USER}" -Nse \
+            "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='$${MYSQL_DATABASE}' AND table_name='employees' AND column_name='company_id'")"
+          if [ "$${has_column}" = "1" ]; then
+            mysql --protocol=TCP -hmysql -u"$${MYSQL_USER}" "$${MYSQL_DATABASE}" -e \
+              "UPDATE employees e JOIN (SELECT id FROM companies ORDER BY id LIMIT 1) c
+               SET e.company_id = c.id WHERE e.company_id IS NULL;"
+            echo "Company backfill completed."
+          else
+            echo "employees.company_id is not present; skipping backfill."
+          fi
+        else
+          echo "Fresh database detected; skipping pre-migration company backfill."
+        fi
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: true
+    environment:
+      MYSQL_DATABASE: hrms_audit
+      MYSQL_PASSWORD: [REDACTED-VALUE]-PASSWORD]
+      MYSQL_USER: audit
+    image: mysql:8.4@sha256:1d6b6a8fcee8ff758ff151d017f5203cd06792a0e698f0a593c9dfcb14609cf0
+    networks:
+      default: null
+    restart: "no"
+  backup:
+    command:
+      - |
+        set -e
+        echo "Backup service started (MySQL encrypted mode)."
+        echo "Schedule: $${BACKUP_CRON_SCHEDULE} (UTC).  Retention: $${RETAIN_DAYS} days."
+
+        # Fail fast if the encryption key is missing or empty.
+        if [ -z "$${BACKUP_ENCRYPTION_KEY}" ]; then
+          echo "FATAL: BACKUP_ENCRYPTION_KEY is not set. Refusing to write unencrypted backups." >&2
+          exit 1
+        fi
+
+        # Write the crontab for the root user.
+        mkdir -p /var/spool/cron/crontabs
+        printf '%s /bin/sh /backup.sh\n' "$${BACKUP_CRON_SCHEDULE}" \
+            > /var/spool/cron/crontabs/root
+
+        # Write the backup script.
+        cat > /backup.sh << 'SCRIPT'
+        #!/bin/sh
+        set -e
+        BASENAME="/backups/hrms_$$(date -u '+%Y%m%d_%H%M%S')"
+        OUTFILE="$${BASENAME}.sql.gz.enc"
+
+        # Dump → compress → encrypt (AES-256-CBC, PBKDF2 with 600 000 iterations).
+        mysqldump -h mysql -u "$$MYSQL_USER" -p"$$MYSQL_PASSWORD" "$$MYSQL_DATABASE" \
+          | gzip \
+          | openssl enc -aes-256-cbc -pbkdf2 -iter 600000 \
+              -pass "env:BACKUP_ENCRYPTION_KEY" \
+              -out "$$OUTFILE"
+
+        echo "$$(date -u) Encrypted backup written: $$OUTFILE ($$(du -sh "$$OUTFILE" | cut -f1))"
+
+        # Prune old encrypted backups.
+        find /backups -name 'hrms_*.sql.gz.enc' -mtime +"$$RETAIN_DAYS" -delete
+        echo "$$(date -u) Old backups pruned (retention: $$RETAIN_DAYS days)."
+        SCRIPT
+        chmod +x /backup.sh
+
+        # Run crond in the foreground (-f) with logging to stderr (-d 8).
+        exec crond -f -d 8
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: true
+    entrypoint:
+      - /bin/sh
+      - -c
+    environment:
+      BACKUP_CRON_SCHEDULE: 0 2 * * *
+      BACKUP_ENCRYPTION_KEY: [REDACTED-VALUE]-BACKUP-KEY]
+      MYSQL_DATABASE: hrms_audit
+      MYSQL_PASSWORD: [REDACTED-VALUE]-PASSWORD]
+      MYSQL_USER: audit
+      RETAIN_DAYS: "14"
+    image: mysql:8.4@sha256:1d6b6a8fcee8ff758ff151d017f5203cd06792a0e698f0a593c9dfcb14609cf0
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/backups
+        target: /backups
+        bind:
+          create_host_path: true
+  certbot:
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |2
+          trap exit TERM;
+          while :; do
+            certbot renew --webroot --webroot-path=/var/www/certbot --quiet;
+            sleep 12h & wait $$!;
+          done
+    image: certbot/certbot:v2.11.0@sha256:534384860340f96acbb098e1581961d4656b7fa6e8a485fb625e9c33c4df3842
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_certbot_conf
+        target: /etc/letsencrypt
+        volume: {}
+      - type: volume
+        source: hrms_certbot_www
+        target: /var/www/certbot
+        volume: {}
+  clamav:
+    environment:
+      CLAMAV_NO_CLAMD: "false"
+      CLAMAV_NO_FRESHCLAMD: "false"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - clamdscan --ping 3 || exit 1
+      timeout: 10s
+      interval: 30s
+      retries: 5
+      start_period: 1m30s
+    image: clamav/clamav:1.4_base
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_clamav
+        target: /var/lib/clamav
+        volume: {}
+  grafana:
+    depends_on:
+      prometheus:
+        condition: service_started
+        required: true
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/hrms-dashboard.json
+      GF_SECURITY_ADMIN_PASSWORD: [REDACTED-VALUE]-GRAFANA-PASSWORD]
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SERVER_ROOT_URL: http://localhost:3000
+    image: grafana/grafana:11.1.0
+    networks:
+      hrms_internal: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 3000
+        published: "3000"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_grafana
+        target: /var/lib/grafana
+        volume: {}
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/monitoring/grafana-dashboard.json
+        target: /var/lib/grafana/dashboards/hrms-dashboard.json
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/grafana/provisioning
+        target: /etc/grafana/provisioning
+        read_only: true
+        bind:
+          create_host_path: true
+  jaeger:
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+      MEMORY_MAX_TRACES: "50000"
+      SPAN_STORAGE_TYPE: memory
+    image: jaegertracing/all-in-one:1.58
+    networks:
+      hrms_internal: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 16686
+        published: "16686"
+        protocol: tcp
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 4317
+        published: "4317"
+        protocol: tcp
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 4318
+        published: "4318"
+        protocol: tcp
+    restart: unless-stopped
+  migrate:
+    build:
+      context: /home/runner/workspace/RatanHR-work-fixed-updated
+      dockerfile: Dockerfile
+      target: migrate
+    depends_on:
+      backfill:
+        condition: service_completed_successfully
+        required: true
+    environment:
+      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=hrms_audit;User ID=audit;Password=[REDACTED-VALUE]-PASSWORD];AllowPublicKeyRetrieval=True;SslMode=None
+    networks:
+      default: null
+    restart: "no"
+  mysql:
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: "1073741824"
+        reservations:
+          cpus: 0.25
+          memory: "268435456"
+    environment:
+      MYSQL_DATABASE: hrms_audit
+      MYSQL_PASSWORD: [REDACTED-VALUE]-PASSWORD]
+      MYSQL_ROOT_PASSWORD: [REDACTED-VALUE]-ROOT-PASSWORD]
+      MYSQL_USER: audit
+    healthcheck:
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - -h
+        - localhost
+        - -u
+        - audit
+        - --password=[REDACTED-VALUE]-PASSWORD]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 1m0s
+    image: mysql:8.4@sha256:1d6b6a8fcee8ff758ff151d017f5203cd06792a0e698f0a593c9dfcb14609cf0
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_mysqldata
+        target: /var/lib/mysql
+        volume: {}
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/scripts/db-init.sql
+        target: /docker-entrypoint-initdb.d/00-init.sql
+        read_only: true
+        bind:
+          create_host_path: true
+  nginx:
+    depends_on:
+      api:
+        condition: service_started
+        required: true
+    entrypoint:
+      - /bin/sh
+      - /etc/nginx/entrypoint.sh
+    environment:
+      API_URL: https://audit.local/api
+      APP_ENV: production
+      DOMAIN_NAME: audit.local
+      SSL_CERT_PATH: /etc/letsencrypt/live/audit.local/fullchain.pem
+      SSL_KEY_PATH: /etc/letsencrypt/live/audit.local/privkey.pem
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://localhost/health || exit 1
+      timeout: 5s
+      interval: 30s
+      retries: 3
+    image: nginx:1.27.0-alpine@sha256:63ffc0d1f14e4082b832c6a42e606e9a0384a526f16ddd720af7c1f018f2f7c4
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "80"
+        protocol: tcp
+      - mode: ingress
+        target: 443
+        published: "443"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/nginx/nginx.conf.template
+        target: /etc/nginx/nginx.conf.template
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/nginx/entrypoint.sh
+        target: /etc/nginx/entrypoint.sh
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: volume
+        source: hrms_certbot_conf
+        target: /etc/letsencrypt
+        read_only: true
+        volume: {}
+      - type: volume
+        source: hrms_certbot_www
+        target: /var/www/certbot
+        read_only: true
+        volume: {}
+      - type: volume
+        source: hrms_uploads
+        target: /app/wwwroot/uploads
+        read_only: true
+        volume: {}
+  prometheus:
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+      - --web.enable-lifecycle
+      - --web.listen-address=:9090
+    image: prom/prometheus:v2.53.0
+    networks:
+      hrms_internal: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 9090
+        published: "9090"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/monitoring/prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/monitoring/alerts.yml
+        target: /etc/prometheus/alerts.yml
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: volume
+        source: hrms_prometheus
+        target: /prometheus
+        volume: {}
+  redis:
+    command:
+      - redis-server
+      - --requirepass
+      - [REDACTED-VALUE]-REDIS-PASSWORD]
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - allkeys-lru
+      - --save
+      - "60"
+      - "1"
+      - --appendonly
+      - "yes"
+    deploy:
+      resources:
+        limits:
+          cpus: 0.5
+          memory: "335544320"
+        reservations:
+          cpus: 0.05
+          memory: "67108864"
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - -a
+        - [REDACTED-VALUE]-REDIS-PASSWORD]
+        - ping
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+    image: redis:7.4-alpine@sha256:b1addbe72465a718643cff9e60a58e6df1841e29d6d7d60c9a85d8d72f08d1a7
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_redis
+        target: /data
+        volume: {}
+networks:
+  default:
+    name: ratanhr-work-fixed-updated_default
+  hrms_internal:
+    name: ratanhr-work-fixed-updated_hrms_internal
+    driver: bridge
+volumes:
+  hrms_alertmanager:
+    name: ratanhr-work-fixed-updated_hrms_alertmanager
+  hrms_certbot_conf:
+    name: ratanhr-work-fixed-updated_hrms_certbot_conf
+  hrms_certbot_www:
+    name: ratanhr-work-fixed-updated_hrms_certbot_www
+  hrms_clamav:
+    name: ratanhr-work-fixed-updated_hrms_clamav
+  hrms_grafana:
+    name: ratanhr-work-fixed-updated_hrms_grafana
+  hrms_logs:
+    name: ratanhr-work-fixed-updated_hrms_logs
+  hrms_mysqldata:
+    name: ratanhr-work-fixed-updated_hrms_mysqldata
+  hrms_prometheus:
+    name: ratanhr-work-fixed-updated_hrms_prometheus
+  hrms_redis:
+    name: ratanhr-work-fixed-updated_hrms_redis
+  hrms_uploads:
+    name: ratanhr-work-fixed-updated_hrms_uploads
+
+--- STDERR ---
+
+--- EXIT CODE ---
+0

@@ -1,0 +1,5 @@
+$ docker compose -f docker-compose.yml config
+/bin/sh: 27: docker: not found
+exit: 127
+$ which docker
+exit: 1

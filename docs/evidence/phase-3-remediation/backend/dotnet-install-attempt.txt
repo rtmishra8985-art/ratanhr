@@ -1,0 +1,23 @@
+Command: apt-get install -y dotnet-sdk-8.0
+Result: FAILED
+global.json requires SDK 8.0.416 (rollForward: latestFeature).
+
+--- apt-get output (truncated) ---
+Err:9 http://security.ubuntu.com/ubuntu noble-updates/main amd64 netstandard-targeting-pack-2.1-8.0 amd64 8.0.126-0ubuntu1~24.04.1
+  404  Not Found [IP: 91.189.91.83 80]
+Err:10 http://security.ubuntu.com/ubuntu noble-updates/main amd64 dotnet-sdk-8.0 amd64 8.0.126-0ubuntu1~24.04.1
+  404  Not Found [IP: 91.189.91.83 80]
+E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/d/dotnet8/dotnet-host-8.0_8.0.26-0ubuntu1%7e24.04.1_amd64.deb  404  Not Found [IP: 91.189.91.83 80]
+E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/d/dotnet8/dotnet-hostfxr-8.0_8.0.26-0ubuntu1%7e24.04.1_amd64.deb  404  Not Found [IP: 91.189.91.83 80]
+E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/d/dotnet8/dotnet-runtime-8.0_8.0.26-0ubuntu1%7e24.04.1_amd64.deb  404  Not Found [IP: 91.189.91.83 80]
+E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/d/dotnet8/aspnetcore-runtime-8.0_8.0.26-0ubuntu1%7e24.04.1_amd64.deb  404  Not Found [IP: 91.189.91.83 80]
+E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/d/dotnet8/aspnetcore-targeting-pack-8.0_8.0.26-0ubuntu1%7e24.04.1_amd64.deb  404  Not Found [IP: 91.189.91.83 80]
+E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/d/dotnet8/dotnet-apphost-pack-8.0_8.0.26-0ubuntu1%7e24.04.1_amd64.deb  404  Not Found [IP: 91.189.91.83 80]
+E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/d/dotnet8/dotnet-targeting-pack-8.0_8.0.26-0ubuntu1%7e24.04.1_amd64.deb  404  Not Found [IP: 91.189.91.83 80]
+E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/d/dotnet8/dotnet-templates-8.0_8.0.126-0ubuntu1%7e24.04.1_amd64.deb  404  Not Found [IP: 91.189.91.83 80]
+E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/d/dotnet8/netstandard-targeting-pack-2.1-8.0_8.0.126-0ubuntu1%7e24.04.1_amd64.deb  404  Not Found [IP: 91.189.91.83 80]
+E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/d/dotnet8/dotnet-sdk-8.0_8.0.126-0ubuntu1%7e24.04.1_amd64.deb  404  Not Found [IP: 91.189.91.83 80]
+E: Unable to fetch some archives, maybe run apt-get update or try with --fix-missing?
+
+--- dotnet --info ---
+/bin/sh: 13: dotnet: not found

@@ -1,0 +1,121 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 4.04kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/oven/bun:1.2-alpine
+#2 ...
+
+#3 [internal] load metadata for mcr.microsoft.com/dotnet/sdk:8.0.416-alpine3.21
+#3 DONE 0.3s
+
+#4 [internal] load metadata for mcr.microsoft.com/dotnet/aspnet:8.0.8-alpine3.20
+#4 DONE 0.3s
+
+#2 [internal] load metadata for docker.io/oven/bun:1.2-alpine
+#2 DONE 1.4s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 1.49kB done
+#5 DONE 0.0s
+
+#6 [build  1/16] FROM mcr.microsoft.com/dotnet/sdk:8.0.416-alpine3.21@sha256:e292b92e9f21bb98c75a528877ac9ed8121ab9d96ba3aba620d31c09affc80bd
+#6 DONE 0.0s
+
+#7 [spa-builder 1/6] FROM docker.io/oven/bun:1.2-alpine@sha256:0841c588f6304300baf1d395ae339ce09a6e18c4b6a7cdd4fddcbdb87a2f096a
+#7 DONE 0.0s
+
+#8 [runtime 1/6] FROM mcr.microsoft.com/dotnet/aspnet:8.0.8-alpine3.20@sha256:c45e218d64af2d1f223b2ff0fd3ccb59f2c1a91232c4932bd4e70d2aadf5dc7c
+#8 DONE 0.0s
+
+#9 [internal] load build context
+#9 transferring context: 86.20kB 0.2s done
+#9 DONE 0.6s
+
+#10 [build 12/16] COPY HRMS.Domain/packages.lock.json         HRMS.Domain/
+#10 CACHED
+
+#11 [build  2/16] WORKDIR /src
+#11 CACHED
+
+#12 [build  6/16] COPY HRMS.Application/HRMS.Application.csproj       HRMS.Application/
+#12 CACHED
+
+#13 [build  7/16] COPY HRMS.Domain/HRMS.Domain.csproj                 HRMS.Domain/
+#13 CACHED
+
+#14 [build  8/16] COPY HRMS.Tests/HRMS.Tests.csproj                   HRMS.Tests/
+#14 CACHED
+
+#15 [build 11/16] COPY HRMS.Application/packages.lock.json    HRMS.Application/
+#15 CACHED
+
+#16 [build 13/16] COPY HRMS.Tests/packages.lock.json          HRMS.Tests/
+#16 CACHED
+
+#17 [build  3/16] COPY *.sln ./
+#17 CACHED
+
+#18 [build  4/16] COPY HRMS.API/HRMS.API.csproj                       HRMS.API/
+#18 CACHED
+
+#19 [build  5/16] COPY HRMS.Infrastructure/HRMS.Infrastructure.csproj HRMS.Infrastructure/
+#19 CACHED
+
+#20 [build  9/16] COPY HRMS.API/packages.lock.json            HRMS.API/
+#20 CACHED
+
+#21 [build 10/16] COPY HRMS.Infrastructure/packages.lock.json HRMS.Infrastructure/
+#21 CACHED
+
+#22 [build 14/16] RUN dotnet restore --locked-mode
+#22 CACHED
+
+#23 [build 15/16] COPY . .
+#23 DONE 1.3s
+
+#24 [build 16/16] RUN dotnet publish HRMS.API/HRMS.API.csproj       --configuration Release       --no-restore       --output /app/publish       -p:AssemblyVersion=1.0.0.0       -p:FileVersion=1.0.0.0       -p:InformationalVersion="unknown+unknown"
+#24 9.626   HRMS.Domain -> /src/HRMS.Domain/bin/Release/net8.0/HRMS.Domain.dll
+#24 12.78   HRMS.Application -> /src/HRMS.Application/bin/Release/net8.0/HRMS.Application.dll
+#24 18.96 /src/HRMS.Infrastructure/Biometric/ZKTecoProvider.cs(86,28): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread. [/src/HRMS.Infrastructure/HRMS.Infrastructure.csproj]
+#24 19.88   HRMS.Infrastructure -> /src/HRMS.Infrastructure/bin/Release/net8.0/HRMS.Infrastructure.dll
+#24 22.77   HRMS.API -> /src/HRMS.API/bin/Release/net8.0/HRMS.API.dll
+#24 22.97   HRMS.API -> /app/publish/
+#24 DONE 23.2s
+
+#25 [runtime 5/6] COPY --from=spa-builder /spa/dist/public ./wwwroot
+#25 CACHED
+
+#26 [spa-builder 3/6] COPY HRMS.SPA.Source/package.json HRMS.SPA.Source/bun.lock ./
+#26 CACHED
+
+#27 [spa-builder 5/6] COPY HRMS.SPA.Source/ .
+#27 CACHED
+
+#28 [spa-builder 6/6] RUN bun run build:ci
+#28 CACHED
+
+#29 [runtime 3/6] WORKDIR /app
+#29 CACHED
+
+#30 [spa-builder 4/6] RUN bun install --frozen-lockfile
+#30 CACHED
+
+#31 [runtime 4/6] COPY --from=build /app/publish .
+#31 CACHED
+
+#32 [spa-builder 2/6] WORKDIR /spa
+#32 CACHED
+
+#33 [runtime 2/6] RUN addgroup -S hrms && adduser -S hrms -G hrms
+#33 CACHED
+
+#34 [runtime 6/6] RUN chown -R hrms:hrms /app
+#34 CACHED
+
+#35 exporting to image
+#35 exporting layers done
+#35 writing image sha256:524b5486cf6f5de1856d7b6c1b73076ec3b326b2d42345590c04a91c82623d61 0.0s done
+#35 naming to docker.io/library/hrms:verify done
+#35 DONE 0.1s

@@ -1,0 +1,70 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Item 7: aligned with CHANGELOG 1.0.4. -->
+    <Version>1.0.4</Version>
+    <AssemblyVersion>1.0.4</AssemblyVersion>
+    <FileVersion>1.0.4</FileVersion>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- Fail the build on any compiler warning — keeps CI signal clean. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Suppress xUnit-specific warning about async void test methods. -->
+    <NoWarn>xUnit1031;NU1603;NU1605</NoWarn>
+    <RootNamespace>HRMS.Tests</RootNamespace>
+    <!-- BLOCKER-1 FIX: Enable lock-file generation so dotnet restore HRMS.sln
+         also produces HRMS.Tests/packages.lock.json. Run scripts/generate-lock-file.sh
+         once and commit the result. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Test framework -->
+    <PackageReference Include="xunit"                          Version="2.9.0"  />
+    <PackageReference Include="xunit.runner.visualstudio"      Version="2.8.2"  />
+    <PackageReference Include="Microsoft.NET.Test.Sdk"         Version="17.11.1" />
+    <PackageReference Include="coverlet.collector"             Version="6.0.2"  />
+
+    <!-- Mocking -->
+    <PackageReference Include="Moq"                            Version="4.20.72" />
+    <PackageReference Include="Moq.EntityFrameworkCore"        Version="7.0.0.2" />
+
+    <!-- ASP.NET Core test helpers -->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost"   Version="8.0.8" />
+
+    <!-- EF Core in-memory for unit tests -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.8" />
+
+    <!-- SECURITY: use the current SQLite native package line to avoid the
+         vulnerable e_sqlite3 build reported for the older 2.1.10 package. -->
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
+    <PackageReference Include="SQLitePCLRaw.core"             Version="3.0.5" />
+
+    <!-- Logging in test context -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+
+    <!-- SECURITY: Explicit transitive pin for Microsoft.Extensions.Caching.Memory.
+         NU1603 is suppressed in this project (see <NoWarn>) which means the advisory
+         version 8.0.0 (GHSA-qcnp-7r8w-h4x8, High) could slip through undetected via
+         transitive resolution from test-host packages. Pinning to 8.0.1 (the patched
+         release) forces the floor across all transitive paths in this project. -->
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory"     Version="8.0.1" />
+    <!-- Fluent assertions -->
+    <PackageReference Include="FluentAssertions"                         Version="6.12.0" />
+
+    <!-- SQLite provider for EF Core (used by TestHelpers / N1RegressionTests) -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite"     Version="8.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Reference the main projects under test. -->
+    <ProjectReference Include="..\HRMS.Application\HRMS.Application.csproj" />
+    <ProjectReference Include="..\HRMS.Infrastructure\HRMS.Infrastructure.csproj" />
+    <ProjectReference Include="..\HRMS.API\HRMS.API.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>Employee Report – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <style>
+    @media print {
+      .sidebar, .topnav, .no-print { display: none !important; }
+      .main-panel { margin-left: 0 !important; padding: 16px !important; }
+    }
+    .summary-chip { background:#f8f9fa; border-radius:8px; padding:14px 18px; text-align:center; }
+    .summary-chip .value { font-size:22px; font-weight:700; }
+    .summary-chip .label { font-size:11px; text-transform:uppercase; color:#888; letter-spacing:.5px; }
+  </style>
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Registration</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r1"><i class="bi bi-person-plus"></i> Registration <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r1"><a href="add-employee.html" class="sub-link">Register</a><a href="view-employees.html" class="sub-link">View All</a></div>
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r3"><i class="bi bi-globe"></i> Web Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r3"><a href="web-attendance-admin.html" class="sub-link">View</a></div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r4"><i class="bi bi-file-earmark-spreadsheet"></i> Excel Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r4"><a href="upload-attendance.html" class="sub-link">Upload</a><a href="view-attendance.html" class="sub-link">View</a></div>
+    <div class="nav-label">Payroll</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapsePayroll"><i class="bi bi-cash-stack"></i> Payroll <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapsePayroll"><a href="payroll.html" class="sub-link">View Payroll</a><a href="add-payroll.html" class="sub-link">Generate Payslip</a></div>
+    <div class="nav-label">Reports</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapseReports"><i class="bi bi-bar-chart-line"></i> Reports <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseReports">
+      <a href="reports-attendance.html" class="sub-link">Attendance Report</a>
+      <a href="reports-employee.html" class="sub-link" style="color:#f7b731;">Employee Report</a>
+    </div>
+    <div class="nav-label">Others</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r5"><i class="bi bi-star"></i> Appreciation <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r5"><a href="appreciation.html" class="sub-link">Appreciate</a></div>
+    <a href="admin-users.html" class="nav-link"><i class="bi bi-people"></i> Admin Users</a>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav no-print">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Employee Report</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <!-- Filter Bar -->
+  <!-- BACKEND: GET params ?department=&designation=&status= -->
+  <div class="card card-table mb-4 no-print">
+    <div class="card-body">
+      <form class="row g-2 align-items-end" method="GET" action="">
+        <div class="col-md-3">
+          <label class="form-label fw-semibold small">Department</label>
+          <input type="text" class="form-control form-control-sm" name="department" placeholder="e.g. Development" value="{{filter.department}}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold small">Designation</label>
+          <input type="text" class="form-control form-control-sm" name="designation" placeholder="e.g. Software Engineer" value="{{filter.designation}}">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-semibold small">Status</label>
+          <select class="form-select form-select-sm" name="status">
+            <option value="">All</option>
+            <option value="1">Active</option>
+            <option value="0">Inactive</option>
+          </select>
+        </div>
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-sm btn-warning w-100">Filter</button>
+        </div>
+        <div class="col-md-1">
+          <a href="reports-employee.html" class="btn btn-sm btn-outline-secondary w-100">Reset</a>
+        </div>
+        <div class="col-md-1">
+          <button type="button" class="btn btn-sm btn-dark w-100" onclick="window.print()">
+            <i class="bi bi-printer"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Summary Row -->
+  <!-- BACKEND: Calculate from filtered data -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+      <div class="summary-chip">
+        <div class="value">{{summary.total_employees}}</div>
+        <div class="label">Total Employees</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="summary-chip">
+        <div class="value text-success">{{summary.active_count}}</div>
+        <div class="label">Active</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="summary-chip">
+        <div class="value text-danger">{{summary.inactive_count}}</div>
+        <div class="label">Inactive</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="summary-chip">
+        <div class="value text-warning">{{summary.departments_count}}</div>
+        <div class="label">Departments</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Department-wise Breakdown -->
+  <!-- BACKEND: Group employees by department -->
+  <div class="row g-3 mb-4 no-print">
+    <!-- {% for dept in departments %} -->
+    <div class="col-md-3 col-6">
+      <div class="card card-table text-center p-3">
+        <div class="fw-bold fs-5">{{dept.employee_count}}</div>
+        <div class="text-muted small">{{dept.department_name}}</div>
+      </div>
+    </div>
+    <!-- {% endfor %} -->
+  </div>
+
+  <!-- Full Employee Table -->
+  <div class="card card-table">
+    <div class="card-header d-flex justify-content-between align-items-center py-3">
+      <span class="fw-semibold">Employee Directory</span>
+      <!-- BACKEND: Export link with current filters -->
+      <a href="/export-employee-report?department={{filter.department}}&designation={{filter.designation}}" class="btn btn-sm btn-outline-success no-print">
+        <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+      </a>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Emp ID</th>
+              <th>Name</th>
+              <th>Gender</th>
+              <th>DOJ</th>
+              <th>Designation</th>
+              <th>Department</th>
+              <th>Qualification</th>
+              <th>Skills</th>
+              <th>Contact</th>
+              <th>Blood Group</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- BACKEND: {% for i, emp in enumerate(employees, 1) %} -->
+            <tr>
+              <td class="text-muted small">{{i}}</td>
+              <td><code>{{emp.employee_id}}</code></td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="avatar-circle" style="width:28px;height:28px;font-size:10px;">{{emp.initials}}</div>
+                  <div>
+                    <div class="fw-semibold small">{{emp.fullname}}</div>
+                    <div class="text-muted" style="font-size:11px;">{{emp.email}}</div>
+                  </div>
+                </div>
+              </td>
+              <td>{{emp.gender}}</td>
+              <td>{{emp.doj}}</td>
+              <td>{{emp.designation}}</td>
+              <td>{{emp.department}}</td>
+              <td>{{emp.qualification}}</td>
+              <td>{{emp.skills}}</td>
+              <td>{{emp.emergency_contact_phone}}</td>
+              <td>{{emp.blood_group}}</td>
+              <td>
+                <!-- BACKEND: Conditional badge -->
+                <span class="badge bg-success-subtle text-success small">Active</span>
+              </td>
+            </tr>
+            <!-- BACKEND: {% endfor %} -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

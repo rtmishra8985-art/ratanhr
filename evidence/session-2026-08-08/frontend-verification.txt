@@ -1,0 +1,47 @@
+All commands run for real in this session, HRMS.SPA.Source/, using npm (bun binary is not
+obtainable in this sandbox — oven.sh / GitHub release CDN for bun is not on the egress
+allowlist; npm + the committed package-lock.json was used as a legitimate fallback package
+manager against the same package.json, registry.npmjs.org IS on the allowlist).
+
+$ npm install --no-audit --no-fund
+added 574 packages in 28s
+(exit 0)
+
+$ npm run typecheck        # tsc -p tsconfig.json --noEmit
+(exit 0, no errors)
+
+$ npm run lint              # eslint src --ext .ts,.tsx --max-warnings 0
+(exit 0, no errors/warnings)
+
+$ npm run test               # vitest run
+ Test Files  5 passed (5)
+      Tests  82 passed (82)
+(exit 0)
+
+$ npm run build:ci           # tsc --noEmit && vite build
+✓ built in 16.49s
+dist/public/... (all chunks emitted)
+(exit 0)
+
+$ npx playwright test --list --project=setup
+Listing tests:
+  [setup] › global.setup.ts:38:3 › auth state present: superAdmin
+  ... (6 auth-state tests)
+  [setup] › global.setup.ts:66:1 › staging API health check
+Total: 7 tests in 1 file
+(exit 0 — confirms the file that was edited this session, global.setup.ts, is syntactically
+valid TypeScript and Playwright's config/loader accept it. This is test DISCOVERY only, not
+execution — no browser ran, no assertion was evaluated.)
+
+$ npx playwright install --with-deps chromium
+E: Failed to fetch https://deb.nodesource.com/node_22.x/dists/nodistro/InRelease  403 Forbidden
+Failed to install browsers
+Error: Installation process exited with code: 100
+BLOCKED — ENVIRONMENT (Playwright's own browser-download step also reaches out to a
+playwright.download CDN which is equally not on the allowlist; the apt-dependency step above
+failed first)
+
+CONCLUSION: the SPA/frontend toolchain is genuinely healthy and independently re-verified this
+session (install, typecheck, lint, unit tests, production build all pass for real). Playwright
+E2E execution remains BLOCKED — ENVIRONMENT: no Chromium/Firefox browser binary can be
+downloaded in this sandbox.

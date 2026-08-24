@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <title>Biometric Punch Logs – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Biometric</div>
+    <a class="nav-link" href="biometric-dashboard.html"><i class="bi bi-fingerprint"></i> Biometric Dashboard</a>
+    <a class="nav-link" href="biometric-devices.html"><i class="bi bi-hdd-network"></i> Devices</a>
+    <a class="nav-link active" href="biometric-logs.html"><i class="bi bi-list-ul"></i> Punch Logs</a>
+    <a class="nav-link" href="biometric-realtime.html"><i class="bi bi-broadcast"></i> Realtime Monitor</a>
+    <a class="nav-link" href="biometric-sync-history.html"><i class="bi bi-arrow-repeat"></i> Sync History</a>
+    <a class="nav-link" href="biometric-settings.html"><i class="bi bi-gear"></i> Settings</a>
+  </div>
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Biometric Punch Logs</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+
+  <!-- Filters -->
+  <div class="card mb-3">
+    <div class="card-body py-2">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-2">
+          <label class="form-label small fw-semibold mb-1">Employee ID</label>
+          <input type="text" class="form-control form-control-sm" id="filterUserId" placeholder="EMP001">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small fw-semibold mb-1">From Date</label>
+          <input type="date" class="form-control form-control-sm" id="filterFrom">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small fw-semibold mb-1">To Date</label>
+          <input type="date" class="form-control form-control-sm" id="filterTo">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small fw-semibold mb-1">Processed</label>
+          <select class="form-select form-select-sm" id="filterProcessed">
+            <option value="">All</option>
+            <option value="true">Processed</option>
+            <option value="false">Unprocessed</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small fw-semibold mb-1">Page Size</label>
+          <select class="form-select form-select-sm" id="filterPageSize">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+          <button class="btn btn-primary btn-sm flex-grow-1" onclick="loadLogs(1)">
+            <i class="bi bi-search me-1"></i> Filter
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="clearFilters()">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Table -->
+  <div class="card">
+    <div class="card-header fw-semibold d-flex justify-content-between">
+      <span><i class="bi bi-list-ul me-2"></i>Punch Logs</span>
+      <span class="badge bg-secondary" id="totalBadge">–</span>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th><th>Device</th><th>Employee ID</th><th>Punched At</th>
+              <th>Direction</th><th>Status</th><th>Attendance</th>
+            </tr>
+          </thead>
+          <tbody id="logsBody">
+            <tr><td colspan="7" class="text-center py-4 text-muted">Use filters above to load logs.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Pagination -->
+    <div class="card-footer d-flex justify-content-between align-items-center">
+      <small class="text-muted" id="pageInfo"></small>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary" id="btnPrev" onclick="changePage(-1)">‹ Prev</button>
+        <button class="btn btn-sm btn-outline-secondary" id="btnNext" onclick="changePage(1)">Next ›</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script>
+let currentPage = 1;
+let totalPages  = 1;
+
+async function loadLogs(page = 1) {
+  currentPage = page;
+  const userId   = document.getElementById('filterUserId').value.trim();
+  const from     = document.getElementById('filterFrom').value;
+  const to       = document.getElementById('filterTo').value;
+  const processed = document.getElementById('filterProcessed').value;
+  const pageSize  = document.getElementById('filterPageSize').value;
+
+  const params = new URLSearchParams({ page, pageSize });
+  if (userId)    params.set('userId',      userId);
+  if (from)      params.set('from',        from + 'T00:00:00');
+  if (to)        params.set('to',          to   + 'T23:59:59');
+  if (processed !== '') params.set('isProcessed', processed);
+
+  const tbody = document.getElementById('logsBody');
+  tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3"><span class="spinner-border spinner-border-sm"></span> Loading…</td></tr>';
+
+  const r = await fetch('/api/biometric/logs?' + params.toString(), { credentials: 'include' });
+  const d = await r.json();
+
+  if (!d.success) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4">${d.message}</td></tr>`;
+    return;
+  }
+
+  const pr = d.data;
+  document.getElementById('totalBadge').textContent = pr.total + ' records';
+  totalPages = Math.ceil(pr.total / parseInt(pageSize));
+  document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages} (${pr.total} total)`;
+  document.getElementById('btnPrev').disabled = currentPage <= 1;
+  document.getElementById('btnNext').disabled = currentPage >= totalPages;
+
+  if (!pr.items?.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No punch logs found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = pr.items.map(l => `
+    <tr>
+      <td class="text-muted small">${l.id}</td>
+      <td>${l.deviceName}</td>
+      <td><code>${l.userId}</code></td>
+      <td>${new Date(l.punchedAt).toLocaleString()}</td>
+      <td>${directionBadge(l.direction)}</td>
+      <td>${l.isProcessed
+        ? '<span class="badge bg-success">Processed</span>'
+        : `<span class="badge bg-warning text-dark" title="${l.skipReason||''}">Pending</span>`}</td>
+      <td>${l.webAttendanceId ? `<span class="badge bg-light text-dark border">#${l.webAttendanceId}</span>` : '–'}</td>
+    </tr>`).join('');
+}
+
+function directionBadge(dir) {
+  if (dir === 'CheckIn')  return '<span class="badge bg-success">Check-In</span>';
+  if (dir === 'CheckOut') return '<span class="badge bg-primary">Check-Out</span>';
+  return '<span class="badge bg-secondary">Unknown</span>';
+}
+
+function clearFilters() {
+  ['filterUserId','filterFrom','filterTo'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('filterProcessed').value = '';
+}
+
+function changePage(dir) {
+  const newPage = currentPage + dir;
+  if (newPage >= 1 && newPage <= totalPages) loadLogs(newPage);
+}
+
+
+// Default date range: last 7 days
+const today = new Date();
+const week  = new Date(today); week.setDate(today.getDate() - 7);
+document.getElementById('filterFrom').value = week.toISOString().split('T')[0];
+document.getElementById('filterTo').value   = today.toISOString().split('T')[0];
+loadLogs(1);
+</script>
+</body>
+</html>

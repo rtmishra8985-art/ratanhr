@@ -1,0 +1,9 @@
+$ dotnet --version
+
+--- STDOUT ---
+8.0.416
+
+--- STDERR ---
+
+--- EXIT CODE ---
+0

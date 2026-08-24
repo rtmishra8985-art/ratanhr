@@ -1,0 +1,50 @@
+# ============================================================
+# docker-compose.override.yml — LOCAL DEVELOPMENT ONLY
+#
+# This file is automatically merged with docker-compose.yml
+# when you run `docker compose up` locally.
+# It is NOT used in production (CI/CD uses docker-compose.yml directly).
+#
+# Differences from production:
+#   • API runs in Development mode (Swagger UI enabled, detailed errors)
+#   • MySQL port 3306 exposed to host for direct DB access (DBeaver, mysql CLI)
+#   • Redis port 6379 exposed to host for inspection (redis-cli, RedisInsight)
+#   • Jaeger UI exposed on localhost:16686
+#   • No Nginx — hit the API directly on localhost:8080
+#   • ClamAV FailOpen=true — don't block dev uploads if ClamAV is slow to start
+#   • No resource limits — dev machines vary; remove constraints for faster startup
+# ============================================================
+
+services:
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      # Fail-open in dev so uploads don't block while ClamAV initialises
+      CLAMAV__FailOpen: "true"
+    ports:
+      - "8080:8080"   # Direct API access (bypasses nginx)
+    # Remove resource limits in development
+    deploy:
+      resources: {}
+
+  mysql:
+    ports:
+      - "127.0.0.1:3306:3306"   # Expose for DBeaver / mysql CLI / EF Core migrations
+
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379"   # Expose for redis-cli / RedisInsight
+
+  jaeger:
+    ports:
+      - "127.0.0.1:16686:16686"   # Jaeger UI — http://localhost:16686
+
+  # Disable nginx in local dev — talk to the API directly
+  nginx:
+    profiles:
+      - production-only
+
+  # Disable certbot in local dev
+  certbot:
+    profiles:
+      - production-only

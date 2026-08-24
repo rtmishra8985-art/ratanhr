@@ -1,0 +1,9 @@
+$ mysql --version
+
+--- STDOUT ---
+
+--- STDERR ---
+environment: line 2: mysql: command not found
+
+--- EXIT CODE ---
+127

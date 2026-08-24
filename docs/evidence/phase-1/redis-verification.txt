@@ -1,0 +1,5 @@
+Command: redis-server 8.2.3 (nix) + redis-cli ping
+Date (UTC): Mon Aug 10 06:31:41 UTC 2026
+----
+PONG
+API /health redis check -> Healthy

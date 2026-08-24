@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>Login – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="text-center mb-4">
+      <div class="login-logo mb-1"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+      <p class="text-muted small mb-0">Human Resource Management System</p>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold small">Login Portal</label>
+      <div class="btn-group w-100" role="group">
+        <input type="radio" class="btn-check" name="portal" id="pEmp" value="employee" checked>
+        <label class="btn btn-outline-primary btn-sm" for="pEmp"><i class="bi bi-person me-1"></i>Employee</label>
+        <input type="radio" class="btn-check" name="portal" id="pAdm" value="admin">
+        <label class="btn btn-outline-primary btn-sm" for="pAdm"><i class="bi bi-briefcase me-1"></i>Admin</label>
+        <input type="radio" class="btn-check" name="portal" id="pSA" value="superadmin">
+        <label class="btn btn-outline-primary btn-sm" for="pSA"><i class="bi bi-shield-lock me-1"></i>Super Admin</label>
+      </div>
+    </div>
+    <div id="alertBox" class="alert d-none py-2 small"></div>
+    <form id="loginForm">
+      <div class="mb-3">
+        <label class="form-label small fw-semibold">Email Address</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+          <input type="email" class="form-control" id="email" placeholder="you@company.com" required autocomplete="username">
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="form-label small fw-semibold">Password</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-lock"></i></span>
+          <input type="password" class="form-control" id="password" placeholder="••••••••" required autocomplete="current-password">
+          <button type="button" class="btn btn-outline-secondary" onclick="togglePwd()" tabindex="-1"><i class="bi bi-eye" id="eyeIcon"></i></button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary w-100 fw-semibold py-2" id="loginBtn">
+        <span id="btnText"><i class="bi bi-box-arrow-in-right me-2"></i>Sign In</span>
+        <span id="btnSpin" class="d-none"><span class="spinner-border spinner-border-sm me-2"></span>Signing in…</span>
+      </button>
+    </form>
+    <div class="text-center mt-3"><a href="forgot-password.html" class="text-decoration-none small text-muted">Forgot password?</a></div>
+  </div>
+</div>
+<script>
+  function togglePwd(){const p=document.getElementById('password'),i=document.getElementById('eyeIcon');p.type=p.type==='password'?'text':'password';i.className=p.type==='password'?'bi bi-eye':'bi bi-eye-slash';}
+
+  // Clear any stale session on landing at login page
+  ['hrms_token','hrms_user','hrms_refresh_token','hrms_role','hrms_name',
+   'hrms_userId','hrms_companyId','hrms_employeeId'].forEach(k => {
+    localStorage.removeItem(k); sessionStorage.removeItem(k);
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    document.getElementById('btnText').classList.add('d-none');
+    document.getElementById('btnSpin').classList.remove('d-none');
+    document.getElementById('alertBox').className = 'alert d-none';
+    btn.disabled = true;
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('email').value.trim(),
+          password: document.getElementById('password').value,
+          portal: document.querySelector('input[name="portal"]:checked').value
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        const box = document.getElementById('alertBox');
+        box.className = 'alert alert-danger py-2 small';
+        box.textContent = data.message || 'Invalid credentials. Check email, password and portal.';
+      } else {
+        // FIX [3] — Do NOT store access tokens or refresh tokens in localStorage.
+        // Tokens are set as HttpOnly cookies by the server and must never be
+        // accessible from JavaScript. Only non-sensitive UI metadata is stored here.
+        localStorage.setItem('hrms_role', data.data.role);
+        localStorage.setItem('hrms_name', data.data.fullName);
+        localStorage.setItem('hrms_userId', data.data.userId);
+        if (data.data.companyId) localStorage.setItem('hrms_companyId', data.data.companyId);
+        if (data.data.employeeId) localStorage.setItem('hrms_employeeId', data.data.employeeId);
+        if (data.data.mustChangePassword) {
+          window.location.href = 'change-password.html';
+          return;
+        }
+        const r = data.data.role;
+        window.location.href = r === 'superadmin' ? 'superadmin-dashboard.html'
+                             : r === 'admin'       ? 'admin-dashboard.html'
+                             :                      'emp-dashboard.html';
+      }
+    } catch {
+      const box = document.getElementById('alertBox');
+      box.className = 'alert alert-danger py-2 small';
+      box.textContent = 'Cannot connect to server. Please try again.';
+    } finally {
+      document.getElementById('btnText').classList.remove('d-none');
+      document.getElementById('btnSpin').classList.add('d-none');
+      btn.disabled = false;
+    }
+  });
+</script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

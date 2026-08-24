@@ -1,0 +1,11 @@
+$ dotnet tool restore
+
+--- STDOUT ---
+Tool 'dotnet-ef' (version '8.0.8') was restored. Available commands: dotnet-ef
+
+Restore was successful.
+
+--- STDERR ---
+
+--- EXIT CODE ---
+0

@@ -1,0 +1,20 @@
+EXISTS: HRMS.sln
+EXISTS: global.json
+EXISTS: HRMS.Infrastructure/HRMS.Infrastructure.csproj
+EXISTS: HRMS.API/HRMS.API.csproj
+EXISTS: HRMS.Tests/HRMS.Tests.csproj
+EXISTS: HRMS.SPA.Source/package.json
+EXISTS: docker-compose.yml
+EXISTS: docker-compose.e2e.yml
+EXISTS: Dockerfile
+EXISTS: HRMS.SPA.Source/.env.e2e.example
+---npm/bun scripts referenced by CI actually exist in package.json---
+SCRIPT OK: typecheck
+SCRIPT OK: test
+SCRIPT OK: build:ci
+SCRIPT OK: e2e
+SCRIPT OK: e2e:install
+---Dockerfile targets referenced by CI---
+TARGET OK: build
+TARGET OK: migrate
+TARGET OK: runtime

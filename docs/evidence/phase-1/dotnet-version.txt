@@ -1,0 +1,12 @@
+Command: dotnet --version / --info (nix dotnet-sdk 8.0.418, global.json requires 8.0.416 rollForward=latestFeature)
+Date (UTC): Mon Aug 10 06:31:41 UTC 2026
+----
+8.0.418
+global.json:
+{
+  "sdk": {
+    "version": "8.0.416",
+    "rollForward": "latestFeature",
+    "allowPrerelease": false
+  }
+}

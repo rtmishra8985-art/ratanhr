@@ -1,0 +1,17 @@
+$ dotnet restore HRMS.sln --locked-mode
+/bin/sh: 4: dotnet: not found
+exit: 127
+$ apt-get install -y dotnet-sdk-8.0 (attempted earlier in this session)
+Result: 404 Not Found for dotnet-host-8.0, dotnet-hostfxr-8.0, dotnet-runtime-8.0,
+aspnetcore-runtime-8.0, aspnetcore-targeting-pack-8.0, dotnet-apphost-pack-8.0,
+dotnet-targeting-pack-8.0, dotnet-templates-8.0, netstandard-targeting-pack-2.1-8.0,
+dotnet-sdk-8.0 -- all 404 from security.ubuntu.com (package index listed the version,
+pool did not actually contain it).
+
+dot.net install scripts / Microsoft package feeds are not in this sandbox's allowed
+network egress list (allowed: api.anthropic.com, api.github.com, archive.ubuntu.com,
+codeload.github.com, crates.io, files.pythonhosted.org, github.com, index.crates.io,
+npmjs.com/.org, pypi.org, pythonhosted.org, raw.githubusercontent.com,
+registry.npmjs.org, registry.yarnpkg.com, release-assets.githubusercontent.com,
+security.ubuntu.com, static.crates.io, yarnpkg.com). No dotnet CDN, no NuGet.org,
+no Docker Hub, no Playwright CDN are reachable.

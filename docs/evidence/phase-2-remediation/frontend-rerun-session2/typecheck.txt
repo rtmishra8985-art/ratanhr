@@ -1,0 +1,2 @@
+Command: npx tsc -p tsconfig.json --noEmit
+Result: PASS (0 errors, exit 0)

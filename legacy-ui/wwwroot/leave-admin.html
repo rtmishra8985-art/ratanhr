@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>Leave Management – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<div id="sidebarHolder"></div>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Leave Management</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="text-end d-none d-sm-block">
+      <div class="fw-semibold small" id="navUserName"></div>
+      <div class="text-muted" style="font-size:11px;" id="navUserRole"></div>
+    </div>
+    <div class="avatar-circle ad" id="navAvatar">A</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<div class="main-panel">
+
+  <!-- Leave Types Card -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card card-table h-100">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+          <span>Leave Types</span>
+          <button class="btn btn-sm btn-warning px-3" data-bs-toggle="modal" data-bs-target="#addTypeModal">
+            <i class="bi bi-plus"></i> Add
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Name</th><th>Days/yr</th><th>Paid</th></tr></thead>
+            <tbody id="leaveTypeBody"><tr><td colspan="3" class="text-center text-muted small py-3">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="col-md-8">
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <div class="stat-card">
+            <div class="stat-icon text-warning"><i class="bi bi-hourglass-split"></i></div>
+            <div class="stat-label">Pending</div>
+            <div class="stat-value" id="statPending">–</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-card">
+            <div class="stat-icon text-success"><i class="bi bi-check-circle"></i></div>
+            <div class="stat-label">Approved (Today)</div>
+            <div class="stat-value" id="statApproved">–</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-card">
+            <div class="stat-icon text-danger"><i class="bi bi-x-circle"></i></div>
+            <div class="stat-label">Rejected (Today)</div>
+            <div class="stat-value" id="statRejected">–</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter -->
+      <div class="card card-table mb-0">
+        <div class="card-header py-3 d-flex align-items-center gap-2">
+          <span class="me-auto">All Leave Requests</span>
+          <select class="form-select form-select-sm w-auto" id="statusFilter" onchange="loadRequests()">
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Action</th></tr>
+              </thead>
+              <tbody id="requestsBody"><tr><td colspan="8" class="text-center text-muted small py-3">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Leave Type Modal -->
+<div class="modal fade" id="addTypeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Leave Type</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="typeAlert" class="alert d-none py-2 small"></div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Leave Type Name</label>
+          <input type="text" class="form-control form-control-sm" id="typeName" placeholder="e.g. Paternity Leave" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Annual Quota (Days)</label>
+          <input type="number" class="form-control form-control-sm" id="typeQuota" value="12" min="1" max="365">
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="typePaid" checked>
+          <label class="form-check-label small">Paid Leave</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-sm btn-warning" onclick="createLeaveType()">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Decision Modal -->
+<div class="modal fade" id="decisionModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="decisionTitle">Approve / Reject Leave</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="decisionAlert" class="alert d-none py-2 small"></div>
+        <p class="small text-muted" id="decisionMeta"></p>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Remarks (optional)</label>
+          <textarea class="form-control form-control-sm" id="decisionRemarks" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-sm btn-danger" onclick="submitDecision(false)"><i class="bi bi-x-circle me-1"></i>Reject</button>
+        <button class="btn btn-sm btn-success" onclick="submitDecision(true)"><i class="bi bi-check-circle me-1"></i>Approve</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+if (!requireAuth(['admin', 'superadmin'])) throw new Error('unauthorized');
+populateTopnav();
+
+let currentRequestId = null;
+let allRequests = [];
+
+const statusBadge = (s) => ({
+  Pending:   'badge bg-warning-subtle text-warning-emphasis',
+  Approved:  'badge bg-success-subtle text-success-emphasis',
+  Rejected:  'badge bg-danger-subtle text-danger-emphasis',
+  Cancelled: 'badge bg-secondary-subtle text-secondary-emphasis'
+}[s] || 'badge bg-secondary');
+
+async function loadLeaveTypes() {
+  const res = await HrmsApi.listLeaveTypes();
+  const rows = res.data || [];
+  document.getElementById('leaveTypeBody').innerHTML = rows.length
+    ? rows.map(t => `<tr>
+        <td class="small fw-semibold">${t.name}</td>
+        <td class="small">${t.annualQuotaDays}</td>
+        <td class="small">${t.isPaid ? '<span class="badge bg-success-subtle text-success-emphasis">Paid</span>' : '<span class="badge bg-secondary-subtle">Unpaid</span>'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="3" class="text-center text-muted small py-3">No leave types yet.</td></tr>';
+}
+
+async function loadRequests() {
+  const status = document.getElementById('statusFilter').value;
+  const res = await HrmsApi.listAllLeaveRequests(status || null);
+  allRequests = res.data || [];
+
+  const pending  = allRequests.filter(r => r.status === 'Pending').length;
+  const approved = allRequests.filter(r => r.status === 'Approved').length;
+  const rejected = allRequests.filter(r => r.status === 'Rejected').length;
+  document.getElementById('statPending').textContent  = pending;
+  document.getElementById('statApproved').textContent = approved;
+  document.getElementById('statRejected').textContent = rejected;
+
+  const body = document.getElementById('requestsBody');
+  body.innerHTML = allRequests.length
+    ? allRequests.map(r => `
+      <tr>
+        <td class="small">${r.employeeName || r.employeeId}</td>
+        <td class="small">${r.leaveTypeName}</td>
+        <td class="small">${r.startDate}</td>
+        <td class="small">${r.endDate}</td>
+        <td class="small">${r.totalDays}</td>
+        <td class="small text-muted" style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.reason || ''}">${r.reason || '—'}</td>
+        <td><span class="${statusBadge(r.status)}">${r.status}</span></td>
+        <td>
+          ${r.status === 'Pending'
+            ? `<button class="btn btn-sm btn-outline-primary py-0" onclick="openDecision(${r.id},'${(r.employeeName || r.employeeId).replace(/'/g,"\\'")}','${r.leaveTypeName}','${r.startDate}','${r.endDate}',${r.totalDays})">
+                <i class="bi bi-check2-square me-1"></i>Decide
+              </button>`
+            : `<span class="text-muted small">${r.approverRemarks || '—'}</span>`}
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="8" class="text-center text-muted small py-3">No leave requests found.</td></tr>';
+}
+
+function openDecision(id, empName, leaveType, from, to, days) {
+  currentRequestId = id;
+  document.getElementById('decisionTitle').textContent = `Decision — ${empName}`;
+  document.getElementById('decisionMeta').textContent = `${leaveType}: ${from} → ${to} (${days} day${days > 1 ? 's' : ''})`;
+  document.getElementById('decisionRemarks').value = '';
+  document.getElementById('decisionAlert').className = 'alert d-none';
+  new bootstrap.Modal(document.getElementById('decisionModal')).show();
+}
+
+async function submitDecision(approve) {
+  if (!currentRequestId) return;
+  const remarks = document.getElementById('decisionRemarks').value.trim();
+  const res = await HrmsApi.decideLeave(currentRequestId, { approve, remarks });
+  const alert = document.getElementById('decisionAlert');
+  alert.className = res && res.success ? 'alert alert-success py-2 small' : 'alert alert-danger py-2 small';
+  alert.textContent = (res && res.message) || 'Something went wrong.';
+  if (res && res.success) {
+    setTimeout(() => {
+      bootstrap.Modal.getInstance(document.getElementById('decisionModal'))?.hide();
+      loadRequests();
+    }, 900);
+  }
+}
+
+async function createLeaveType() {
+  const name  = document.getElementById('typeName').value.trim();
+  const quota = parseInt(document.getElementById('typeQuota').value, 10);
+  const isPaid = document.getElementById('typePaid').checked;
+  const alert = document.getElementById('typeAlert');
+  if (!name) { alert.className = 'alert alert-danger py-2 small'; alert.textContent = 'Name is required.'; return; }
+  const res = await HrmsApi.createLeaveType({ name, annualQuotaDays: quota, isPaid });
+  alert.className = res && res.success ? 'alert alert-success py-2 small' : 'alert alert-danger py-2 small';
+  alert.textContent = (res && res.message) || (res && res.success ? 'Leave type created.' : 'Error.');
+  if (res && res.success) { document.getElementById('typeName').value = ''; loadLeaveTypes(); }
+}
+
+fetch('includes/sidebar-admin.html').then(r => r.text()).then(html => {
+  document.getElementById('sidebarHolder').innerHTML = html;
+  document.querySelectorAll('#sidebar .nav-link, #sidebar .sub-link').forEach(a => {
+    if (a.getAttribute('href') === 'leave-admin.html') a.classList.add('active');
+  });
+});
+
+loadLeaveTypes();
+loadRequests();
+</script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

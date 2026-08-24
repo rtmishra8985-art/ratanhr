@@ -1,0 +1,1 @@
+This directory intentionally left mostly empty: Playwright E2E could not run in this sandbox (no Bun, no browser CDN access, no live API/SPA/MySQL/Redis stack). See docs/phase-2-blocker-remediation.md item 7 for exact blockers and next steps.

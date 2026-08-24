@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # MailHog - Simulates On-Premise SMTP
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: on-premise-smtp
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    environment:
+      MH_STORAGE: memory
+    networks:
+      - on-premise-network
+    restart: unless-stopped
+
+  # Simple Node.js app to send email (simulates your .NET app on-premise)
+  test-app:
+    image: node:18-alpine
+    container_name: on-premise-app
+    working_dir: /app
+    volumes:
+      - ./send_email_test.js:/app/send_email_test.js
+    command: node send_email_test.js
+    environment:
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      SMTP_USER: user
+      SMTP_PASS: pass
+      EMAIL_FROM: rtmishra8985@gmail.com
+      EMAIL_TO: rtmishra7040@gmail.com
+    depends_on:
+      - mailhog
+    networks:
+      - on-premise-network
+    restart: "no"
+
+networks:
+  on-premise-network:
+    driver: bridge

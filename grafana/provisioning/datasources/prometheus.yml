@@ -1,0 +1,23 @@
+# =============================================================
+# Grafana Datasource Provisioning — Prometheus
+# FIX 11: Auto-configures the Prometheus datasource on first start.
+# Mounted at /etc/grafana/provisioning/datasources/ in docker-compose.yml.
+#
+# Grafana reads this file at startup and creates/updates the datasource
+# automatically — no manual UI configuration required after deploy.
+# =============================================================
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    # 'prometheus' is the Docker Compose service name — resolvable within
+    # the hrms_internal network without exposing port 9090 publicly.
+    url: http://prometheus:9090
+    isDefault: true
+    jsonData:
+      # Scrape interval must match or be a multiple of prometheus.yml global.scrape_interval (15s).
+      timeInterval: "15s"
+      httpMethod: POST
+    editable: false

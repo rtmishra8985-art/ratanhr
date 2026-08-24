@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Reports – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Sales</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapseSales"><i class="bi bi-graph-up-arrow"></i> Sales <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseSales">
+      <a href="sales-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="sales-leads.html" class="sub-link">Leads</a>
+      <a href="sales-customers.html" class="sub-link">Customers</a>
+      <a href="sales-followups.html" class="sub-link">Follow Ups</a>
+      <a href="sales-meetings.html" class="sub-link">Meetings</a>
+      <a href="sales-visits.html" class="sub-link">Field Visits</a>
+      <a href="sales-quotations.html" class="sub-link">Quotations</a>
+      <a href="sales-tasks.html" class="sub-link">Tasks</a>
+      <a href="sales-reports.html" class="sub-link" style="color:#f7b731;">Reports</a>
+    </div>
+  </div>
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Sales Reports</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-muted" id="navUserName"></span>
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <!-- Date Filter -->
+  <div class="card mb-4">
+    <div class="card-body py-2">
+      <div class="row g-2 align-items-end">
+        <div class="col-auto"><label class="form-label mb-0 small">From</label><input type="date" class="form-control form-control-sm" id="fromDate"></div>
+        <div class="col-auto"><label class="form-label mb-0 small">To</label><input type="date" class="form-control form-control-sm" id="toDate"></div>
+        <div class="col-auto"><button class="btn btn-sm btn-warning" onclick="loadAllReports()"><i class="bi bi-bar-chart-line me-1"></i>Run Reports</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Lead Report -->
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header fw-semibold py-3"><i class="bi bi-funnel me-2"></i>Lead Report</div>
+        <div class="card-body" id="leadReportBody"><div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div></div>
+      </div>
+    </div>
+    <!-- Conversion Report -->
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header fw-semibold py-3"><i class="bi bi-arrow-repeat me-2"></i>Conversion Report</div>
+        <div class="card-body" id="conversionReportBody"><div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div></div>
+      </div>
+    </div>
+    <!-- Revenue Report -->
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header fw-semibold py-3"><i class="bi bi-cash-stack me-2"></i>Revenue Report</div>
+        <div class="card-body" id="revenueReportBody"><div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div></div>
+      </div>
+    </div>
+    <!-- Pipeline Report -->
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header fw-semibold py-3"><i class="bi bi-diagram-3 me-2"></i>Pipeline Report</div>
+        <div class="card-body" id="pipelineReportBody"><div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div></div>
+      </div>
+    </div>
+    <!-- Visit Report -->
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header fw-semibold py-3"><i class="bi bi-geo-alt me-2"></i>Visit Report</div>
+        <div class="card-body" id="visitReportBody"><div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div></div>
+      </div>
+    </div>
+    <!-- Employee Performance -->
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header fw-semibold py-3"><i class="bi bi-person-badge me-2"></i>Employee Performance</div>
+        <div class="card-body" id="perfReportBody"><div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script>
+const role = sessionStorage.getItem('hrms_role') || localStorage.getItem('hrms_role');
+const name = sessionStorage.getItem('hrms_name') || localStorage.getItem('hrms_name') || 'User';
+if (!role) window.location.replace('/login.html');
+document.getElementById('navUserName').textContent = name;
+document.getElementById('navAvatar').textContent   = name.charAt(0).toUpperCase();
+
+function getFrom() { return document.getElementById('fromDate').value || null; }
+function getTo()   { return document.getElementById('toDate').value || null; }
+function fmtINR(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
+
+function renderBars(data, keyLabel, keyCount, title) {
+  if (!data || !data.length) return `<p class="text-muted text-center py-3">No data</p>`;
+  const max = Math.max(...data.map(x => x[keyCount]), 1);
+  return data.map(x => `
+    <div class="mb-2">
+      <div class="d-flex justify-content-between small mb-1"><span>${x[keyLabel]||'—'}</span><span class="fw-semibold">${x[keyCount]}</span></div>
+      <div class="progress" style="height:6px">
+        <div class="progress-bar bg-warning" style="width:${Math.round(x[keyCount]/max*100)}%"></div>
+      </div>
+    </div>`).join('');
+}
+
+async function loadAllReports() {
+  const from = getFrom(); const to = getTo();
+
+  const [lr, cr, rr, pr, vr, per] = await Promise.all([
+    HrmsApi.salesLeadReport(from, to),
+    HrmsApi.salesConversionReport(from, to),
+    HrmsApi.salesRevenueReport(from, to),
+    HrmsApi.salesPipelineReport(),
+    HrmsApi.salesVisitReport(from, to),
+    HrmsApi.salesPerfReport(from, to),
+  ]);
+
+  // Lead Report
+  const ld = lr?.data;
+  document.getElementById('leadReportBody').innerHTML = ld ? `
+    <div class="row text-center mb-3">
+      <div class="col-6"><div class="fs-3 fw-bold text-warning">${ld.total}</div><div class="small text-muted">Total Leads</div></div>
+    </div>
+    <p class="fw-semibold small">By Status</p>
+    ${renderBars(ld.byStatus, 'status', 'count', 'Status')}
+    <p class="fw-semibold small mt-3">By Source</p>
+    ${renderBars(ld.bySource, 'source', 'count', 'Source')}
+  ` : '<p class="text-danger">Failed to load.</p>';
+
+  // Conversion Report
+  const cd = cr?.data;
+  document.getElementById('conversionReportBody').innerHTML = cd ? `
+    <div class="row text-center g-3 mb-3">
+      <div class="col-4"><div class="fs-3 fw-bold text-primary">${cd.total}</div><div class="small text-muted">Total</div></div>
+      <div class="col-4"><div class="fs-3 fw-bold text-success">${cd.won}</div><div class="small text-muted">Won</div></div>
+      <div class="col-4"><div class="fs-3 fw-bold text-danger">${cd.lost}</div><div class="small text-muted">Lost</div></div>
+    </div>
+    <div class="text-center">
+      <div class="fs-1 fw-bold text-warning">${cd.conversionPercent}%</div>
+      <div class="text-muted">Conversion Rate</div>
+    </div>
+  ` : '<p class="text-danger">Failed to load.</p>';
+
+  // Revenue Report
+  const rd = rr?.data;
+  if (rd) {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('revenueReportBody').innerHTML = `
+      <div class="text-center mb-3">
+        <div class="fs-2 fw-bold text-success">${fmtINR(rd.totalRevenue)}</div>
+        <div class="text-muted small">Total Accepted Revenue</div>
+      </div>
+      ${rd.byMonth?.length ? renderBars(rd.byMonth.map(m => ({ ...m, label: months[m.month-1]+' '+m.year })), 'label', 'revenue', 'Revenue') : '<p class="text-muted text-center">No monthly data</p>'}
+    `;
+  } else { document.getElementById('revenueReportBody').innerHTML = '<p class="text-danger">Failed to load.</p>'; }
+
+  // Pipeline Report
+  const pd = pr?.data;
+  if (pd) {
+    document.getElementById('pipelineReportBody').innerHTML = `
+      <div class="text-center mb-3">
+        <div class="fs-2 fw-bold text-info">${fmtINR(pd.totalPipelineValue)}</div>
+        <div class="text-muted small">Total Pipeline Value</div>
+      </div>
+      ${renderBars(pd.pipeline?.map(p => ({ ...p, label: p.status })), 'label', 'count', 'Stage')}
+    `;
+  } else { document.getElementById('pipelineReportBody').innerHTML = '<p class="text-danger">Failed to load.</p>'; }
+
+  // Visit Report
+  const vd = vr?.data;
+  if (vd) {
+    document.getElementById('visitReportBody').innerHTML = `
+      <div class="row text-center mb-3">
+        <div class="col-6"><div class="fs-3 fw-bold text-primary">${vd.total}</div><div class="small text-muted">Total Visits</div></div>
+        <div class="col-6"><div class="fs-3 fw-bold text-info">${vd.averageDurationMinutes} min</div><div class="small text-muted">Avg Duration</div></div>
+      </div>
+      <p class="fw-semibold small">By Employee</p>
+      ${renderBars(vd.byEmployee, 'employeeId', 'visits', 'Employee')}
+    `;
+  } else { document.getElementById('visitReportBody').innerHTML = '<p class="text-danger">Failed to load.</p>'; }
+
+  // Performance Report
+  const ed = per?.data;
+  if (ed) {
+    document.getElementById('perfReportBody').innerHTML = ed.byOwner?.length ? `
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Employee</th><th>Total Leads</th><th>Won</th><th>Conv%</th></tr></thead>
+        <tbody>${ed.byOwner.map(e => `<tr>
+          <td>${e.employeeId||'—'}</td>
+          <td>${e.total}</td>
+          <td class="text-success fw-semibold">${e.won}</td>
+          <td>${e.total > 0 ? Math.round(e.won/e.total*100) : 0}%</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    ` : '<p class="text-muted text-center py-3">No data</p>';
+  } else { document.getElementById('perfReportBody').innerHTML = '<p class="text-danger">Failed to load.</p>'; }
+}
+
+loadAllReports();
+</script>
+</body>
+</html>

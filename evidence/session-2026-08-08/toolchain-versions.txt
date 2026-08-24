@@ -1,0 +1,62 @@
+$ which dotnet && dotnet --version
+/bin/sh: 1: dotnet: not found
+
+$ which docker && docker --version
+(not found)
+
+$ docker compose version
+/bin/sh: 3: docker: not found
+
+$ which mysql mysqld
+(not found)
+
+$ node --version
+v22.22.2
+
+$ npm --version
+10.9.7
+
+$ apt-get install -y dotnet-sdk-8.0
+-> succeeded: installed dotnet-sdk-8.0 8.0.129-0ubuntu1~24.04.1 (from archive.ubuntu.com,
+   the only .NET SDK package available in Ubuntu 24.04's apt repos; apt-cache madison shows
+   only 8.0.129-0ubuntu1~24.04.1 and 8.0.104-0ubuntu1 as candidates — neither is in the
+   8.0.4xx feature band required by global.json's "version": "8.0.416".)
+
+$ cd /home/claude/work && dotnet --version   (global.json present, requests 8.0.416)
+The command could not be loaded, possibly because:
+  * You intended to execute a .NET SDK command:
+      A compatible .NET SDK was not found.
+Requested SDK version: 8.0.416
+global.json file: /home/claude/work/global.json
+Installed SDKs:
+Install the [8.0.416] .NET SDK or update [/home/claude/work/global.json] to match an installed SDK.
+
+$ curl -sI https://dot.net/v1/dotnet-install.sh
+HTTP/2 403, x-deny-reason: host_not_allowed
+
+$ curl -sI https://builds.dotnet.microsoft.com
+HTTP/2 403, x-deny-reason: host_not_allowed
+
+$ curl -sI https://api.nuget.org/v3/index.json
+HTTP/2 403, x-deny-reason: host_not_allowed
+
+$ curl -sI https://registry-1.docker.io/v2/
+HTTP/2 403, x-deny-reason: host_not_allowed
+
+$ curl -sI https://dev.mysql.com
+HTTP/2 403, x-deny-reason: host_not_allowed
+
+Diagnostic-only test (NOT part of the delivered repo — global.json was reverted immediately
+after): in a throwaway copy, global.json was temporarily relaxed to accept 8.0.129 to test
+whether NuGet restore was reachable at all with *any* SDK.
+$ dotnet restore HRMS.API/HRMS.API.csproj
+error NU1301: Unable to load the service index for source https://api.nuget.org/v3/index.json.
+(repeated once per project reference — every HRMS.* project failed identically)
+
+CONCLUSION: the blocker is not merely "wrong SDK patch version" — this sandbox's network
+egress allowlist (see filesystem/network configuration) does not include api.nuget.org,
+dot.net, builds.dotnet.microsoft.com, registry-1.docker.io, docker.io, mcr.microsoft.com, or
+any MySQL/Playwright-browser download host. archive.ubuntu.com and security.ubuntu.com are
+reachable (that is how dotnet-sdk-8.0 8.0.129 itself was installed), as is registry.npmjs.org.
+Even with a fully installed local SDK, `dotnet restore` cannot reach NuGet, so `dotnet build`,
+`dotnet test`, and `dotnet ef` cannot proceed regardless of which SDK patch is present.

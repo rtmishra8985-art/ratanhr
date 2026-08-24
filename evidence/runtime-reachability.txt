@@ -1,0 +1,97 @@
+$ dotnet run --project HRMS.API --no-build --urls http://127.0.0.1:5000
+
+--- STDOUT ---
+
+--- STDERR ---
+Unhandled exception. System.AggregateException: Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IAppreciationService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.AppreciationService': Unable to resolve service for type 'HRMS.Infrastructure.FileStorage.FileStorageService' while attempting to activate 'HRMS.Infrastructure.Services.AppreciationService'.) (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IAuthService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.AuthService': Unable to resolve service for type 'HRMS.Infrastructure.FileStorage.FileStorageService' while attempting to activate 'HRMS.Infrastructure.Services.AuthService'.) (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.) (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IExpenseService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.ExpenseService': Unable to resolve service for type 'HRMS.Infrastructure.FileStorage.FileStorageService' while attempting to activate 'HRMS.Infrastructure.Services.ExpenseService'.) (Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IWebhookService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.WebhookService': Unable to resolve service for type 'System.Threading.Channels.ChannelWriter`1[HRMS.Infrastructure.Services.WebhookJob]' while attempting to activate 'HRMS.Infrastructure.Services.WebhookService'.) (Error while validating the service descriptor 'ServiceType: Microsoft.Extensions.Hosting.IHostedService Lifetime: Singleton ImplementationType: HRMS.Infrastructure.Services.WebhookDispatcherService': Unable to resolve service for type 'System.Threading.Channels.ChannelReader`1[HRMS.Infrastructure.Services.WebhookJob]' while attempting to activate 'HRMS.Infrastructure.Services.WebhookDispatcherService'.)
+ ---> System.InvalidOperationException: Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IAppreciationService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.AppreciationService': Unable to resolve service for type 'HRMS.Infrastructure.FileStorage.FileStorageService' while attempting to activate 'HRMS.Infrastructure.Services.AppreciationService'.
+ ---> System.InvalidOperationException: Unable to resolve service for type 'HRMS.Infrastructure.FileStorage.FileStorageService' while attempting to activate 'HRMS.Infrastructure.Services.AppreciationService'.
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   --- End of inner exception stack trace ---
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   --- End of inner exception stack trace ---
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Program.<Main>$(String[] args) in /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Program.cs:line 434
+   at Program.<Main>(String[] args)
+ ---> (Inner Exception #1) System.InvalidOperationException: Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IAuthService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.AuthService': Unable to resolve service for type 'HRMS.Infrastructure.FileStorage.FileStorageService' while attempting to activate 'HRMS.Infrastructure.Services.AuthService'.
+ ---> System.InvalidOperationException: Unable to resolve service for type 'HRMS.Infrastructure.FileStorage.FileStorageService' while attempting to activate 'HRMS.Infrastructure.Services.AuthService'.
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   --- End of inner exception stack trace ---
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)<---
+
+ ---> (Inner Exception #2) System.InvalidOperationException: Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IEmailQueueService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.EmailQueueService': Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+ ---> System.InvalidOperationException: Unable to resolve service for type 'Microsoft.EntityFrameworkCore.IDbContextFactory`1[HRMS.Infrastructure.Data.ApplicationDbContext]' while attempting to activate 'HRMS.Infrastructure.Services.EmailQueueService'.
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   --- End of inner exception stack trace ---
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)<---
+
+ ---> (Inner Exception #3) System.InvalidOperationException: Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IExpenseService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.ExpenseService': Unable to resolve service for type 'HRMS.Infrastructure.FileStorage.FileStorageService' while attempting to activate 'HRMS.Infrastructure.Services.ExpenseService'.
+ ---> System.InvalidOperationException: Unable to resolve service for type 'HRMS.Infrastructure.FileStorage.FileStorageService' while attempting to activate 'HRMS.Infrastructure.Services.ExpenseService'.
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   --- End of inner exception stack trace ---
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)<---
+
+ ---> (Inner Exception #4) System.InvalidOperationException: Error while validating the service descriptor 'ServiceType: HRMS.Application.Interfaces.IWebhookService Lifetime: Scoped ImplementationType: HRMS.Infrastructure.Services.WebhookService': Unable to resolve service for type 'System.Threading.Channels.ChannelWriter`1[HRMS.Infrastructure.Services.WebhookJob]' while attempting to activate 'HRMS.Infrastructure.Services.WebhookService'.
+ ---> System.InvalidOperationException: Unable to resolve service for type 'System.Threading.Channels.ChannelWriter`1[HRMS.Infrastructure.Services.WebhookJob]' while attempting to activate 'HRMS.Infrastructure.Services.WebhookService'.
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   --- End of inner exception stack trace ---
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)<---
+
+ ---> (Inner Exception #5) System.InvalidOperationException: Error while validating the service descriptor 'ServiceType: Microsoft.Extensions.Hosting.IHostedService Lifetime: Singleton ImplementationType: HRMS.Infrastructure.Services.WebhookDispatcherService': Unable to resolve service for type 'System.Threading.Channels.ChannelReader`1[HRMS.Infrastructure.Services.WebhookJob]' while attempting to activate 'HRMS.Infrastructure.Services.WebhookDispatcherService'.
+ ---> System.InvalidOperationException: Unable to resolve service for type 'System.Threading.Channels.ChannelReader`1[HRMS.Infrastructure.Services.WebhookJob]' while attempting to activate 'HRMS.Infrastructure.Services.WebhookDispatcherService'.
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.TryCreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.GetCallSite(ServiceDescriptor serviceDescriptor, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   --- End of inner exception stack trace ---
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)<---
+
+
+--- EXIT CODE ---
+134
+$ curl -sS -D - -o /tmp/ratanhr-patch-response http://localhost:80/api/includes/sidebar-admin.html.patch
+HTTP/1.1 404 Not Found
+Access-Control-Allow-Origin: *
+Content-Length: 176
+Content-Security-Policy: default-src 'none'
+Content-Type: text/html; charset=utf-8
+Date: Fri, 07 Aug 2026 12:53:24 GMT
+X-Content-Type-Options: nosniff
+X-Powered-By: Express
+
+--- CURL EXIT CODE ---
+0
+--- RESPONSE SIZE ---
+176 /tmp/ratanhr-patch-response
+--- PATCH CONTENT MATCH ---
+no

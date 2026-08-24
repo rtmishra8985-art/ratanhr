@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  coverlet.runsettings — Code coverage settings for HRMS (FIX-6)
+  Referenced by: dotnet test - -settings coverlet.runsettings
+  Enforced threshold: 60% line coverage (checked in CI via ReportGenerator)
+  
+  Excludes:
+    - Migrations (auto-generated, untestable unit code)
+    - Program.cs (composition root, best tested via integration)
+    - Generated DTOs / AutoMapper profiles (data shapes, not logic)
+-->
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Exclude>
+            <!-- EF Core migrations — auto-generated DDL, not testable as units -->
+            [HRMS.Infrastructure]HRMS.Infrastructure.Migrations.*
+            <!-- Program.cs / startup composition root -->
+            [HRMS.API]HRMS.API.Program
+            <!-- AutoMapper profiles — pure mapping declarations, no logic -->
+            [HRMS.Application]HRMS.Application.Mapping.*
+            <!-- DTO classes — plain data holders -->
+            [HRMS.Application]HRMS.Application.DTOs.*
+            <!-- Domain entities — POCOs with no business logic -->
+            [HRMS.Domain]HRMS.Domain.Entities.*
+            [HRMS.Domain]HRMS.Domain.Enums.*
+          </Exclude>
+          <ExcludeByAttribute>
+            <!-- Skip generated code and test helpers decorated with these attributes -->
+            GeneratedCodeAttribute
+            CompilerGeneratedAttribute
+            ExcludeFromCodeCoverageAttribute
+          </ExcludeByAttribute>
+          <SingleHit>false</SingleHit>
+          <UseSourceLink>true</UseSourceLink>
+          <IncludeTestAssembly>false</IncludeTestAssembly>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

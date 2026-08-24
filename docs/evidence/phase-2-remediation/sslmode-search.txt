@@ -1,0 +1,2 @@
+./Documentation/MySqlMigrationGuide.md:51:  `SslMode=None`, even locally — it disables TLS entirely and sends credentials in clear text.
+exit code: 0

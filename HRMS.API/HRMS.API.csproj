@@ -1,0 +1,90 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>hrms-api-secrets</UserSecretsId>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <Version>1.0.4</Version>
+    <AssemblyVersion>1.0.4</AssemblyVersion>
+    <FileVersion>1.0.4</FileVersion>
+    <InformationalVersion>1.0.4</InformationalVersion>
+    <!-- BLOCKER-1 FIX: Enabled RestorePackagesWithLockFile so dotnet restore generates
+         (and enforces) HRMS.API/packages.lock.json. Run the restore once locally, commit
+         the resulting packages.lock.json, then switch Dockerfile/CI to locked mode. -->
+
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.3" />
+    <PackageReference Include="AutoMapper" Version="15.1.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="Serilog.Sinks.Seq" Version="7.0.0" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <!-- Pinned to exact version — wildcard 4.* removed (reproducible builds, no surprise upgrades) -->
+    <PackageReference Include="Sentry.AspNetCore" Version="5.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.8" />
+    <!-- PHASE 3: FluentValidation.AspNetCore 11.3.0 is deprecated (package author
+         retired the MVC auto-validation integration). Replaced with the supported
+         FluentValidation 11.x DI pattern; validators are registered via
+         AddValidatorsFromAssembly in HRMS.Application. No behavioural change:
+         AddFluentValidation() was never called in this codebase. -->
+    <PackageReference Include="FluentValidation" Version="11.9.2" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.2" />
+    <!-- FIX MED: API versioning -->
+    <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.0" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
+    <!-- Phase 1: Replaced AspNetCore.HealthChecks.NpgSql with MySQL health checks -->
+    <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="8.0.1" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+    <!-- SECURITY: transitive pins (pulled in by legacy Hangfire/SqlClient stack).
+         Newtonsoft.Json 11.0.2  -> GHSA-5crp-9r3c-p9vr (High, DoS on deep JSON)
+         System.Data.SqlClient 4.4.0 -> CVE-2024-0056 / CVE-2019-0545 (High + Moderate) -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <!-- M-21: Hangfire distributed background jobs -->
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.14" />
+    <!-- FIX-TEST: In-memory Hangfire storage used when Hangfire:UseInMemory=true (CI / tests) -->
+    <PackageReference Include="Hangfire.InMemory" Version="1.0.0" />
+    <!-- FIX BLOCKER-HANGFIRE: Redis-backed storage avoids the legacy MySQL adapter's
+         connector incompatibility with Pomelo EF Core. Redis is already deployed and
+         StackExchange.Redis is already a dependency. In Development, UseInMemory=true
+         bypasses Redis (no Redis required for local development). -->
+    <PackageReference Include="Hangfire.Redis.StackExchange" Version="1.9.3" />
+
+    <!-- Fix HIGH: Polly-based resilience (circuit breaker + retry + timeout) for outbound HTTP -->
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.9.1" />
+
+    <!-- OpenTelemetry: Tracing + Metrics + Logs                                          -->
+    <!-- Stable packages pinned to 1.17.0.                                                 -->
+    <!-- The following contrib packages have no stable release at 1.17.0; their latest
+         exact prerelease versions are pinned so telemetry remains enabled and restore
+         remains deterministic. -->
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.17.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.17.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.17.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.17.0-beta.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.17.0" />
+    <!-- OpenTelemetry.Instrumentation.Process has no stable release and is not used. -->
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.17.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.17.0-beta.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.17.0-beta.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HRMS.Application\HRMS.Application.csproj" />
+    <ProjectReference Include="..\HRMS.Infrastructure\HRMS.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

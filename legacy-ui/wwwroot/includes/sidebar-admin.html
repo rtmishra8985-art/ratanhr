@@ -1,0 +1,158 @@
+<!-- ADMIN SIDEBAR - Include this in all admin pages -->
+<nav class="sidebar" id="sidebar">
+  <div class="brand">
+    <img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR
+  </div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+
+    <div class="nav-label">Registration</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseReg" role="button">
+      <i class="bi bi-person-plus"></i> Registration <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseReg">
+      <a href="add-employee.html" class="sub-link">Register Employees</a>
+      <a href="view-employees.html" class="sub-link">View All Employees</a>
+    </div>
+
+    <div class="nav-label">Company</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseCompany" role="button">
+      <i class="bi bi-building"></i> Company <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseCompany">
+      <a href="add-company.html" class="sub-link">Add Company Details</a>
+      <a href="view-company.html" class="sub-link">View Company Details</a>
+    </div>
+
+    <div class="nav-label">Organisation</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseOrg" role="button">
+      <i class="bi bi-diagram-3"></i> Master Data <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseOrg">
+      <a href="departments.html" class="sub-link"><i class="bi bi-building me-1"></i>Departments &amp; Designations</a>
+      <a href="holidays.html" class="sub-link"><i class="bi bi-calendar-heart me-1"></i>Holiday Calendar</a>
+    </div>
+
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseWebAtt" role="button">
+      <i class="bi bi-globe"></i> Web Attendance <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseWebAtt">
+      <a href="web-attendance-admin.html" class="sub-link">View Web Attendance</a>
+    </div>
+
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseExcelAtt" role="button">
+      <i class="bi bi-file-earmark-spreadsheet"></i> Excel Attendance <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseExcelAtt">
+      <a href="upload-attendance.html" class="sub-link">Upload Excel</a>
+      <a href="view-attendance.html" class="sub-link">View Attendance</a>
+    </div>
+
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseBiometric" role="button">
+      <i class="bi bi-fingerprint"></i> Biometric <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseBiometric">
+      <a href="biometric-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="biometric-devices.html" class="sub-link">Devices</a>
+      <a href="biometric-logs.html" class="sub-link">Attendance Logs</a>
+      <!-- DEFERRED: Realtime biometric monitoring is not available in this release.
+           See Biometric/BIOMETRIC_RELEASE_DECISION.md before uncommenting. -->
+      <!-- <a href="biometric-realtime.html" class="sub-link">Realtime Monitor</a> -->
+      <a href="biometric-settings.html" class="sub-link">Settings</a>
+      <a href="biometric-sync-history.html" class="sub-link">Sync History</a>
+    </div>
+
+    <div class="nav-label">People</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseRecruitment" role="button">
+      <i class="bi bi-briefcase"></i> Recruitment <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseRecruitment">
+      <a href="recruitment-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="recruitment-requisitions.html" class="sub-link">Job Openings</a>
+      <a href="recruitment-candidates.html" class="sub-link">Candidates</a>
+      <a href="recruitment-interviews.html" class="sub-link">Interviews</a>
+      <a href="recruitment-offers.html" class="sub-link">Offer Letters</a>
+    </div>
+
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapsePerformance" role="button">
+      <i class="bi bi-trophy"></i> Performance <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapsePerformance">
+      <a href="performance-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="performance-cycles.html" class="sub-link">Review Cycles</a>
+      <a href="performance-goals.html" class="sub-link">Goals</a>
+      <a href="performance-reviews.html" class="sub-link">Reviews</a>
+      <a href="performance-feedback.html" class="sub-link">Feedback</a>
+    </div>
+
+    <div class="nav-label">Payroll</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapsePayroll" role="button">
+      <i class="bi bi-cash-stack"></i> Payroll <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapsePayroll">
+      <a href="payroll.html" class="sub-link">View Payroll</a>
+      <a href="add-payroll.html" class="sub-link">Generate Payslip</a>
+      <a href="bulk-payroll.html" class="sub-link"><i class="bi bi-people-fill me-1"></i>Bulk Payroll</a>
+    </div>
+
+    <div class="nav-label">Leave</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseLeave" role="button">
+      <i class="bi bi-calendar2-check"></i> Leave <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseLeave">
+      <a href="leave-admin.html" class="sub-link">Leave Requests</a>
+      <a href="leave-adjustments.html" class="sub-link"><i class="bi bi-sliders me-1"></i>Balance Adjustment</a>
+    </div>
+
+    <div class="nav-label">Reports</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseReports" role="button">
+      <i class="bi bi-bar-chart-line"></i> Reports <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseReports">
+      <a href="reports-attendance.html" class="sub-link">Attendance Report</a>
+      <a href="reports-employee.html" class="sub-link">Employee Report</a>
+      <a href="reports-payroll.html" class="sub-link">Payroll Report</a>
+      <a href="reports-leave.html" class="sub-link"><i class="bi bi-calendar2-minus me-1"></i>Leave Report</a>
+      <a href="reports-salary-register.html" class="sub-link"><i class="bi bi-table me-1"></i>Salary Register</a>
+    </div>
+
+    <div class="nav-label">Integrations</div>
+    <a href="webhooks.html" class="nav-link"><i class="bi bi-diagram-2"></i> Webhooks</a>
+
+    <div class="nav-label">Others</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseAppreciate" role="button">
+      <i class="bi bi-star"></i> Appreciation <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseAppreciate">
+      <a href="appreciation.html" class="sub-link">Appreciate Employees</a>
+    </div>
+
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseLogo" role="button">
+      <i class="bi bi-image"></i> Logo <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseLogo">
+      <a href="upload-logo.html" class="sub-link">Upload Logo</a>
+    </div>
+
+    <a href="admin-permissions.html" class="nav-link"><i class="bi bi-lock"></i> Permissions</a>
+    <a href="admin-users.html" class="nav-link"><i class="bi bi-people"></i> Admin Users</a>
+
+    <div class="nav-label">Sales</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseSales" role="button">
+      <i class="bi bi-graph-up-arrow"></i> Sales <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseSales">
+      <a href="sales-dashboard.html" class="sub-link"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
+      <a href="sales-leads.html" class="sub-link"><i class="bi bi-funnel me-1"></i>Leads</a>
+      <a href="sales-customers.html" class="sub-link"><i class="bi bi-people me-1"></i>Customers</a>
+      <a href="sales-followups.html" class="sub-link"><i class="bi bi-bell me-1"></i>Follow Ups</a>
+      <a href="sales-meetings.html" class="sub-link"><i class="bi bi-calendar-event me-1"></i>Meetings</a>
+      <a href="sales-visits.html" class="sub-link"><i class="bi bi-geo-alt me-1"></i>Field Visits</a>
+      <a href="sales-quotations.html" class="sub-link"><i class="bi bi-file-earmark-text me-1"></i>Quotations</a>
+      <a href="sales-tasks.html" class="sub-link"><i class="bi bi-check2-square me-1"></i>Tasks</a>
+      <a href="sales-reports.html" class="sub-link"><i class="bi bi-bar-chart-line me-1"></i>Reports</a>
+    </div>
+  </div>
+</nav>

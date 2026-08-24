@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # MailHog - Local SMTP Server for Development & Testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: ratanhr-mailhog
+    ports:
+      - "1025:1025"    # SMTP port for applications
+      - "8025:8025"    # Web UI for viewing emails
+    environment:
+      MH_STORAGE: memory
+      MH_MAILDIR_OUTGOING_WAIT: 5s
+    networks:
+      - ratanhr-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8025"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: ratanhr-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secure_password_456}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-hrms_db}
+      MYSQL_USER: ${MYSQL_USER:-hrms}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-hrms_secure_password_123}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - ratanhr-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis - Caching & Hangfire Storage
+  redis:
+    image: redis:7-alpine
+    container_name: ratanhr-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis_secure_password_789}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - ratanhr-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # RatanHR API - Your .NET Application
+  # Uncomment and update when you have Docker image
+  # ratanhr-api:
+  #   image: ratanhr-api:1.0.4
+  #   container_name: ratanhr-api
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=${MYSQL_DATABASE:-hrms_db};User ID=${MYSQL_USER:-hrms};Password=${MYSQL_PASSWORD:-hrms_secure_password_123};AllowPublicKeyRetrieval=True;SslMode=Required
+  #     - Redis__ConnectionString=redis:6379,password=${REDIS_PASSWORD:-redis_secure_password_789},ssl=False,abortConnect=False
+  #     - Email__Host=${EMAIL_HOST:-localhost}
+  #     - Email__Port=${EMAIL_PORT:-1025}
+  #     - Email__UseSsl=${EMAIL_USE_SSL:-false}
+  #     - Email__Username=${EMAIL_USERNAME:-}
+  #     - Email__Password=${EMAIL_PASSWORD:-}
+  #     - Email__FromAddress=${EMAIL_FROM_ADDRESS:-rtmishra8985@gmail.com}
+  #     - Email__FromName=${EMAIL_FROM_NAME:-RatanHR HRMS}
+  #   ports:
+  #     - "8080:80"
+  #   depends_on:
+  #     - mysql
+  #     - redis
+  #     - mailhog
+  #   networks:
+  #     - ratanhr-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+
+networks:
+  ratanhr-network:
+    driver: bridge

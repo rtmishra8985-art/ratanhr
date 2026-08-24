@@ -1,0 +1,2 @@
+Command: PORT=3000 BASE_PATH=/ NODE_ENV=production npx vite build --config vite.config.ts
+Result: PASS - built in 13.92s, dist/ produced

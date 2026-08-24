@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <title>Biometric Dashboard – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Biometric</div>
+    <a class="nav-link active" href="biometric-dashboard.html"><i class="bi bi-fingerprint"></i> Biometric Dashboard</a>
+    <a class="nav-link" href="biometric-devices.html"><i class="bi bi-hdd-network"></i> Devices</a>
+    <a class="nav-link" href="biometric-logs.html"><i class="bi bi-list-ul"></i> Punch Logs</a>
+    <a class="nav-link" href="biometric-realtime.html"><i class="bi bi-broadcast"></i> Realtime Monitor</a>
+    <a class="nav-link" href="biometric-sync-history.html"><i class="bi bi-arrow-repeat"></i> Sync History</a>
+    <a class="nav-link" href="biometric-settings.html"><i class="bi bi-gear"></i> Settings</a>
+  </div>
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+
+<!-- TOPNAV -->
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Biometric Dashboard</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="text-end d-none d-sm-block">
+      <div class="fw-semibold small" id="navUserName"></div>
+      <div class="text-muted" style="font-size:11px;" id="navUserRole"></div>
+    </div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<!-- MAIN PANEL -->
+<div class="main-panel">
+
+  <!-- Header -->
+  <div class="p-4 mb-4 rounded-3 text-white position-relative overflow-hidden"
+    style="background:linear-gradient(135deg,#1a5276,#2e86c1);">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-fingerprint me-2"></i>Biometric Overview</h4>
+        <p class="mb-0 opacity-75 small">Device health, punch activity, and sync status</p>
+      </div>
+      <button class="btn btn-light btn-sm px-3" onclick="loadDashboard()">
+        <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="bi bi-hdd-network-fill"></i></div>
+        <div class="stat-label">Total Devices</div>
+        <div class="stat-value" id="statTotal">–</div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card">
+        <div class="stat-icon text-success"><i class="bi bi-wifi"></i></div>
+        <div class="stat-label">Online</div>
+        <div class="stat-value text-success" id="statOnline">–</div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card">
+        <div class="stat-icon text-danger"><i class="bi bi-wifi-off"></i></div>
+        <div class="stat-label">Offline / Unreachable</div>
+        <div class="stat-value text-danger" id="statOffline">–</div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card">
+        <div class="stat-icon text-primary"><i class="bi bi-fingerprint"></i></div>
+        <div class="stat-label">Today's Punches</div>
+        <div class="stat-value text-primary" id="statToday">–</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Device Status Table -->
+  <div class="card mb-4">
+    <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-hdd-network me-2"></i>Device Status</span>
+      <small class="text-muted" id="lastSyncLabel"></small>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Device</th>
+              <th>Vendor</th>
+              <th>Status</th>
+              <th>Firmware</th>
+              <th>Enrolled Users</th>
+              <th>Checked At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="deviceStatusBody">
+            <tr><td colspan="7" class="text-center py-4 text-muted">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="card text-center p-4">
+        <i class="bi bi-hdd-network fs-2 text-primary mb-2"></i>
+        <h6 class="fw-semibold">Manage Devices</h6>
+        <p class="text-muted small mb-3">Add, configure, enable or disable biometric terminals.</p>
+        <a href="biometric-devices.html" class="btn btn-primary btn-sm">Go to Devices</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center p-4">
+        <i class="bi bi-broadcast fs-2 text-success mb-2"></i>
+        <h6 class="fw-semibold">Realtime Monitor</h6>
+        <p class="text-muted small mb-3">Live punch feed and device connectivity.</p>
+        <a href="biometric-realtime.html" class="btn btn-success btn-sm">Open Monitor</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center p-4">
+        <i class="bi bi-gear fs-2 text-secondary mb-2"></i>
+        <h6 class="fw-semibold">Settings</h6>
+        <p class="text-muted small mb-3">Configure sync interval, grace time, and retention.</p>
+        <a href="biometric-settings.html" class="btn btn-secondary btn-sm">Open Settings</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.main-panel -->
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script>
+const api = window.hrmsApi || { get: (url) => fetch(url, { credentials: 'include' }).then(r => r.json()) };
+
+async function loadDashboard() {
+  try {
+    const r = await fetch('/api/biometric/dashboard', { credentials: 'include' });
+    const d = await r.json();
+    if (!d.success) return;
+    const b = d.data;
+    document.getElementById('statTotal').textContent   = b.totalDevices;
+    document.getElementById('statOnline').textContent  = b.onlineDevices;
+    document.getElementById('statOffline').textContent = b.offlineDevices + b.disabledDevices;
+    document.getElementById('statToday').textContent   = b.todayPunches;
+    if (b.lastSyncAt) {
+      document.getElementById('lastSyncLabel').textContent = 'Last sync: ' + new Date(b.lastSyncAt).toLocaleString();
+    }
+    const tbody = document.getElementById('deviceStatusBody');
+    if (!b.deviceStatuses || b.deviceStatuses.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No devices registered. <a href="biometric-devices.html">Add one.</a></td></tr>';
+      return;
+    }
+    tbody.innerHTML = b.deviceStatuses.map(s => `
+      <tr>
+        <td class="fw-semibold">${s.deviceName}</td>
+        <td><span class="badge bg-secondary">${s.vendorName}</span></td>
+        <td>${s.isOnline
+          ? '<span class="badge bg-success">Online</span>'
+          : '<span class="badge bg-danger">Offline</span>'}</td>
+        <td>${s.firmwareVersion || '–'}</td>
+        <td>${s.enrolledUserCount ?? '–'}</td>
+        <td class="small text-muted">${new Date(s.checkedAt).toLocaleTimeString()}</td>
+        <td><a href="biometric-devices.html" class="btn btn-xs btn-outline-primary btn-sm py-0 px-2">Details</a></td>
+      </tr>`).join('');
+  } catch (e) {
+    console.error('Dashboard load error', e);
+  }
+}
+
+
+const u = JSON.parse(localStorage.getItem('user') || '{}');
+if (document.getElementById('navUserName')) document.getElementById('navUserName').textContent = u.fullName || u.username || '';
+if (document.getElementById('navUserRole')) document.getElementById('navUserRole').textContent = u.role || '';
+
+loadDashboard();
+// Auto-refresh every 60 seconds
+setInterval(loadDashboard, 60000);
+</script>
+</body>
+</html>

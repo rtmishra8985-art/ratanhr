@@ -1,0 +1,95 @@
+$ env PORT=3000 BASE_PATH=/ NODE_ENV=production bun run build:ci
+
+--- STDOUT ---
+vite v6.4.3 building for production...
+transforming...
+✓ 2735 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/public/index.html                                  3.96 kB │ gzip:   1.57 kB
+dist/public/assets/index-DB_nDRVF.css                 121.31 kB │ gzip:  19.97 kB
+dist/public/assets/skeleton-DoRiwi__.js                 0.18 kB │ gzip:   0.17 kB
+dist/public/assets/chevron-down-DdNBFafQ.js             0.30 kB │ gzip:   0.25 kB
+dist/public/assets/chevron-left-DT0aLykC.js             0.30 kB │ gzip:   0.25 kB
+dist/public/assets/plus-C5auE2XY.js                     0.32 kB │ gzip:   0.26 kB
+dist/public/assets/filter-qLNkUFAz.js                   0.33 kB │ gzip:   0.27 kB
+dist/public/assets/arrow-left-saeXavlh.js               0.33 kB │ gzip:   0.27 kB
+dist/public/assets/search-D41ActQv.js                   0.34 kB │ gzip:   0.27 kB
+dist/public/assets/circle-check-big-Fw76N80i.js         0.36 kB │ gzip:   0.28 kB
+dist/public/assets/ellipsis-C3y5-HZg.js                 0.39 kB │ gzip:   0.27 kB
+dist/public/assets/eye-CT0X-SmH.js                      0.42 kB │ gzip:   0.30 kB
+dist/public/assets/usePermissions-BLf-2NuS.js           0.42 kB │ gzip:   0.30 kB
+dist/public/assets/calendar-DNfkAROr.js                 0.43 kB │ gzip:   0.31 kB
+dist/public/assets/download-C5MsoTbS.js                 0.43 kB │ gzip:   0.32 kB
+dist/public/assets/pencil-jF5BjDTz.js                   0.45 kB │ gzip:   0.33 kB
+dist/public/assets/textarea-CWd5YSYh.js                 0.46 kB │ gzip:   0.32 kB
+dist/public/assets/refresh-cw-CVFgL4s_.js               0.49 kB │ gzip:   0.33 kB
+dist/public/assets/trash-2-5z4IsINt.js                  0.53 kB │ gzip:   0.35 kB
+dist/public/assets/PageHeader-DPFdfvOg.js               0.56 kB │ gzip:   0.31 kB
+dist/public/assets/SafeAvatar-CG2guzV2.js               0.58 kB │ gzip:   0.41 kB
+dist/public/assets/SkeletonTable-CJgs2OcU.js            0.61 kB │ gzip:   0.33 kB
+dist/public/assets/label-CZWgn8XX.js                    0.62 kB │ gzip:   0.43 kB
+dist/public/assets/badge-DPS1UdHs.js                    0.74 kB │ gzip:   0.41 kB
+dist/public/assets/not-found-ugAA-8AS.js                0.93 kB │ gzip:   0.50 kB
+dist/public/assets/card-Dwcz0hYU.js                     0.99 kB │ gzip:   0.37 kB
+dist/public/assets/send-eu1Teswv.js                     1.10 kB │ gzip:   0.47 kB
+dist/public/assets/phone-DiJ-Q3T3.js                    1.35 kB │ gzip:   0.55 kB
+dist/public/assets/table-BnAI1bME.js                    1.56 kB │ gzip:   0.54 kB
+dist/public/assets/EmptyState-CQZJeZdf.js               1.73 kB │ gzip:   0.81 kB
+dist/public/assets/StatusBadge-TTomjfg0.js              1.75 kB │ gzip:   0.64 kB
+dist/public/assets/dialog-BGw8sZad.js                   2.15 kB │ gzip:   0.85 kB
+dist/public/assets/progress-VxzGaJpz.js                 2.16 kB │ gzip:   1.06 kB
+dist/public/assets/usePaginationState-DXzVKXHK.js       2.31 kB │ gzip:   0.82 kB
+dist/public/assets/tabs-NM_oOW91.js                     3.34 kB │ gzip:   1.44 kB
+dist/public/assets/alert-dialog-EEgvzIQp.js             3.70 kB │ gzip:   1.25 kB
+dist/public/assets/BiometricPage-CKHDrLmu.js            4.08 kB │ gzip:   1.61 kB
+dist/public/assets/PerformancePage-D7VcGONE.js          4.69 kB │ gzip:   1.68 kB
+dist/public/assets/TrainingPage-BQIrXzyK.js             4.98 kB │ gzip:   2.11 kB
+dist/public/assets/HelpdeskPage-BysLS3bV.js             5.01 kB │ gzip:   1.73 kB
+dist/public/assets/EmployeeTransferPage-CZqtw-5F.js     5.02 kB │ gzip:   1.88 kB
+dist/public/assets/EmployeePromotionPage-DibquCNE.js    5.05 kB │ gzip:   1.92 kB
+dist/public/assets/AttendancePage-CxGb7Rq2.js           5.18 kB │ gzip:   1.59 kB
+dist/public/assets/RecruitmentPage-DcK56rYh.js          5.43 kB │ gzip:   1.79 kB
+dist/public/assets/AuditLogPage-C7bsJ0sf.js             5.72 kB │ gzip:   2.33 kB
+dist/public/assets/AnalyticsPage-DXlHJWhb.js            6.09 kB │ gzip:   1.96 kB
+dist/public/assets/PayrollPage-DCy0XVxd.js              6.32 kB │ gzip:   2.33 kB
+dist/public/assets/AssetsPage-CAu7CzUb.js               6.47 kB │ gzip:   2.24 kB
+dist/public/assets/DepartmentPage-Bz7uahf3.js           6.54 kB │ gzip:   2.44 kB
+dist/public/assets/EmployeeExitPage-D6WwFOlV.js         6.56 kB │ gzip:   2.19 kB
+dist/public/assets/ReportsPage-24G3msJZ.js              6.69 kB │ gzip:   2.41 kB
+dist/public/assets/LoginPage-CQxo9wJk.js                6.91 kB │ gzip:   2.69 kB
+dist/public/assets/DesignationPage-U798a3ss.js          6.98 kB │ gzip:   2.47 kB
+dist/public/assets/HolidayPage-2zstqpSu.js              7.16 kB │ gzip:   2.63 kB
+dist/public/assets/EmployeeDetailPage-BvLO7589.js       7.20 kB │ gzip:   2.00 kB
+dist/public/assets/LeavePage-BTIvGqbo.js                7.86 kB │ gzip:   2.84 kB
+dist/public/assets/BiometricDevicesPage-BUQXyYiy.js     8.69 kB │ gzip:   2.98 kB
+dist/public/assets/EmployeesPage-CbsP4W0C.js            9.76 kB │ gzip:   3.46 kB
+dist/public/assets/TimesheetPage-BZyJVW0b.js           10.31 kB │ gzip:   3.23 kB
+dist/public/assets/ShiftPage-CRzWMOgO.js               10.80 kB │ gzip:   3.98 kB
+dist/public/assets/BonusDeductionPage-MNQjunp6.js      12.11 kB │ gzip:   2.82 kB
+dist/public/assets/OnboardingPage--KBQ1Qyd.js          12.54 kB │ gzip:   4.29 kB
+dist/public/assets/ExpensesPage-DDWb1Diy.js            16.06 kB │ gzip:   4.46 kB
+dist/public/assets/TravelPage-VLGqYFHd.js              18.44 kB │ gzip:   5.61 kB
+dist/public/assets/index-CHyXlT8f.js                   18.98 kB │ gzip:   4.42 kB
+dist/public/assets/OrgChartPage-CUbVsWyE.js            19.58 kB │ gzip:   7.57 kB
+dist/public/assets/select-BXtCnrLU.js                  22.81 kB │ gzip:   7.92 kB
+dist/public/assets/SalesPage-DGECBDWO.js               23.30 kB │ gzip:   5.73 kB
+dist/public/assets/SettingsPage-HANdSseI.js            37.85 kB │ gzip:  14.24 kB
+dist/public/assets/DashboardPage-BfFTL7M-.js           44.96 kB │ gzip:  11.66 kB
+dist/public/assets/form-vAynQP5M.js                    94.57 kB │ gzip:  26.51 kB
+dist/public/assets/BarChart-CskO1bpp.js               384.52 kB │ gzip: 105.81 kB
+dist/public/assets/index-BWX-4zOA.js                  461.90 kB │ gzip: 146.36 kB
+✓ built in 5.24s
+
+--- STDERR ---
+$ tsc -p tsconfig.json --noEmit && PORT=3000 BASE_PATH=/ NODE_ENV=production vite build --config vite.config.ts
+src/components/ui/tooltip.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/sidebar.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/dropdown-menu.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/progress.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/select.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/label.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/sheet.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+
+--- EXIT CODE ---
+0

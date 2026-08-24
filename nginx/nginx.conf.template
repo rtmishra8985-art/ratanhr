@@ -1,0 +1,285 @@
+# =============================================================================
+# nginx/nginx.conf.template — RatanHR HRMS Production
+#
+# P1-D FIX: This is a template — do NOT edit nginx.conf directly.
+# The entrypoint.sh script expands ${DOMAIN_NAME} (and other vars) into
+# /etc/nginx/nginx.conf at container startup using envsubst.
+# Required env vars: DOMAIN_NAME, SSL_CERT_PATH, SSL_KEY_PATH, API_URL, APP_ENV
+#
+# To test locally:
+#   DOMAIN_NAME=app.example.com envsubst '$DOMAIN_NAME' < nginx/nginx.conf.template > /tmp/nginx.conf
+#   nginx -t -c /tmp/nginx.conf
+#
+# Features:
+#   • HTTP → HTTPS permanent redirect (301) with ACME challenge passthrough
+#   • TLS 1.2 / 1.3 only (Mozilla Intermediate profile)
+#   • HSTS (max-age 2 years, includeSubDomains)
+#   • Security headers: CSP, X-Frame-Options DENY, X-Content-Type-Options,
+#     Referrer-Policy, Permissions-Policy
+#   • Static SPA assets served directly from /usr/share/nginx/html
+#   • React SPA client-side routing: all non-asset 404s → index.html
+#   • /api/* reverse-proxied to API container on port 8080
+#   • /uploads/* served directly (static file bypass)
+#   • /health proxied without rate limiting (monitoring)
+#   • Rate limiting zones: 5 req/min on auth endpoints, 30 req/min on API
+#   • ACME webroot challenge for Let's Encrypt renewal
+# =============================================================================
+
+worker_processes auto;
+error_log  /var/log/nginx/error.log warn;
+pid        /var/run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include      /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for" '
+                    'rt=$request_time corr=$http_x_correlation_id';
+
+    access_log /var/log/nginx/access.log main;
+
+    sendfile           on;
+    tcp_nopush         on;
+    tcp_nodelay        on;
+    keepalive_timeout  65;
+    server_tokens      off;
+
+    # ── Compression ──────────────────────────────────────────────────────────
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        application/json
+        application/javascript
+        application/xml+rss
+        application/atom+xml
+        image/svg+xml;
+
+    # ── Rate limiting zones ───────────────────────────────────────────────────
+    # auth zone:  5 req/min — covers login, refresh, forgot-password, MFA
+    # api zone:  30 req/min — covers all other /api/* routes
+    limit_req_zone $binary_remote_addr zone=auth:10m rate=5r/m;
+    limit_req_zone $binary_remote_addr zone=api:10m  rate=30r/m;
+    limit_req_status 429;
+
+    # ── Upstream: HRMS API ────────────────────────────────────────────────────
+    # INFRA-1 FIX: the API container listens on 8080 (see Dockerfile
+    # ASPNETCORE_URLS=http://+:8080 / EXPOSE 8080 and docker-compose.yml's
+    # `expose: ["8080"]` + healthcheck on localhost:8080). Port 9090 belongs to
+    # Prometheus (docker-compose.yml `--web.listen-address=:9090`), not the API.
+    # The previous value routed all /api/* traffic to the wrong upstream.
+    upstream hrms_api {
+        server api:8080;
+        keepalive 16;
+    }
+
+    # ── HTTP → HTTPS redirect ─────────────────────────────────────────────────
+    server {
+        listen 80;
+        server_name _;
+
+        # ACME challenge (Let's Encrypt / Certbot renewal)
+        location /.well-known/acme-challenge/ {
+            root /var/www/certbot;
+        }
+
+        # All other HTTP traffic → permanent HTTPS redirect
+        location / {
+            return 301 https://$host$request_uri;
+        }
+    }
+
+    # ── HTTPS ─────────────────────────────────────────────────────────────────
+    server {
+        listen 443 ssl http2;
+        server_name ${DOMAIN_NAME};
+
+        # ── TLS ───────────────────────────────────────────────────────────────
+        ssl_certificate     /etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem;
+
+        # Mozilla Intermediate compatibility: TLS 1.2 + TLS 1.3
+        ssl_protocols             TLSv1.2 TLSv1.3;
+        ssl_ciphers               ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256;
+        ssl_prefer_server_ciphers off;
+        ssl_session_cache         shared:SSL:10m;
+        ssl_session_timeout       1d;
+        ssl_session_tickets       off;
+
+        # OCSP stapling (requires resolver reachability from the nginx container)
+        ssl_stapling        on;
+        ssl_stapling_verify on;
+        resolver            8.8.8.8 8.8.4.4 valid=300s;
+        resolver_timeout    5s;
+
+        # ── Security headers ──────────────────────────────────────────────────
+
+        # HSTS: 2 years, all sub-domains, preload-list eligible
+        add_header Strict-Transport-Security
+            "max-age=63072000; includeSubDomains; preload" always;
+
+        # Clickjacking: deny all frames
+        add_header X-Frame-Options "DENY" always;
+
+        # MIME sniffing prevention
+        add_header X-Content-Type-Options "nosniff" always;
+
+        # Referrer policy: no cross-origin leakage
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+        # XSS legacy header (belt-and-suspenders for old IE/Edge)
+        add_header X-XSS-Protection "1; mode=block" always;
+
+        # Permissions policy: restrict sensors, camera, mic
+        add_header Permissions-Policy
+            "geolocation=(self), microphone=(), camera=(), payment=()" always;
+
+        # Content-Security-Policy:
+        #   • 'nonce-{nonce}' inline scripts are permitted (CspNonceMiddleware
+        #     in the .NET API injects a per-request nonce into the SPA HTML).
+        #   • 'unsafe-inline' styles required for Tailwind CSS runtime injection.
+        #   • Connect-src allows the API on the same origin.
+        #   • Adjust frame-ancestors and form-action per your deployment domain.
+        add_header Content-Security-Policy
+            "default-src 'self'; \
+             script-src 'self' 'nonce-PLACEHOLDER'; \
+             style-src 'self' 'unsafe-inline'; \
+             img-src 'self' data: blob:; \
+             font-src 'self'; \
+             connect-src 'self' https://${DOMAIN_NAME}; \
+             frame-ancestors 'none'; \
+             form-action 'self'; \
+             base-uri 'self'; \
+             object-src 'none'" always;
+        # NOTE: The actual nonce value is injected by CspNonceMiddleware in the
+        # .NET API for the SPA's index.html. The static 'nonce-PLACEHOLDER' above
+        # is superseded by the API's dynamic nonce when the SPA is served through
+        # the /api proxy. For purely static SPA assets served by nginx, the CSP
+        # header from this file applies. The safest configuration is to let the
+        # .NET API serve index.html (the / → @spa_fallback block below proxies it
+        # to the API) and have nginx serve only /assets/* directly.
+
+        # ── General proxy config ──────────────────────────────────────────────
+        client_max_body_size 25M;
+
+        proxy_http_version  1.1;
+        proxy_set_header    Host              $host;
+        proxy_set_header    X-Real-IP         $remote_addr;
+        proxy_set_header    X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto $scheme;
+        proxy_set_header    X-Correlation-ID  $http_x_correlation_id;
+        proxy_read_timeout  300s;
+        proxy_send_timeout  300s;
+
+        # ── /health — no rate limit, used by load balancers & uptime monitors ──
+        location = /health {
+            proxy_pass http://hrms_api/health;
+        }
+
+        location = /healthz {
+            proxy_pass http://hrms_api/healthz;
+        }
+
+        # ── /metrics — internal networks only ────────────────────────────────
+        location /metrics {
+            allow 127.0.0.1;
+            allow 10.0.0.0/8;
+            allow 172.16.0.0/12;
+            allow 192.168.0.0/16;
+            deny  all;
+            proxy_pass http://hrms_api/metrics;
+        }
+
+        # ── /hangfire — dashboard restricted to internal CIDRs (HIGH-6) ──────
+        location /hangfire {
+            allow 127.0.0.1;
+            allow 10.0.0.0/8;
+            allow 172.16.0.0/12;
+            allow 192.168.0.0/16;
+            deny  all;
+            proxy_pass http://hrms_api;
+        }
+
+        # ── Auth endpoints — strict rate limit (5/min, burst 3) ───────────────
+        location ~ ^/api/auth/(login|refresh|forgot-password|reset-password|logout|mfa/verify)$ {
+            limit_req zone=auth burst=3 nodelay;
+            proxy_pass http://hrms_api;
+        }
+
+        # ── All other /api/* — normal rate limit (30/min, burst 20) ───────────
+        location /api/ {
+            limit_req zone=api burst=20 nodelay;
+            proxy_pass http://hrms_api;
+        }
+
+        # ── /uploads/* — static file bypass (served directly by nginx) ────────
+        # FIX INFRA-03: apply the same api-zone rate limit (30 req/min, burst 20)
+        # to prevent bandwidth exhaustion from unauthenticated enumeration of
+        # upload file names (even though UUIDs are used, rate-limiting adds defence).
+        #
+        # BUGFIX: FileStorageService (resumes, employee documents, profile
+        # photos, company logos, expense receipts, appreciation certificates)
+        # persists to /app/uploads/<subfolder>/<file>, while PayslipPdfJob persists
+        # to /app/wwwroot/uploads/payslip-pdfs/<token>.pdf - two different roots
+        # even though both generate URLs under the same /uploads/ prefix. Try the
+        # wwwroot root first (payslip PDFs), then fall back to the general
+        # uploads root (everything else) before returning 404.
+        location /uploads/ {
+            limit_req zone=api burst=20 nodelay;
+            root /app/wwwroot;
+            try_files $uri @general_uploads;
+            expires 30d;
+            add_header Cache-Control "public, max-age=2592000, immutable";
+
+            # Deny direct listing
+            autoindex off;
+        }
+
+        # Fallback root for /uploads/* paths not found under wwwroot (i.e.
+        # everything except payslip PDFs). $uri is still "/uploads/<subfolder>/<file>"
+        # here, so root /app + $uri = /app/uploads/<subfolder>/<file>, matching
+        # FileStorageService's actual write path exactly.
+        location @general_uploads {
+            internal;
+            root /app;
+            try_files $uri =404;
+        }
+
+        # ── SPA static assets — long-lived cache ──────────────────────────────
+        # Vite/React builds emit content-hashed filenames (e.g. index.abc123.js),
+        # so immutable caching is safe for assets/*.
+        location /assets/ {
+            root    /usr/share/nginx/html;
+            expires 1y;
+            add_header Cache-Control "public, max-age=31536000, immutable";
+            access_log off;
+        }
+
+        # ── SPA root + client-side routing ───────────────────────────────────
+        # All requests that don't match /api/, /uploads/, /assets/, /health, or
+        # /metrics fall through to here. The API serves index.html so that
+        # CspNonceMiddleware can inject the per-request nonce into the HTML.
+        # Static files (favicon.ico, robots.txt, etc.) are served from nginx
+        # if they exist in /usr/share/nginx/html, otherwise fall back to the API.
+        location / {
+            # Try the file on disk first (e.g. favicon.ico, robots.txt, manifest.webmanifest)
+            root /usr/share/nginx/html;
+            try_files $uri @spa_fallback;
+        }
+
+        # Named location: proxy to API so index.html gets its nonce-based CSP
+        location @spa_fallback {
+            proxy_pass http://hrms_api;
+        }
+    }
+}

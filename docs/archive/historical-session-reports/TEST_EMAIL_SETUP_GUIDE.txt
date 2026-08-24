@@ -1,0 +1,127 @@
+═══════════════════════════════════════════════════════════════════════════════
+                  RATANHR PHASE 8 - TEST EMAIL SETUP GUIDE
+═══════════════════════════════════════════════════════════════════════════════
+
+STATUS: Ready to send test email
+EMAIL TO: rtmishra7040@gmail.com
+EMAIL FROM: rtmishra8985@gmail.com
+
+═══════════════════════════════════════════════════════════════════════════════
+                        STEP 1: GET BREVO SMTP KEY
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Open: https://app.brevo.com/settings/keys/smtp
+
+2. You should see:
+   - SMTP Server: smtp-relay.brevo.com
+   - Port: 587
+   - Login: b5ef15001@smtp-brevo.com
+   - Your SMTP Keys section
+
+3. If you see "Click here to generate an SMTP key":
+   - Click that link
+   - A new key will be generated
+   - Copy the entire key (it will look like: xkeysib-xxx...xxx)
+
+4. If you already have a key listed:
+   - Click on it to view
+   - Copy the key value
+
+═══════════════════════════════════════════════════════════════════════════════
+                        STEP 2: UPDATE THE PYTHON SCRIPT
+═══════════════════════════════════════════════════════════════════════════════
+
+File: C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR\send_phase8_test_email.py
+
+Find this line (line 12):
+    SMTP_PASSWORD = ""  # Will be prompted or set via environment
+
+Replace with your Brevo SMTP key:
+    SMTP_PASSWORD = "xkeysib-1234567890abcdefghijklmnopqrstuvwxyz123456"
+
+(Replace with your actual key from Step 1)
+
+═══════════════════════════════════════════════════════════════════════════════
+                        STEP 3: RUN THE SCRIPT
+═══════════════════════════════════════════════════════════════════════════════
+
+Open PowerShell and run:
+
+cd C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR
+python send_phase8_test_email.py
+
+═══════════════════════════════════════════════════════════════════════════════
+                        EXPECTED OUTPUT
+═══════════════════════════════════════════════════════════════════════════════
+
+If successful, you will see:
+
+╔════════════════════════════════════════════════════════╗
+║   RatanHR Phase 8 - Brevo SMTP Test Email Sender      ║
+╚════════════════════════════════════════════════════════╝
+
+[✓] Connecting to Brevo SMTP server...
+    Host: smtp-relay.brevo.com
+    Port: 587
+
+[✓] Authenticating...
+[✓] Creating email message...
+    From: rtmishra8985@gmail.com
+    To: rtmishra7040@gmail.com
+    Subject: RatanHR Phase 8 Test - Brevo SMTP Working
+
+[→] Sending email...
+[✓] Email sent successfully!
+
+╔════════════════════════════════════════════════════════╗
+║   STATUS: SUCCESS - Email Delivered via Brevo         ║
+╚════════════════════════════════════════════════════════╝
+
+[✓] Test email delivered to: rtmishra7040@gmail.com
+[✓] Phase 8 Infrastructure: VERIFIED
+[✓] Phase 9: READY FOR DEPLOYMENT
+
+═══════════════════════════════════════════════════════════════════════════════
+                        TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+Error: SMTPAuthenticationError
+  → Check your Brevo SMTP key is correct and pasted completely
+  → Verify username is: b5ef15001@smtp-brevo.com
+
+Error: Connection timeout
+  → Check network connectivity to smtp-relay.brevo.com
+  → Verify firewall allows port 587
+
+Error: Module not found (requests/smtplib)
+  → Python is installed but modules missing
+  → Run: pip install requests
+
+═══════════════════════════════════════════════════════════════════════════════
+                        FILES CREATED
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ send_phase8_test_email.py (Python script - 10.5 KB)
+  - Ready to send test email via Brevo SMTP
+  - Email from: rtmishra8985@gmail.com
+  - Email to: rtmishra7040@gmail.com
+
+✓ .env (Configuration file - 7.1 KB)
+  - All environment variables configured
+  - Brevo SMTP settings included
+
+✓ PHASE8_COMPLETE_READY_FOR_PHASE9.md
+  - Phase 8 verification report
+  - All 13 blockers verified
+
+═══════════════════════════════════════════════════════════════════════════════
+                        NEXT STEPS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Get your Brevo SMTP key (see STEP 1 above)
+2. Update send_phase8_test_email.py with your key (STEP 2)
+3. Run the Python script (STEP 3)
+4. Check that email arrived at rtmishra7040@gmail.com
+5. Proceed to Phase 9: Production Deployment
+
+═══════════════════════════════════════════════════════════════════════════════

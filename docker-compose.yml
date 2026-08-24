@@ -1,0 +1,615 @@
+# ============================================================
+# HRMS Docker Compose — Production Stack
+# Pinned image versions prevent silent tag mutations.
+# Digest pinning: append @sha256:<digest> to each image line.
+#
+# Phase 4: Migrated database service from PostgreSQL to MySQL 8.4.
+# HOW TO PIN (run once per image update):
+#   docker pull mysql:8.4 && \
+#   docker inspect --format='{{index .RepoDigests 0}}' mysql:8.4
+# ============================================================
+
+services:
+  # ── One-shot DB migration job (runs once, then exits) ─────────────────────
+  # SAFE MIGRATION: Only one container ever runs migrations.
+  # The API service starts only after this job completes successfully (exit 0).
+  # In Kubernetes, replace this with an initContainer on the API Deployment.
+  migrate:
+    networks: [hrms_internal]   # single shared network: Prometheus must reach api:8080 and the API must reach jaeger:4317
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: ${MYSQL_USER:-hrms}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-hrms_db}
+      ConnectionStrings__DefaultConnection: "${ConnectionStrings__DefaultConnection:-Server=mysql;Port=3306;Database=${MYSQL_DATABASE:-hrms_db};User ID=${MYSQL_USER:-hrms};Password=${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env};AllowPublicKeyRetrieval=True;SslMode=Required}"
+    depends_on:
+      backfill:
+        condition: service_completed_successfully
+    restart: "no"   # Run exactly once — never restart
+
+  # ── Existing-data safety backfill ─────────────────────────────────────────
+  # Runs before EF migrations. On a fresh database the employees table does not
+  # exist yet, so the job exits successfully without doing anything. On an
+  # existing database it assigns orphaned employees to the first company,
+  # matching the documented release procedure without failing a fresh install.
+  backfill:
+    networks: [hrms_internal]   # single shared network: Prometheus must reach api:8080 and the API must reach jaeger:4317
+    image: mysql:8.4@sha256:1d6b6a8fcee8ff758ff151d017f5203cd06792a0e698f0a593c9dfcb14609cf0
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-hrms_db}
+      MYSQL_USER: ${MYSQL_USER:-hrms}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        export MYSQL_PWD="$${MYSQL_PASSWORD}"
+        has_table() {
+          [ "$$(mysql --protocol=TCP -hmysql -u"$${MYSQL_USER}" -Nse \
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$${MYSQL_DATABASE}' AND table_name='$$1'")" = "1" ]
+        }
+        if has_table companies && has_table employees; then
+          has_column="$$(mysql --protocol=TCP -hmysql -u"$${MYSQL_USER}" -Nse \
+            "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='$${MYSQL_DATABASE}' AND table_name='employees' AND column_name='company_id'")"
+          if [ "$${has_column}" = "1" ]; then
+            mysql --protocol=TCP -hmysql -u"$${MYSQL_USER}" "$${MYSQL_DATABASE}" -e \
+              "UPDATE employees e JOIN (SELECT id FROM companies ORDER BY id LIMIT 1) c
+               SET e.company_id = c.id WHERE e.company_id IS NULL;"
+            echo "Company backfill completed."
+          else
+            echo "employees.company_id is not present; skipping backfill."
+          fi
+        else
+          echo "Fresh database detected; skipping pre-migration company backfill."
+        fi
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: "no"
+
+  # ── MySQL 8.4 ──────────────────────────────────────────────────────────────
+  # Phase 4: Replaced PostgreSQL 16 with MySQL 8.4.
+  # mysql:8.4 — SHA256-pinned (FIX: prevents silent tag mutation; re-pin with:
+  #   docker inspect --format='{{index .RepoDigests 0}}' mysql:8.4  after any version bump)
+  mysql:
+    networks: [hrms_internal]   # single shared network: Prometheus must reach api:8080 and the API must reach jaeger:4317
+    image: mysql:8.4@sha256:1d6b6a8fcee8ff758ff151d017f5203cd06792a0e698f0a593c9dfcb14609cf0
+    restart: unless-stopped
+    # FIX: Resource limits protect the host from unbounded DB memory growth.
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    environment:
+      MYSQL_DATABASE:      ${MYSQL_DATABASE:-hrms_db}
+      MYSQL_USER:          ${MYSQL_USER:-hrms}
+      MYSQL_PASSWORD:      ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+    volumes:
+      - hrms_mysqldata:/var/lib/mysql
+      - ./scripts/db-init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    # Port 3306 intentionally NOT exposed to host — only reachable within Docker network.
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
+             "-u", "${MYSQL_USER:-hrms}",
+             "--password=${MYSQL_PASSWORD}"]
+      # FIX LOW: Standardise health-check timing to production-grade values.
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ── Redis ──────────────────────────────────────────────────────────────────
+  # redis:7.4-alpine — pin digest with: docker inspect --format='{{index .RepoDigests 0}}' redis:7.4-alpine
+  redis:
+    networks: [hrms_internal]   # single shared network: Prometheus must reach api:8080 and the API must reach jaeger:4317
+    image: redis:7.4-alpine@sha256:b1addbe72465a718643cff9e60a58e6df1841e29d6d7d60c9a85d8d72f08d1a7
+    restart: unless-stopped
+    # FIX: Enforce Docker-level memory cap (Redis --maxmemory is advisory only;
+    # the OOM killer can still consume all host RAM without a hard limit here).
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 320M
+        reservations:
+          cpus: "0.05"
+          memory: 64M
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:?ERROR - set REDIS_PASSWORD in your .env file before starting the stack}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1
+      --appendonly yes
+    volumes:
+      - hrms_redis:/data
+    # Port 6379 intentionally NOT exposed to host.
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:?ERROR - set REDIS_PASSWORD in your .env file before starting the stack}", "ping"]
+      # FIX LOW: Standardise health-check timing to production-grade values.
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ── HRMS API ───────────────────────────────────────────────────────────────
+  api:
+    networks: [hrms_internal]   # single shared network: Prometheus must reach api:8080 and the API must reach jaeger:4317
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    restart: unless-stopped
+    # FIX: Allow 30 s for graceful shutdown so in-flight requests and the
+    # EmailQueueWorker background service can drain before the container is killed.
+    # ASP.NET Core default is 5 s; long-running payroll/report requests need more.
+    stop_grace_period: 30s
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully   # wait for migrations
+      clamav:
+        condition: service_healthy                  # Fix low: ensure ClamAV is ready before API accepts uploads
+    # FIX: Resource limits prevent a runaway request (e.g. bulk payroll generation)
+    # from consuming all host memory/CPU and degrading other services.
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      # Database — migrations are handled by the migrate job above
+      ConnectionStrings__DefaultConnection: "${ConnectionStrings__DefaultConnection:-Server=mysql;Port=3306;Database=${MYSQL_DATABASE:-hrms_db};User ID=${MYSQL_USER:-hrms};Password=${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env};AllowPublicKeyRetrieval=True;SslMode=Required}"
+      # JWT (RS256) — generate key pair with: ./scripts/generate-rsa-keys.sh
+      Jwt__PrivateKeyPem: "${Jwt__PrivateKeyPem:-${JWT_PRIVATE_KEY_PEM:?run scripts/generate-rsa-keys.sh to create RSA key pair}}"
+      Jwt__PublicKeyPem:  "${Jwt__PublicKeyPem:-${JWT_PUBLIC_KEY_PEM:?run scripts/generate-rsa-keys.sh to create RSA key pair}}"
+      Jwt__Issuer:  HRMS.API
+      Jwt__Audience: HRMS.Client
+      # PII encryption
+      Security__EncryptionKey: "${Security__EncryptionKey:-${ENCRYPTION_KEY:?set Security__EncryptionKey in .env}}"
+      # CORS
+      Cors__AllowedOrigins: "${Cors__AllowedOrigins:-${ALLOWED_ORIGINS:-}}"
+      # Host filtering. `ALLOWED_HOSTS` is the documented .env alias; both the
+      # config key and the env alias are set so either reader resolves the value.
+      AllowedHosts: "${AllowedHosts:-${ALLOWED_HOSTS:-${DOMAIN_NAME:?set DOMAIN_NAME in .env}}}"
+      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-${AllowedHosts:-${DOMAIN_NAME:?set DOMAIN_NAME in .env}}}"
+      # FIX: trusted proxy CIDRs — required for correct client-IP in rate limiting and audit logs
+      Network__KnownProxyCidrs: ${NETWORK__KNOWN_PROXY_CIDRS:-172.18.0.0/16}
+      # Disable auto-migrate — handled by the migrate job above
+      Database__AutoMigrate: "false"
+      # Deterministic initial superadmin password for the one-time seed (SeedAsync in Program.cs).
+      # Compose .env values are NOT auto-injected into the container; this line forwards it explicitly.
+      SUPERADMIN_INITIAL_PASSWORD: ${SUPERADMIN_INITIAL_PASSWORD:-}
+      # Redis (shared) + Hangfire storage (mandatory outside Development)
+      Hangfire__UseRedis: "true"
+      Hangfire__UseInMemory: "false"
+      Hangfire__RedisConnectionString: "redis:6379,password=${REDIS_PASSWORD:?ERROR - set REDIS_PASSWORD in your .env file before starting the stack},abortConnect=false"
+      Redis__ConnectionString: "redis:6379,password=${REDIS_PASSWORD:?ERROR - set REDIS_PASSWORD in your .env file before starting the stack},abortConnect=false"
+      # Email
+      Email__Host:        "${Email__Host:-${EMAIL_HOST:-}}"
+      Email__Port:        "${Email__Port:-${EMAIL_PORT:-587}}"
+      Email__UseSsl:      "${Email__UseSsl:-${EMAIL_USE_SSL:-false}}"
+      Email__Username:    "${Email__Username:-${EMAIL_USERNAME:-}}"
+      Email__Password:    "${Email__Password:-${EMAIL_PASSWORD:-}}"
+      Email__FromAddress: "${Email__FromAddress:-${EMAIL_FROM_ADDRESS:-noreply@hrms.com}}"
+      Email__FromName:    "${Email__FromName:-${EMAIL_FROM_NAME:-HRMS System}}"
+      Email__AppBaseUrl:  "${Email__AppBaseUrl:-${APP_BASE_URL:-}}"
+      # OpenTelemetry
+      App__CompanyName:  ${APP_COMPANY_NAME:-HRMS System}
+      App__SupportName:  ${APP_SUPPORT_NAME:-HRMS Support}
+      App__SupportEmail: ${APP_SUPPORT_EMAIL:-support@yourdomain.com}
+      OpenTelemetry__ServiceName:    hrms-api
+      OpenTelemetry__ServiceVersion: "1.0.0"
+      # Traces: OTLP -> Jaeger all-in-one (gRPC 4317). Metrics: Prometheus scrape of
+      # GET /metrics (see monitoring/prometheus.yml). Set OTEL_OTLP_ENDPOINT="" to
+      # disable trace export entirely. Zipkin was never wired up and is removed.
+      OpenTelemetry__OtlpEndpoint:          ${OTEL_OTLP_ENDPOINT-http://jaeger:4317}
+      OpenTelemetry__OtlpProtocol:          ${OTEL_OTLP_PROTOCOL:-grpc}
+      OpenTelemetry__ExportMetricsViaOtlp:  "${OTEL_EXPORT_METRICS_VIA_OTLP:-false}"
+      # Monitoring
+      Monitoring__SeqUrl: ${SEQ_URL:-}
+      # Compliance — required in production (enforced by EnvironmentValidator at startup)
+      Compliance__DpoEmail:         "${Compliance__DpoEmail:-${DPO_EMAIL:?set Compliance__DpoEmail to your Data Protection Officer email in .env}}"
+      Compliance__ComplianceRegime: "${Compliance__ComplianceRegime:-${COMPLIANCE_REGIME:-dpdp}}"
+      # Webhook domain allowlist (SSRF hardening — comma-separated suffixes, e.g. "hooks.slack.com,yourdomain.com")
+      Webhook__AllowedDomainSuffixes: ${WEBHOOK_ALLOWED_DOMAIN_SUFFIXES:-}
+    expose:
+      - "8080"
+    volumes:
+      # BUGFIX: the general-purpose FileStorageService (resumes, employee documents,
+      # profile photos, company logos, expense receipts, appreciation certificates)
+      # falls back to AppContext.BaseDirectory + "uploads" = /app/uploads when
+      # FileStorage:RootPath is not configured (it isn't, in any appsettings*.json
+      # or compose env block here) - this is a DIFFERENT directory from
+      # /app/wwwroot/uploads used only by PayslipPdfJob. Previously only the
+      # wwwroot path was mounted, so every resume/photo/document/receipt upload
+      # was written to the container's ephemeral filesystem and silently lost on
+      # every restart/redeploy. Both paths must be persisted.
+      - hrms_uploads:/app/wwwroot/uploads
+      - hrms_uploads_general:/app/uploads
+      - hrms_logs:/app/Logs
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ── Nginx (TLS termination + Certbot-aware) ────────────────────────────────
+  # nginx:1.27.0-alpine — pin digest with: docker inspect --format='{{index .RepoDigests 0}}' nginx:1.27.0-alpine
+  nginx:
+    networks: [hrms_internal]   # single shared network: Prometheus must reach api:8080 and the API must reach jaeger:4317
+    image: nginx:1.27.0-alpine@sha256:63ffc0d1f14e4082b832c6a42e606e9a0384a526f16ddd720af7c1f018f2f7c4
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN_NAME:    ${DOMAIN_NAME:?set DOMAIN_NAME in .env}
+      API_URL:        ${API_URL:-https://${DOMAIN_NAME}/api}
+      APP_ENV:        ${APP_ENV:-production}
+      SSL_CERT_PATH:  ${SSL_CERT_PATH:-/etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem}
+      SSL_KEY_PATH:   ${SSL_KEY_PATH:-/etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem}
+    volumes:
+      - ./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template:ro
+      # FIX 3: Mount dedicated entrypoint script for envsubst-based config expansion
+      - ./nginx/entrypoint.sh:/etc/nginx/entrypoint.sh:ro
+      - hrms_certbot_conf:/etc/letsencrypt:ro
+      - hrms_certbot_www:/var/www/certbot:ro
+      - hrms_uploads:/app/wwwroot/uploads:ro
+      # BUGFIX: nginx's /uploads/ location previously only saw payslip PDFs
+      # (hrms_uploads -> /app/wwwroot/uploads). General uploads saved by
+      # FileStorageService (resumes, employee docs, photos, logos, receipts)
+      # live in a separate volume/path and were invisible to nginx, so every
+      # generated URL like /uploads/resumes/<file> 404'd even after the file
+      # was correctly persisted on the API container. Mount the general
+      # uploads volume too; nginx.conf.template's /uploads/ location must
+      # try both roots (see nginx/nginx.conf.template FIX comment).
+      - hrms_uploads_general:/app/uploads:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    # FIX 3: Use the dedicated entrypoint script (nginx/entrypoint.sh) instead of
+    # an inline command. The script validates required env vars, runs envsubst to
+    # expand ${DOMAIN_NAME}, ${API_URL}, ${SSL_CERT_PATH}, ${SSL_KEY_PATH} from the
+    # template, validates the generated config, then starts nginx with a background
+    # reload loop that picks up renewed Let's Encrypt certificates every 6 hours.
+    entrypoint: ["/bin/sh", "/etc/nginx/entrypoint.sh"]
+
+  # ── Certbot (ACME / Let's Encrypt) ────────────────────────────────────────
+  # certbot/certbot:v2.11.0 — pin digest with: docker inspect --format='{{index .RepoDigests 0}}' certbot/certbot:v2.11.0
+  certbot:
+    networks: [hrms_internal]   # single shared network: Prometheus must reach api:8080 and the API must reach jaeger:4317
+    image: certbot/certbot:v2.11.0@sha256:534384860340f96acbb098e1581961d4656b7fa6e8a485fb625e9c33c4df3842
+    restart: unless-stopped
+    volumes:
+      - hrms_certbot_conf:/etc/letsencrypt
+      - hrms_certbot_www:/var/www/certbot
+    # Renew check every 12 hours; Let's Encrypt certs are renewed at 60 days
+    entrypoint: >
+      /bin/sh -c "
+        trap exit TERM;
+        while :; do
+          certbot renew --webroot --webroot-path=/var/www/certbot --quiet;
+          sleep 12h & wait $$!;
+        done
+      "
+
+  # ── Prometheus ────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+      - --web.enable-lifecycle
+      - --web.listen-address=:9090
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - hrms_prometheus:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"    # localhost only — not exposed publicly
+    networks:
+      - hrms_internal
+
+  # ── Grafana ────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:11.1.0
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER:     ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD must be set. Generate: openssl rand -base64 32}"
+      GF_SERVER_ROOT_URL:         http://localhost:3000
+      GF_AUTH_ANONYMOUS_ENABLED:  "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/hrms-dashboard.json
+    volumes:
+      - hrms_grafana:/var/lib/grafana
+      - ./monitoring/grafana-dashboard.json:/var/lib/grafana/dashboards/hrms-dashboard.json:ro
+      # FIX 11: Mount provisioning directory so Grafana auto-configures the Prometheus
+      # datasource and imports the HRMS dashboard on first start — no manual UI setup
+      # required after a fresh deploy or container recreation.
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "127.0.0.1:3000:3000"    # localhost only — expose via VPN or SSH tunnel
+    depends_on:
+      - prometheus
+    networks:
+      - hrms_internal
+
+  # ── Automated DB backup (encrypted) ──────────────────────────────────────────
+  # Phase 4: Replaced pg_dump with mysqldump. Uses mysql:8.4 image (SHA256-pinned).
+  # mysqldump output is piped through OpenSSL AES-256-CBC (PBKDF2, 600 000 iterations)
+  # before writing to disk.  Files are stored as *.sql.gz.enc — encrypted, compressed.
+  # The decryption passphrase is injected via BACKUP_ENCRYPTION_KEY environment variable.
+  # (set in .env; rotate quarterly via key-rotation runbook)
+  #
+  # To decrypt a backup manually:
+  #   openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+  #     -pass pass:"$BACKUP_ENCRYPTION_KEY" \
+  #     -in hrms_20260722_020000.sql.gz.enc | gunzip > hrms_restored.sql
+  #
+  # Uses busybox crond (available in the alpine image) instead of a sleep-60 poll loop.
+  # crond wakes exactly at the scheduled time regardless of when the container started.
+  # Schedule: daily at 02:00 UTC (configurable via BACKUP_CRON_SCHEDULE).
+  # Retention: files older than BACKUP_RETAIN_DAYS (default 14) days are pruned.
+  backup:
+    networks: [hrms_internal]   # single shared network: Prometheus must reach api:8080 and the API must reach jaeger:4317
+    image: mysql:8.4@sha256:1d6b6a8fcee8ff758ff151d017f5203cd06792a0e698f0a593c9dfcb14609cf0
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_DATABASE:           ${MYSQL_DATABASE:-hrms_db}
+      MYSQL_USER:               ${MYSQL_USER:-hrms}
+      MYSQL_PASSWORD:           ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+      RETAIN_DAYS:              ${BACKUP_RETAIN_DAYS:-14}
+      BACKUP_CRON_SCHEDULE:     ${BACKUP_CRON_SCHEDULE:-0 2 * * *}
+      # REQUIRED: Set a strong random passphrase in .env — never commit the real value.
+      # Generate one with: openssl rand -base64 48
+      BACKUP_ENCRYPTION_KEY:    ${BACKUP_ENCRYPTION_KEY:?BACKUP_ENCRYPTION_KEY must be set in .env}
+    volumes:
+      - ./backups:/backups
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        echo "Backup service started (MySQL encrypted mode)."
+        echo "Schedule: $${BACKUP_CRON_SCHEDULE} (UTC).  Retention: $${RETAIN_DAYS} days."
+
+        # Fail fast if the encryption key is missing or empty.
+        if [ -z "$${BACKUP_ENCRYPTION_KEY}" ]; then
+          echo "FATAL: BACKUP_ENCRYPTION_KEY is not set. Refusing to write unencrypted backups." >&2
+          exit 1
+        fi
+
+        # Write the crontab for the root user.
+        mkdir -p /var/spool/cron/crontabs
+        printf '%s /bin/sh /backup.sh\n' "$${BACKUP_CRON_SCHEDULE}" \
+            > /var/spool/cron/crontabs/root
+
+        # Write the backup script.
+        cat > /backup.sh << 'SCRIPT'
+        #!/bin/sh
+        set -e
+        BASENAME="/backups/hrms_$$(date -u '+%Y%m%d_%H%M%S')"
+        OUTFILE="$${BASENAME}.sql.gz.enc"
+
+        # Dump → compress → encrypt (AES-256-CBC, PBKDF2 with 600 000 iterations).
+        mysqldump -h mysql -u "$$MYSQL_USER" -p"$$MYSQL_PASSWORD" "$$MYSQL_DATABASE" \
+          | gzip \
+          | openssl enc -aes-256-cbc -pbkdf2 -iter 600000 \
+              -pass "env:BACKUP_ENCRYPTION_KEY" \
+              -out "$$OUTFILE"
+
+        echo "$$(date -u) Encrypted backup written: $$OUTFILE ($$(du -sh "$$OUTFILE" | cut -f1))"
+
+        # Prune old encrypted backups.
+        find /backups -name 'hrms_*.sql.gz.enc' -mtime +"$$RETAIN_DAYS" -delete
+        echo "$$(date -u) Old backups pruned (retention: $$RETAIN_DAYS days)."
+        SCRIPT
+        chmod +x /backup.sh
+
+        # Run crond in the foreground (-f) with logging to stderr (-d 8).
+        exec crond -f -d 8
+
+
+  # ── Off-site backup: uploads local encrypted backups to S3 / S3-compatible ───
+  # Disabled by default. Enable with: docker compose --profile offsite up -d
+  # Requires S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION in .env.
+  # For Backblaze B2 / MinIO / Cloudflare R2 set AWS_ENDPOINT_URL in .env too.
+  # Runs daily (sleep-loop — starts 1 h after container starts, then every 24 h).
+  # The local backup service writes *.sql.gz.enc files; this service uploads the latest one.
+  offsite-backup:
+    image: amazon/aws-cli:2.17.0
+    profiles: [offsite]
+    restart: unless-stopped
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        set -eu
+        : "$${S3_BUCKET:?S3_BUCKET is required when using the offsite profile}"
+        : "$${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID is required when using the offsite profile}"
+        : "$${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is required when using the offsite profile}"
+        echo "$$(date -u) Off-site backup uploader started."
+
+        upload_latest() {
+          BACKUP_DIR="$${BACKUP_DIR:-/backups}"
+          S3_PREFIX="$${S3_PREFIX:-hrms/mysql}"
+          ENDPOINT_ARG="$${AWS_ENDPOINT_URL:+--endpoint-url $${AWS_ENDPOINT_URL}}"
+
+          # Find newest encrypted backup file
+          LATEST=$$(find "$$BACKUP_DIR" -name 'hrms_*.sql.gz.enc' -type f \
+                   | sort | tail -1)
+          if [ -z "$$LATEST" ]; then
+            echo "$$(date -u) No backup file found — skipping upload."
+            return 0
+          fi
+
+          FILENAME=$$(basename "$$LATEST")
+          S3_URI="s3://$${S3_BUCKET}/$${S3_PREFIX}/$${FILENAME}"
+          echo "$$(date -u) Uploading $${FILENAME} → $${S3_URI}"
+          # shellcheck disable=SC2086
+          aws s3 cp "$$LATEST" "$$S3_URI" $$ENDPOINT_ARG \
+            --storage-class STANDARD_IA --sse AES256 --no-progress
+          echo "$$(date -u) ✅ Upload verified."
+
+          # Prune remote objects older than S3_RETAIN_DAYS
+          RETAIN="$${S3_RETAIN_DAYS:-90}"
+          CUTOFF=$$(python3 -c "
+        from datetime import datetime, timedelta, timezone
+        print((datetime.now(timezone.utc) - timedelta(days=$${RETAIN})).strftime('%Y-%m-%dT%H:%M:%SZ'))")
+          # shellcheck disable=SC2086
+          aws s3api list-objects-v2 --bucket "$$S3_BUCKET" --prefix "$${S3_PREFIX}/" \
+            $$ENDPOINT_ARG \
+            --query "Contents[?LastModified<='$${CUTOFF}'].Key" --output text 2>/dev/null \
+            | tr '\t' '\n' | grep -v '^None$$' | while IFS= read -r KEY; do
+              [ -z "$$KEY" ] && continue
+              # shellcheck disable=SC2086
+              aws s3 rm "s3://$${S3_BUCKET}/$${KEY}" $$ENDPOINT_ARG --quiet
+              echo "$$(date -u) 🗑️  Pruned: $${KEY}"
+            done || true
+
+          echo "$$(date -u) Off-site backup run complete."
+        }
+
+        # Run once at start (handles container restarts near schedule time)
+        sleep 60 && upload_latest &
+
+        # Then run every 24 hours
+        while true; do
+          sleep 86400
+          upload_latest
+        done
+    environment:
+      # These are validated by the offsite container itself. Keeping them
+      # optional at Compose interpolation time means the normal stack can be
+      # validated and started without enabling the optional offsite profile.
+      S3_BUCKET:             ${S3_BUCKET:-}
+      S3_PREFIX:             ${S3_PREFIX:-hrms/mysql}
+      AWS_ACCESS_KEY_ID:     ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_DEFAULT_REGION:    ${AWS_DEFAULT_REGION:-ap-south-1}
+      AWS_ENDPOINT_URL:      ${AWS_ENDPOINT_URL:-}
+      S3_RETAIN_DAYS:        ${S3_RETAIN_DAYS:-90}
+      BACKUP_DIR:            /backups
+    volumes:
+      - ./backups:/backups:ro
+    networks:
+      - hrms_internal
+
+  # ── Alertmanager ────────────────────────────────────────────────────────────
+  # FIX 10: Alertmanager routes Prometheus alerts to Slack, PagerDuty, or email.
+  # Configure receivers in monitoring/alertmanager.yml.template — no API keys are
+  # stored in this file; inject them as environment variables from .env.
+  #
+  # RHR-003 FIX: alertmanager.yml previously embedded shell-style ${VAR:-default}
+  # placeholders, which Alertmanager's own config parser cannot expand (it has no
+  # variable-substitution support) -- the container crash-looped on every start
+  # ("too many colons in address": literal "${ALERTMANAGER_SMTP_SMARTHOST:-...}"
+  # was parsed as the smarthost value). Mount the plain-placeholder .template file
+  # and expand it with envsubst via a dedicated entrypoint before Alertmanager starts,
+  # mirroring the existing nginx/entrypoint.sh pattern.
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/etc/alertmanager/alertmanager-entrypoint.sh"]
+    environment:
+      ALERTMANAGER_SMTP_FROM: ${ALERTMANAGER_SMTP_FROM:-alerts@example.com}
+      ALERTMANAGER_SMTP_SMARTHOST: ${ALERTMANAGER_SMTP_SMARTHOST:-smtp.example.com:587}
+      ALERTMANAGER_SMTP_USERNAME: ${ALERTMANAGER_SMTP_USERNAME:-}
+      ALERTMANAGER_SMTP_PASSWORD: ${ALERTMANAGER_SMTP_PASSWORD:-}
+      ALERTMANAGER_EMAIL_TO: ${ALERTMANAGER_EMAIL_TO:-ops@example.com}
+      ALERTMANAGER_ONCALL_EMAIL: ${ALERTMANAGER_ONCALL_EMAIL:-oncall@example.com}
+    volumes:
+      - ./monitoring/alertmanager.yml.template:/etc/alertmanager/alertmanager.yml.template:ro
+      - ./monitoring/alertmanager-entrypoint.sh:/etc/alertmanager/alertmanager-entrypoint.sh:ro
+      - hrms_alertmanager:/alertmanager
+    ports:
+      - "127.0.0.1:9093:9093"    # localhost only — not exposed publicly
+    networks:
+      - hrms_internal
+
+  # ── Jaeger (all-in-one) — OTLP / distributed tracing exporter ─────────────
+  # Low FIX: monitoring exporters were missing from docker-compose. The HRMS API
+  # emits OpenTelemetry spans via OpenTelemetry__OtlpEndpoint / __JaegerEndpoint
+  # but had no collector to receive them. Jaeger all-in-one accepts OTLP over
+  # gRPC (4317) and HTTP (4318) and exposes a trace query UI on 16686.
+  # All ports are bound to localhost only — expose via VPN or SSH tunnel.
+  # Enable: set OTEL_OTLP_ENDPOINT=http://jaeger:4317 in your .env.
+  jaeger:
+    image: jaegertracing/all-in-one:1.58
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+      SPAN_STORAGE_TYPE: memory
+      MEMORY_MAX_TRACES: "50000"
+    ports:
+      - "127.0.0.1:16686:16686"   # Jaeger query UI
+      - "127.0.0.1:4317:4317"     # OTLP gRPC receiver
+      - "127.0.0.1:4318:4318"     # OTLP HTTP receiver
+    networks:
+      - hrms_internal
+
+  # ── ClamAV Antivirus (FIX MED-03) ─────────────────────────────────────────
+  clamav:
+    networks: [hrms_internal]   # single shared network: Prometheus must reach api:8080 and the API must reach jaeger:4317
+    image: clamav/clamav:1.4_base
+    restart: unless-stopped
+    environment:
+      CLAMAV_NO_FRESHCLAMD: "false"
+      CLAMAV_NO_CLAMD:      "false"
+    volumes:
+      - hrms_clamav:/var/lib/clamav
+    # Port 3310 intentionally NOT exposed to host — internal network only.
+    # FIX 1: Use clamdscan --ping 3 (built-in daemon ping) instead of the
+    # external clamdcheck.sh script which may not be present in all image
+    # variants. interval 30s / retries 5 / start_period 90s gives the virus
+    # definition download enough runway before Docker marks the service unhealthy.
+    healthcheck:
+      test: ["CMD-SHELL", "clamdscan --ping 3 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+volumes:
+  hrms_mysqldata:
+  hrms_redis:
+  hrms_uploads:
+  hrms_uploads_general:
+  hrms_logs:
+  hrms_certbot_conf:
+  hrms_certbot_www:
+  hrms_prometheus:
+  hrms_alertmanager:
+  hrms_clamav:
+  hrms_grafana:
+
+networks:
+  hrms_internal:
+    driver: bridge

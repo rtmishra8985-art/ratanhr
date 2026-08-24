@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>My Details – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="emp-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">My Profile</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseEmp"><i class="bi bi-person-vcard"></i> Employees <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseEmp">
+      <a href="add-emp-details.html" class="sub-link">Add Employee Details</a>
+      <a href="view-emp-details.html" class="sub-link" style="color:#f7b731;">View Employee Details</a>
+    </div>
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#att"><i class="bi bi-clock"></i> Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="att"><a href="emp-web-attendance.html" class="sub-link">Web Attendance</a></div>
+    <div class="nav-label">Documents</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#docs"><i class="bi bi-folder"></i> Company Docs <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="docs"><a href="company-docs.html" class="sub-link">View</a></div>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">My Employee Details</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="avatar-circle">E</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+<div class="main-panel">
+  <div class="row g-4">
+    <!-- Profile Card -->
+    <div class="col-md-3">
+      <div class="card card-table text-center p-3">
+        <div class="card-body">
+          <!-- <img src="/files/photo/{{emp.passport_photo}}" class="rounded-circle mb-3" style="width:80px;height:80px;object-fit:cover;"> -->
+          <div class="avatar-circle mx-auto mb-3" style="width:70px;height:70px;font-size:22px;"><span id="empInitials">?</span></div>
+          <h6 class="fw-bold"><span id="empFullname">—</span></h6>
+          <div class="text-muted small"><span id="empDesignation">—</span></div>
+          <div class="text-muted small mb-3"><span id="empDepartment">—</span></div>
+          <span id="empStatusBadge" class="badge bg-success">Active</span>
+          <hr>
+          <div class="text-start small">
+            <div class="d-flex justify-content-between mb-1"><span class="text-muted">Emp ID</span><strong><code><span id="empId">—</span></code></strong></div>
+            <div class="d-flex justify-content-between mb-1"><span class="text-muted">Blood Group</span><strong><span id="empBloodGroup">—</span></strong></div>
+            <div class="d-flex justify-content-between mb-1"><span class="text-muted">DOJ</span><strong><span id="empDoj">—</span></strong></div>
+          </div>
+          <a href="edit-employee.html?employeeId=<span id="empId">—</span>" class="btn btn-sm btn-outline-warning mt-3 w-100">
+            <i class="bi bi-pencil me-1"></i>Edit Details
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details Tabs -->
+    <div class="col-md-9">
+      <div class="card card-table">
+        <div class="card-header p-0">
+          <ul class="nav nav-tabs border-0 px-3" id="empTabs">
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabPersonal">Personal</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabBank">Bank</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabEducation">Education</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabExperience">Experience</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabEmergency">Emergency</a></li>
+          </ul>
+        </div>
+        <div class="card-body tab-content">
+          <!-- Personal Tab -->
+          <div class="tab-pane active" id="tabPersonal">
+            <div class="row g-3">
+              <div class="col-md-4"><span class="text-muted small d-block">Gender</span><strong><span id="empGender">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Date of Birth</span><strong><span id="empDob">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Nationality</span><strong><span id="empNationality">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Marital Status</span><strong><span id="empMarital">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Blood Group</span><strong><span id="empBloodGroup">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Languages</span><strong><span id="empLanguages">—</span></strong></div>
+              <div class="col-md-6"><span class="text-muted small d-block">Permanent Address</span><strong><span id="empPermAddr">—</span></strong></div>
+              <div class="col-md-6"><span class="text-muted small d-block">Current Address</span><strong><span id="empCurrAddr">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Aadhaar</span><strong><span id="empAadhaar">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">PAN</span><strong><span id="empPan">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Skills</span><strong><span id="empSkills">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Hobbies</span><strong><span id="empHobbies">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Medical Conditions</span><strong><span id="empMedical">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Identity Docs</span>
+                <a href="/files/identity/{{emp.identity_docs}}" class="text-warning small" download>Download</a>
+              </div>
+            </div>
+          </div>
+          <!-- Bank Tab -->
+          <div class="tab-pane" id="tabBank">
+            <div class="row g-3">
+              <div class="col-md-4"><span class="text-muted small d-block">Account Holder</span><strong><span id="empBankHolder">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Bank Name</span><strong><span id="empBankName">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Branch Name</span><strong><span id="empBranch">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Account Number</span><strong><span id="empAccNum">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">IFSC Code</span><strong><span id="empIfsc">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">UAN</span><strong><span id="empUan">—</span></strong></div>
+            </div>
+          </div>
+          <!-- Education Tab -->
+          <div class="tab-pane" id="tabEducation">
+            <div class="row g-3">
+              <div class="col-md-4"><span class="text-muted small d-block">Qualification</span><strong><span id="empQual">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Institution</span><strong><span id="empInstitution">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Year of Passing</span><strong><span id="empYop">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Specialization</span><strong><span id="empSpec">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Edu Documents</span>
+                <a id="eduDocLink" href="#" class="text-warning small" download>Download</a>
+              </div>
+              <div class="col-md-4"><span class="text-muted small d-block">Passport Photo</span>
+                <a id="photoLink" href="#" class="text-warning small" target="_blank">View</a>
+              </div>
+            </div>
+          </div>
+          <!-- Experience Tab -->
+          <div class="tab-pane" id="tabExperience">
+            <div class="row g-3">
+              <div class="col-md-4"><span class="text-muted small d-block">Previous Employer</span><strong><span id="empPrevEmp">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Job Title</span><strong><span id="empJobTitle">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Duration</span><strong><span id="empDuration">—</span></strong></div>
+              <div class="col-12"><span class="text-muted small d-block">Responsibilities</span><strong><span id="empResp">—</span></strong></div>
+              <div class="col-md-4"><span class="text-muted small d-block">Experience Docs</span>
+                <a id="expDocLink" href="#" class="text-warning small" download>Download</a>
+              </div>
+            </div>
+          </div>
+          <!-- Emergency Tab -->
+          <div class="tab-pane" id="tabEmergency">
+            <div class="row g-3">
+              <div class="col-md-3"><span class="text-muted small d-block">Name</span><strong><span id="empEcName">—</span></strong></div>
+              <div class="col-md-3"><span class="text-muted small d-block">Relationship</span><strong><span id="empEcRel">—</span></strong></div>
+              <div class="col-md-3"><span class="text-muted small d-block">Phone</span><strong><span id="empEcPhone">—</span></strong></div>
+              <div class="col-md-3"><span class="text-muted small d-block">Address</span><strong><span id="empEcAddr">—</span></strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<script src="js/api.js"></script>
+<script>
+requireAuth(['employee']);
+populateTopnav();
+
+function setEl(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val || '—';
+}
+
+async function loadProfile() {
+  const res = await HrmsApi.myProfile();
+  if (!res || !res.success || !res.data) {
+    alert('Could not load profile.');
+    return;
+  }
+  const e = res.data;
+  const name = e.fullName || e.fullname || '';
+  const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() || '?';
+  document.getElementById('empInitials').textContent = initials;
+  setEl('empFullname', name);
+  setEl('empDesignation', e.designation);
+  setEl('empDepartment', e.department);
+  setEl('empId', e.employeeId || e.employee_id);
+  setEl('empBloodGroup', e.bloodGroup);
+  setEl('empDoj', e.doj ? e.doj.substring(0,10) : '');
+  setEl('empGender', e.gender);
+  setEl('empDob', e.dob ? e.dob.substring(0,10) : '');
+  setEl('empNationality', e.nationality);
+  setEl('empMarital', e.maritalStatus);
+  setEl('empPermAddr', e.permanentAddress);
+  setEl('empCurrAddr', e.currentAddress);
+  setEl('empAadhaar', e.aadhaar);
+  setEl('empPan', e.pan);
+  setEl('empMedical', e.medicalConditions);
+  setEl('empLanguages', e.languages);
+  setEl('empHobbies', e.hobbies);
+  setEl('empSkills', e.skills);
+  setEl('empBankHolder', e.bankAccountHolder);
+  setEl('empBankName', e.bankName);
+  setEl('empBranch', e.branchName);
+  setEl('empAccNum', e.accountNumber);
+  setEl('empIfsc', e.ifscCode);
+  setEl('empUan', e.uan);
+  setEl('empQual', e.qualification);
+  setEl('empInstitution', e.institution);
+  setEl('empYop', e.yearOfPassing);
+  setEl('empSpec', e.specialization);
+  setEl('empPrevEmp', e.previousEmployer);
+  setEl('empJobTitle', e.jobTitle);
+  setEl('empDuration', e.duration);
+  setEl('empResp', e.responsibilities);
+  setEl('empEcName', e.emergencyContactName);
+  setEl('empEcRel', e.emergencyContactRelationship);
+  setEl('empEcPhone', e.emergencyContactPhone);
+  setEl('empEcAddr', e.emergencyContactAddress);
+
+  const empId = e.employeeId || e.employee_id || '';
+  const editLink = document.getElementById('editLink');
+  if (editLink && empId) editLink.href = 'edit-employee.html?employeeId=' + empId;
+
+  if (e.isActive === false) {
+    const badge = document.getElementById('empStatusBadge');
+    if (badge) { badge.className = 'badge bg-danger'; badge.textContent = 'Inactive'; }
+  }
+}
+
+loadProfile();
+</script>
+</body>
+</html>

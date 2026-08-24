@@ -1,0 +1,57 @@
+Command: dotnet-ef database update (clean database hrms_migration_check)
+Date (UTC): Mon Aug 10 06:31:41 UTC 2026
+----
+Build started...
+Build succeeded.
+Applying migration '20260726000001_MySqlInitialSchema'.
+Applying migration '20260728000001_AddTimesheetsTable'.
+Applying migration '20260728000002_AddPayslipStatusColumn'.
+Applying migration '20260728000003_FixWebAttendanceTimeColumns'.
+Applying migration '20260728000004_AddCheckConstraintsAndPayslipIndex'.
+Applying migration '20260729120000_EncryptPiiFields'.
+Applying migration '20260731000001_AddUserSoftDelete'.
+Applying migration '20260801000001_AddCompanyIdToLeaveTypes'.
+Applying migration '20260802000001_MySqlFullSchema'.
+Applying migration '20260803000001_AddCompanyIdToTenantEntities'.
+Applying migration '20260803000002_AddAssetSoftDelete'.
+Applying migration '20260803000003_AddCompanyIdToNotifications'.
+Applying migration '20260805000001_AddUniqueAttendanceConstraint'.
+Applying migration '20260805000002_AddOldRegimeTdsFields'.
+Applying migration '20260806000001_AddUniquePayslipConstraint'.
+Applying migration '20260807000001_AddCompanyIdToPayslips'.
+Failed executing DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+
+                SET @hrms_sql = (
+                    SELECT IF(
+                        NOT EXISTS (SELECT 1 FROM payslips WHERE company_id IS NULL)
+                        AND EXISTS (
+                            SELECT 1
+                            FROM INFORMATION_SCHEMA.COLUMNS
+                            WHERE TABLE_SCHEMA = DATABASE()
+                              AND TABLE_NAME   = 'payslips'
+                              AND COLUMN_NAME  = 'company_id'
+                              AND IS_NULLABLE  = 'YES'
+                        ),
+                        'ALTER TABLE payslips MODIFY COLUMN company_id INT NOT NULL',
+                        'SELECT 1'
+                    )
+                );
+                PREPARE hrms_stmt FROM @hrms_sql;
+                EXECUTE hrms_stmt;
+                DEALLOCATE PREPARE hrms_stmt;
+MySqlConnector.MySqlException (0x80004005): Column 'company_id' cannot be NOT NULL: needed in a foreign key constraint 'fk_payslips_company_id' SET NULL
+   at MySqlConnector.Core.ServerSession.ReceiveReplyAsync(IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 894
+   at MySqlConnector.Core.ResultSet.ReadResultSetHeaderAsync(IOBehavior ioBehavior) in /_/src/MySqlConnector/Core/ResultSet.cs:line 37
+   at MySqlConnector.MySqlDataReader.ActivateResultSet(CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlDataReader.cs:line 130
+   at MySqlConnector.MySqlDataReader.InitAsync(CommandListPosition commandListPosition, ICommandPayloadCreator payloadCreator, IDictionary`2 cachedProcedures, IMySqlCommand command, CommandBehavior behavior, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlDataReader.cs:line 483
+   at MySqlConnector.Core.CommandExecutor.ExecuteReaderAsync(CommandListPosition commandListPosition, ICommandPayloadCreator payloadCreator, CommandBehavior behavior, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/CommandExecutor.cs:line 56
+   at MySqlConnector.MySqlCommand.ExecuteNonQueryAsync(IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlCommand.cs:line 309
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQuery(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Migrations.MigrationCommand.ExecuteNonQuery(IRelationalConnection connection, IReadOnlyDictionary`2 parameterValues)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.MigrationCommandExecutor.ExecuteNonQuery(IEnumerable`1 migrationCommands, IRelationalConnection connection)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.Design.Internal.MigrationsOperations.UpdateDatabase(String targetMigration, String connectionString, String contextType)
+   at Microsoft.EntityFrameworkCore.Design.OperationExecutor.UpdateDatabaseImpl(String targetMigration, String connectionString, String contextType)
+   at Microsoft.EntityFrameworkCore.Design.OperationExecutor.UpdateDatabase.<>c__DisplayClass0_0.<.ctor>b__0()
+   at Microsoft.EntityFrameworkCore.Design.OperationExecutor.OperationBase.Execute(Action action)
+Column 'company_id' cannot be NOT NULL: needed in a foreign key constraint 'fk_payslips_company_id' SET NULL

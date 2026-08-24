@@ -1,0 +1,178 @@
+groups:
+  - name: hrms_infrastructure
+    interval: 1m
+    rules:
+
+      # ── API availability ───────────────────────────────────────────────────
+      - alert: HRMSApiDown
+        expr: up{job="hrms-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "HRMS API is DOWN"
+          description: >
+            The HRMS API ({{ $labels.instance }}) has been unreachable for > 1 minute.
+            Check container logs and health endpoint immediately.
+          runbook_url: "https://docs.internal/runbooks/hrms-api-down"
+
+      # ── Database availability ──────────────────────────────────────────────
+      # BLOCKER-7 FIX: Replaced PostgreSQL-specific alert (pg_up from
+      # postgres_exporter) with the correct MySQL metric (mysql_up from
+      # mysqld_exporter, job="mysql"). The previous alert would never fire
+      # on this MySQL deployment because pg_up is never scraped; a real
+      # MySQL outage would pass silently.
+      #
+      # mysql_up is exported by prom/mysqld-exporter (job "mysql" in
+      # prometheus.yml). A value of 0 means the exporter cannot reach the
+      # MySQL instance. Label filter job="mysql" ensures we target only the
+      # HRMS database exporter, not any other MySQL instance in the cluster.
+      - alert: HRMSMySqlDown
+        expr: mysql_up{job="mysql"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "MySQL database is DOWN"
+          description: >
+            The HRMS MySQL instance ({{ $labels.instance }}) is unreachable.
+            All write operations will fail immediately.
+            Check mysqld_exporter sidecar and the MySQL container health.
+
+      # ── High HTTP 5xx error rate ───────────────────────────────────────────
+      - alert: HRMSHighErrorRate
+        expr: >
+          sum(rate(http_requests_received_total{job="hrms-api",status=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_received_total{job="hrms-api"}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "HRMS HTTP 5xx error rate > 5%"
+          description: >
+            {{ $value | humanizePercentage }} of all requests are returning 5xx errors
+            over the last 5 minutes. Investigate application logs immediately.
+
+      # ── High API latency ───────────────────────────────────────────────────
+      - alert: HRMSHighLatency
+        expr: >
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="hrms-api"}[5m])) by (le)
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "HRMS API p95 latency > 2 s"
+          description: >
+            The 95th-percentile request duration is {{ $value | humanizeDuration }}.
+            Check slow queries and resource utilization.
+
+      # ── JWT authentication failures ────────────────────────────────────────
+      - alert: HRMSJwtFailureSpike
+        expr: >
+          sum(rate(hrms_jwt_validation_failures_total[5m])) > 10
+        for: 3m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Spike in JWT validation failures"
+          description: >
+            {{ $value | humanize }} JWT validation failures/s in the last 5 minutes.
+            This may indicate a credential-stuffing or token-replay attack.
+
+      # ── Login failure spike ────────────────────────────────────────────────
+      - alert: HRMSLoginFailureSpike
+        expr: >
+          sum(rate(hrms_login_failures_total[5m])) > 20
+        for: 3m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Spike in login failures (possible brute-force)"
+          description: >
+            {{ $value | humanize }} failed login attempts/s detected.
+            Review IP rate-limiting and consider temporary block.
+
+  - name: hrms_resources
+    interval: 1m
+    rules:
+
+      # ── High CPU ───────────────────────────────────────────────────────────
+      - alert: HRMSHighCpu
+        expr: >
+          rate(process_cpu_seconds_total{job="hrms-api"}[5m]) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "HRMS API CPU usage > 85%"
+          description: >
+            CPU utilization has been above 85% for 10 minutes on {{ $labels.instance }}.
+            Consider scaling up replicas via HPA or investigating hot paths.
+
+      # ── High memory ────────────────────────────────────────────────────────
+      - alert: HRMSHighMemory
+        expr: >
+          process_working_set_bytes{job="hrms-api"}
+          / container_spec_memory_limit_bytes{container="api"} > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "HRMS API memory > 85% of limit"
+          description: >
+            Memory is at {{ $value | humanizePercentage }} of the container limit on
+            {{ $labels.instance }}. Risk of OOMKill if trend continues.
+
+      # ── Disk usage ─────────────────────────────────────────────────────────
+      - alert: HRMSDiskUsageHigh
+        expr: >
+          (node_filesystem_size_bytes{mountpoint="/"} - node_filesystem_free_bytes{mountpoint="/"})
+          / node_filesystem_size_bytes{mountpoint="/"} > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Disk usage > 85% on HRMS host"
+          description: >
+            Disk at {{ $value | humanizePercentage }} capacity on {{ $labels.instance }}.
+            Upload volume or logs may be consuming excessive space.
+
+      - alert: HRMSDiskUsageCritical
+        expr: >
+          (node_filesystem_size_bytes{mountpoint="/"} - node_filesystem_free_bytes{mountpoint="/"})
+          / node_filesystem_size_bytes{mountpoint="/"} > 0.95
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Disk usage CRITICAL (> 95%) on HRMS host"
+          description: >
+            Disk at {{ $value | humanizePercentage }} — system may become unresponsive
+            very soon. Immediate action required on {{ $labels.instance }}.
+
+      # ── Database connection pool saturation ────────────────────────────────
+      - alert: HRMSDbPoolSaturation
+        expr: >
+          hrms_db_pool_active_connections / hrms_db_pool_max_connections > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "HRMS database connection pool > 85% utilized"
+          description: >
+            {{ $value | humanizePercentage }} of the DB connection pool is in use.
+            Long-running queries or connection leaks may be the cause.

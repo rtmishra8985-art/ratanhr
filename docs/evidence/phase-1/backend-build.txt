@@ -1,0 +1,26 @@
+Command: dotnet restore HRMS.sln && dotnet build HRMS.sln --no-restore -c Debug
+Date (UTC): Mon Aug 10 06:31:41 UTC 2026
+----
+  Determining projects to restore...
+  Restored /tmp/rh/RatanHR-Phase1-Remediated/HRMS.Domain/HRMS.Domain.csproj (in 199 ms).
+  Restored /tmp/rh/RatanHR-Phase1-Remediated/HRMS.Application/HRMS.Application.csproj (in 6.45 sec).
+  Restored /tmp/rh/RatanHR-Phase1-Remediated/HRMS.Infrastructure/HRMS.Infrastructure.csproj (in 7.15 sec).
+  Restored /tmp/rh/RatanHR-Phase1-Remediated/HRMS.API/HRMS.API.csproj (in 7.34 sec).
+  Restored /tmp/rh/RatanHR-Phase1-Remediated/HRMS.Tests/HRMS.Tests.csproj (in 7.35 sec).
+RESTORE_EXIT=0
+
+  HRMS.Domain -> /tmp/rh/RatanHR-Phase1-Remediated/HRMS.Domain/bin/Debug/net8.0/HRMS.Domain.dll
+  HRMS.Application -> /tmp/rh/RatanHR-Phase1-Remediated/HRMS.Application/bin/Debug/net8.0/HRMS.Application.dll
+/tmp/rh/RatanHR-Phase1-Remediated/HRMS.Infrastructure/Biometric/ZKTecoProvider.cs(86,28): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread. [/tmp/rh/RatanHR-Phase1-Remediated/HRMS.Infrastructure/HRMS.Infrastructure.csproj]
+  HRMS.Infrastructure -> /tmp/rh/RatanHR-Phase1-Remediated/HRMS.Infrastructure/bin/Debug/net8.0/HRMS.Infrastructure.dll
+  HRMS.API -> /tmp/rh/RatanHR-Phase1-Remediated/HRMS.API/bin/Debug/net8.0/HRMS.API.dll
+  HRMS.Tests -> /tmp/rh/RatanHR-Phase1-Remediated/HRMS.Tests/bin/Debug/net8.0/HRMS.Tests.dll
+
+Build succeeded.
+
+/tmp/rh/RatanHR-Phase1-Remediated/HRMS.Infrastructure/Biometric/ZKTecoProvider.cs(86,28): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread. [/tmp/rh/RatanHR-Phase1-Remediated/HRMS.Infrastructure/HRMS.Infrastructure.csproj]
+    1 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:25.08
+BUILD_EXIT=0

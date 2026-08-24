@@ -1,0 +1,17 @@
+$ dotnet list HRMS.sln package --vulnerable --include-transitive
+
+--- STDOUT ---
+
+The following sources were used:
+   https://api.nuget.org/v3/index.json
+
+The given project `HRMS.Domain` has no vulnerable packages given the current sources.
+The given project `HRMS.Application` has no vulnerable packages given the current sources.
+The given project `HRMS.Infrastructure` has no vulnerable packages given the current sources.
+The given project `HRMS.API` has no vulnerable packages given the current sources.
+The given project `HRMS.Tests` has no vulnerable packages given the current sources.
+
+--- STDERR ---
+
+--- EXIT CODE ---
+0

@@ -1,0 +1,25 @@
+$ bunx playwright install --with-deps chromium
+
+--- STDOUT ---
+Installing dependencies...
+Switching to root user to install dependencies...
+Failed to install browsers
+Error: Installation process exited with code: 1
+
+--- STDERR ---
+	[93mYou don't need sudo in Replit, all files that[0m
+	[93mcan be modified already have the correct permissions[0m
+	[93mand you can install new software using Nix.[0m
+
+[0;93mTools like apt, brew, and yum which modify system
+dependencies are not directly callable inside Replit. We offer the
+[1;93mSystem Dependencies[0;93m pane for easy dependency management.
+
+For more information, please check
+https://docs.replit.com/replit-workspace/dependency-management , and don't
+forget to indicate whether you found the documentation helpful at the bottom
+of the page!
+[0m
+
+--- EXIT CODE ---
+1

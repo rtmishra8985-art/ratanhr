@@ -1,0 +1,93 @@
+═══════════════════════════════════════════════════════════════════════════════
+                    BREVO SMTP CONFIGURATION GUIDE
+═══════════════════════════════════════════════════════════════════════════════
+
+FROM YOUR BREVO DASHBOARD (as shown in screenshot):
+
+SMTP Server:   smtp-relay.brevo.com
+Port:          587
+Login:         b5ef15001@smtp-brevo.com
+Status:        Active
+
+═══════════════════════════════════════════════════════════════════════════════
+                         WHAT'S MISSING
+═══════════════════════════════════════════════════════════════════════════════
+
+Your SMTP Key (Password) is NOT visible in the .env file.
+
+You need to generate or retrieve your SMTP key from Brevo:
+
+STEP 1: Go to Brevo SMTP Settings
+  URL: https://app.brevo.com/settings/keys/smtp
+
+STEP 2: Generate an SMTP Key (if you don't have one)
+  Click: "Click here to generate an SMTP key"
+
+STEP 3: Copy the generated key
+
+STEP 4: Update .env file
+  Edit: C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR\.env
+  
+  Find this section:
+  ───────────────────────────────────────────────────────────────────
+  # Email (SMTP) — Brevo Configuration
+  EMAIL_HOST=smtp-relay.brevo.com
+  EMAIL_PORT=587
+  EMAIL_USE_SSL=false
+  EMAIL_USERNAME=b5ef15001@smtp-brevo.com
+  EMAIL_PASSWORD=YOUR_BREVO_SMTP_KEY        ← PASTE YOUR KEY HERE
+  EMAIL_FROM_ADDRESS=noreply@hrms.company.com
+  EMAIL_FROM_NAME=RatanHR HRMS
+  ───────────────────────────────────────────────────────────────────
+
+STEP 5: Replace "YOUR_BREVO_SMTP_KEY" with your actual SMTP key
+
+Example format (your key will be different):
+  EMAIL_PASSWORD=xkeysib-1234567890abcdefghijklmnop1234567890abcdefghijklmnopqrst
+
+═══════════════════════════════════════════════════════════════════════════════
+                      VERIFICATION CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ SMTP Server: smtp-relay.brevo.com
+✓ Port: 587
+✓ Username: b5ef15001@smtp-brevo.com
+✓ From Address: noreply@hrms.company.com
+✓ From Name: RatanHR HRMS
+? Password: NEEDS TO BE ADDED TO .env FILE
+
+═══════════════════════════════════════════════════════════════════════════════
+                      CURRENT .ENV STATUS
+═══════════════════════════════════════════════════════════════════════════════
+
+File Location: C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR\.env
+File Status: CREATED ✓
+Configuration: 95% COMPLETE
+Missing: BREVO SMTP PASSWORD
+
+═══════════════════════════════════════════════════════════════════════════════
+                      SEND TEST EMAIL AFTER
+═══════════════════════════════════════════════════════════════════════════════
+
+Once you add the SMTP password to .env, run:
+
+PowerShell:
+  powershell -File send-brevo-test-email.ps1
+
+Or manually using .NET:
+  dotnet run --send-email rtmishra8985@gmail.com
+
+Or using Docker:
+  docker exec ratanhr-api dotnet HRMS.API.dll --send-email rtmishra8985@gmail.com
+
+═══════════════════════════════════════════════════════════════════════════════
+                      FILES CREATED FOR YOU
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ .env (Complete environment configuration - 7,136 bytes)
+✓ send-brevo-test-email.ps1 (PowerShell email sender - 9,715 bytes)
+✓ send-brevo-test-email.fsx (F# script version - 6,380 bytes)
+✓ Phase8TestEmailService.cs (C# backend service - 8,414 bytes)
+✓ BREVO_SMTP_CONFIG_GUIDE.txt (This file)
+
+═══════════════════════════════════════════════════════════════════════════════

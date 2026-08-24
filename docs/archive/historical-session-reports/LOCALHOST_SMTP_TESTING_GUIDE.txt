@@ -1,0 +1,280 @@
+═══════════════════════════════════════════════════════════════════════════════
+        HOW TO TEST SMTP ON LOCALHOST (ON-PREMISE SETUP)
+═══════════════════════════════════════════════════════════════════════════════
+
+GOAL: Test SMTP email delivery locally without cloud/AWS
+
+OPTIONS FOR LOCAL TESTING:
+
+1. Use Local SMTP Server (MailHog) ← RECOMMENDED FOR TESTING
+2. Bypass Firewall with VPN
+3. Use Alternative Port (465 SSL instead of 587)
+4. Configure Firewall to Allow Port 587
+5. Use Docker Container with Brevo
+
+═══════════════════════════════════════════════════════════════════════════════
+                    OPTION 1: MAILHOG (BEST FOR LOCAL TESTING)
+═══════════════════════════════════════════════════════════════════════════════
+
+What is MailHog?
+  - Fake SMTP server that runs on your machine
+  - Captures all emails sent to it
+  - Has web UI to view emails
+  - Perfect for testing email functionality
+  - No real emails sent (great for development)
+
+How to Install MailHog:
+──────────────────────
+
+Step 1: Download MailHog
+  Go to: https://github.com/mailhog/MailHog/releases
+  Download: mailhog_windows_amd64.exe
+  
+  Or: Use Chocolatey (if installed)
+  choco install mailhog
+
+Step 2: Run MailHog
+  Double-click mailhog_windows_amd64.exe
+  Or: Open Command Prompt, run: mailhog
+
+Step 3: You'll see output like:
+  MailHog v1.x.x
+  Listening on 0.0.0.0:1025 (SMTP)
+  Listening on 0.0.0.0:8025 (HTTP)
+
+How to Configure Your App for MailHog:
+──────────────────────────────────────
+
+Create a .env.local file or update .env:
+
+  EMAIL_HOST=localhost
+  EMAIL_PORT=1025
+  EMAIL_USE_SSL=false
+  EMAIL_USERNAME=
+  EMAIL_PASSWORD=
+  EMAIL_FROM_ADDRESS=test@localhost.local
+  EMAIL_FROM_NAME=RatanHR Test
+
+How to Test:
+────────────
+
+Step 1: Start MailHog (keep running)
+
+Step 2: Send test email using your app
+
+Step 3: Open browser to: http://localhost:8025
+
+Step 4: See the email captured in MailHog inbox
+
+═══════════════════════════════════════════════════════════════════════════════
+                    OPTION 2: DOCKER SMTP SERVER (EASIEST)
+═══════════════════════════════════════════════════════════════════════════════
+
+If you have Docker installed, this is easiest:
+
+Step 1: Create docker-compose-smtp-test.yml:
+
+version: '3'
+services:
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025"  # SMTP port
+      - "8025:8025"  # Web UI port
+    container_name: mailhog-test
+
+Step 2: Run it:
+  docker compose -f docker-compose-smtp-test.yml up -d
+
+Step 3: Update .env:
+  EMAIL_HOST=localhost
+  EMAIL_PORT=1025
+  EMAIL_USE_SSL=false
+
+Step 4: Send test email and check: http://localhost:8025
+
+═══════════════════════════════════════════════════════════════════════════════
+                    OPTION 3: LOCAL FAKE SMTP WITH PYTHON
+═══════════════════════════════════════════════════════════════════════════════
+
+Run a simple Python SMTP server locally:
+
+Step 1: Create local_smtp_server.py:
+
+import smtpd
+import asyncore
+
+class TestSMTPServer(smtpd.SMTPServer):
+    def process_message(self, peer, mailfrom, rcptto, data):
+        print(f"\n[EMAIL RECEIVED]")
+        print(f"From: {mailfrom}")
+        print(f"To: {rcptto}")
+        print(f"Message:\n{data.decode()}")
+
+server = TestSMTPServer(('localhost', 1025), None)
+print("Testing SMTP server running on localhost:1025")
+print("Press Ctrl+C to stop")
+asyncore.loop()
+
+Step 2: Run it:
+  python local_smtp_server.py
+
+Step 3: Configure your app:
+  EMAIL_HOST=localhost
+  EMAIL_PORT=1025
+
+Step 4: Send test email - you'll see it in console
+
+═══════════════════════════════════════════════════════════════════════════════
+                    OPTION 4: USE DOCKER FOR YOUR APP TOO
+═══════════════════════════════════════════════════════════════════════════════
+
+Best approach for on-premise testing:
+
+Create docker-compose-dev.yml:
+
+version: '3'
+services:
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  ratanhr-api:
+    image: ratanhr-api:1.0.4
+    environment:
+      - EMAIL_HOST=mailhog
+      - EMAIL_PORT=1025
+      - EMAIL_USE_SSL=false
+    depends_on:
+      - mailhog
+    ports:
+      - "8080:8080"
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_DATABASE=hrms_db
+      - MYSQL_ROOT_PASSWORD=root123
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+Run it:
+  docker compose -f docker-compose-dev.yml up
+
+Then:
+  - App will use MailHog for SMTP
+  - All emails viewable at: http://localhost:8025
+  - Complete local testing environment
+
+═══════════════════════════════════════════════════════════════════════════════
+                    OPTION 5: CONFIGURE FIREWALL (BREVO PORT)
+═══════════════════════════════════════════════════════════════════════════════
+
+If you want to test with real Brevo on localhost:
+
+Step 1: Open Windows Defender Firewall
+  - Press: Windows Key + S
+  - Type: Windows Defender Firewall
+  - Click: Advanced Settings
+
+Step 2: Create Outbound Rule
+  - Click: Outbound Rules
+  - Click: New Rule
+  - Select: Port
+  - Select: TCP
+  - Specific ports: 587
+  - Action: Allow
+  - Name: Brevo SMTP
+
+Step 3: Test again with:
+  cd C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR
+  SEND_LIVE_TEST_EMAIL_NOW.bat
+
+This should work if firewall was blocking.
+
+═══════════════════════════════════════════════════════════════════════════════
+                    COMPARISON TABLE
+═══════════════════════════════════════════════════════════════════════════════
+
+Method              | Setup Time | Cost | Real Email | Best For
+──────────────────────────────────────────────────────────────
+MailHog (Direct)    | 2 min      | FREE | No         | Quick testing
+MailHog (Docker)    | 5 min      | FREE | No         | Full stack test
+Python Server       | 5 min      | FREE | No         | Lightweight
+Docker Stack        | 10 min     | FREE | No         | Full dev env
+Firewall Fix        | 5 min      | FREE | Yes        | Real testing
+VPN                 | 15 min     | FREE | Yes        | ISP bypass
+
+═══════════════════════════════════════════════════════════════════════════════
+                    RECOMMENDED: MAILHOG + DOCKER
+═══════════════════════════════════════════════════════════════════════════════
+
+For on-premise local development, use MailHog because:
+
+✅ NO firewall issues
+✅ Works on localhost
+✅ Perfect for testing email logic
+✅ Can see all emails captured
+✅ No real email service needed
+✅ Zero configuration (after install)
+✅ Web UI to inspect emails
+✅ Can switch to Brevo later
+
+Setup (5 minutes):
+
+1. Download MailHog from GitHub
+2. Run: mailhog_windows_amd64.exe
+3. Update .env:
+   EMAIL_HOST=localhost
+   EMAIL_PORT=1025
+4. Start your app
+5. Send test email
+6. Check: http://localhost:8025
+
+═══════════════════════════════════════════════════════════════════════════════
+                    WORKFLOW FOR ON-PREMISE SETUP
+═══════════════════════════════════════════════════════════════════════════════
+
+DEVELOPMENT PHASE (Now):
+  1. Use MailHog for local testing
+  2. Test email functionality
+  3. No firewall issues
+  4. Quick iteration
+
+PRODUCTION PHASE (Later):
+  1. Switch to real Brevo
+  2. Update EMAIL_HOST to smtp-relay.brevo.com
+  3. Update EMAIL_PORT to 587
+  4. Add Brevo credentials
+  5. Deploy on-premise
+  6. Real emails work (no firewall on server)
+
+═══════════════════════════════════════════════════════════════════════════════
+                            QUICK START
+═══════════════════════════════════════════════════════════════════════════════
+
+FASTEST WAY (3 STEPS):
+
+1. Download MailHog:
+   https://github.com/mailhog/MailHog/releases
+   Download: mailhog_windows_amd64.exe
+
+2. Run MailHog:
+   Double-click mailhog_windows_amd64.exe
+   Wait for: "MailHog v1.x.x"
+
+3. Update .env file:
+   EMAIL_HOST=localhost
+   EMAIL_PORT=1025
+   EMAIL_USE_SSL=false
+
+Then your app will capture all emails locally!
+
+═══════════════════════════════════════════════════════════════════════════════

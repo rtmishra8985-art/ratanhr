@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Continuous Feedback – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Performance</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapsePerf"><i class="bi bi-trophy"></i> Performance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapsePerf">
+      <a href="performance-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="performance-cycles.html" class="sub-link">Review Cycles</a>
+      <a href="performance-goals.html" class="sub-link">Goals</a>
+      <a href="performance-reviews.html" class="sub-link">Reviews</a>
+      <a href="performance-feedback.html" class="sub-link" style="color:#f7b731;">Feedback</a>
+    </div>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Continuous Feedback</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-muted" id="navUserName"></span>
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+<div class="main-panel">
+  <div class="row g-3">
+    <!-- Submit Feedback -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header fw-semibold py-3"><i class="bi bi-chat-heart me-2"></i>Give Feedback</div>
+        <div class="card-body">
+          <div class="mb-3"><label class="form-label">To Employee ID *</label><input type="text" class="form-control" id="fbToEmpId"></div>
+          <div class="mb-3"><label class="form-label">Feedback Type</label>
+            <select class="form-select" id="fbType">
+              <option>Praise</option><option>Suggestion</option><option>Concern</option>
+            </select>
+          </div>
+          <div class="mb-3"><label class="form-label">Feedback *</label><textarea class="form-control" id="fbText" rows="4" placeholder="Share your feedback…"></textarea></div>
+          <div class="mb-3 form-check"><input type="checkbox" class="form-check-input" id="fbAnon"><label class="form-check-label" for="fbAnon">Submit anonymously</label></div>
+          <button class="btn btn-warning w-100" onclick="submitFeedback()"><i class="bi bi-send me-1"></i>Submit Feedback</button>
+        </div>
+      </div>
+    </div>
+    <!-- Feedback Wall -->
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center py-3">
+          <span class="fw-semibold"><i class="bi bi-collection me-1"></i>Feedback Wall</span>
+          <div class="d-flex gap-2">
+            <input type="text" class="form-control form-control-sm" id="filterToEmp" placeholder="Filter by Employee ID">
+            <button class="btn btn-sm btn-outline-warning" onclick="loadFeedback()">Filter</button>
+          </div>
+        </div>
+        <div class="card-body" id="feedbackWall">
+          <div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script>
+requireAuth(['admin','superadmin']);
+populateTopnav();
+
+const TYPE_COLORS = { 'Praise':'success','Suggestion':'info','Concern':'warning' };
+const TYPE_ICONS  = { 'Praise':'bi-star-fill','Suggestion':'bi-lightbulb-fill','Concern':'bi-exclamation-triangle-fill' };
+
+async function submitFeedback() {
+  const dto = {
+    toEmployeeId: document.getElementById('fbToEmpId').value,
+    feedbackText: document.getElementById('fbText').value,
+    feedbackType: document.getElementById('fbType').value,
+    isAnonymous:  document.getElementById('fbAnon').checked,
+  };
+  if (!dto.toEmployeeId || !dto.feedbackText) { alert('Please fill all required fields.'); return; }
+  const res = await HrmsApi.submitFeedback(dto);
+  if (res && res.success) {
+    document.getElementById('fbToEmpId').value = '';
+    document.getElementById('fbText').value    = '';
+    document.getElementById('fbAnon').checked  = false;
+    loadFeedback();
+  } else {
+    alert((res && res.message) || 'Failed to submit feedback.');
+  }
+}
+
+async function loadFeedback() {
+  const wall    = document.getElementById('feedbackWall');
+  const toEmpId = document.getElementById('filterToEmp').value.trim();
+  wall.innerHTML = '<div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div>';
+  const params = toEmpId ? { toEmployeeId: toEmpId } : {};
+  const res = await HrmsApi.listFeedback(params);
+  if (!res || !res.success || !res.data.length) {
+    wall.innerHTML = '<p class="text-muted text-center py-3 mb-0">No feedback yet.</p>'; return;
+  }
+  wall.innerHTML = res.data.map(f => `
+    <div class="d-flex gap-3 mb-3 p-3 rounded border">
+      <div class="text-${TYPE_COLORS[f.feedbackType]||'secondary'} fs-5"><i class="bi ${TYPE_ICONS[f.feedbackType]||'bi-chat'}"></i></div>
+      <div class="flex-grow-1">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <div>
+            <span class="badge bg-${TYPE_COLORS[f.feedbackType]||'secondary'} me-2">${f.feedbackType}</span>
+            <span class="small text-muted">To: <strong>${f.toEmployeeId}</strong></span>
+          </div>
+          <span class="text-muted small">${new Date(f.createdAt).toLocaleDateString()}</span>
+        </div>
+        <p class="mb-1">${f.feedbackText}</p>
+        <div class="small text-muted">— ${f.fromEmployeeId}</div>
+      </div>
+    </div>`).join('');
+}
+
+loadFeedback();
+</script>
+</body>
+</html>

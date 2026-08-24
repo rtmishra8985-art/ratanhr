@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>Admin Dashboard – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<div id="sidebarHolder"></div>
+
+<!-- TOPNAV -->
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Dashboard</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="text-end d-none d-sm-block">
+      <div class="fw-semibold small" id="navUserName"></div>
+      <div class="text-muted" style="font-size:11px;" id="navUserRole"></div>
+    </div>
+    <div class="avatar-circle ad" id="navAvatar">A</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+
+<!-- MAIN PANEL -->
+<div class="main-panel">
+
+  <!-- Welcome Banner -->
+  <div class="p-4 mb-4 rounded-3 text-white position-relative overflow-hidden"
+    style="background:linear-gradient(135deg,#1a3a5c,#2980b9);">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h4 class="fw-bold mb-1">Good <span id="greeting">Morning</span>, <span id="welcomeName">Admin</span>! 👋</h4>
+        <p class="mb-0 opacity-75 small">
+          Logged in as <strong id="welcomeRole">Admin</strong>
+        </p>
+      </div>
+      <span class="badge fs-6 px-3 py-2" style="background:rgba(255,255,255,.15);">
+        <i class="bi bi-briefcase-fill me-1"></i><span id="rolePill">Admin</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+        <div class="stat-label">Total Employees</div>
+        <div class="stat-value" id="statEmployees">–</div>
+        <div class="text-muted small mt-1">Registered users</div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card">
+        <div class="stat-icon text-success"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="stat-label">Present Today</div>
+        <div class="stat-value text-success" id="statPresent">–</div>
+        <div class="text-muted small mt-1">Web attendance</div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card">
+        <div class="stat-icon text-warning"><i class="bi bi-calendar2-check"></i></div>
+        <div class="stat-label">Pending Leaves</div>
+        <div class="stat-value text-warning" id="statLeaves">–</div>
+        <div class="text-muted small mt-1">Awaiting decision</div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card">
+        <div class="stat-icon text-danger"><i class="bi bi-cash-stack"></i></div>
+        <div class="stat-label">Payroll (Month)</div>
+        <div class="stat-value text-danger" style="font-size:20px;" id="statPayroll">–</div>
+        <div class="text-muted small mt-1">Net pay disbursed</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Employees + Quick Links -->
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="card card-table">
+        <div class="card-header d-flex justify-content-between align-items-center py-3">
+          <span>Recent Employees</span>
+          <a href="view-employees.html" class="btn btn-sm btn-warning px-3">View All</a>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr><th>Employee</th><th>ID</th><th>Designation</th><th>Department</th><th>Status</th></tr>
+              </thead>
+              <tbody id="empTableBody">
+                <tr><td colspan="5" class="text-center text-muted small py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Quick Links -->
+      <div class="card card-table mb-3">
+        <div class="card-header py-3">Quick Access</div>
+        <div class="card-body p-2">
+          <a href="add-employee.html" class="btn btn-outline-secondary text-start w-100 mb-1 small py-2">
+            <i class="bi bi-person-plus me-2 text-warning"></i>Register New Employee
+          </a>
+          <a href="web-attendance-admin.html" class="btn btn-outline-secondary text-start w-100 mb-1 small py-2">
+            <i class="bi bi-clock-history me-2 text-success"></i>Update Attendance
+          </a>
+          <a href="add-payroll.html" class="btn btn-outline-secondary text-start w-100 mb-1 small py-2">
+            <i class="bi bi-receipt me-2 text-primary"></i>Generate Payslip
+          </a>
+          <a href="leave-admin.html" class="btn btn-outline-secondary text-start w-100 mb-1 small py-2">
+            <i class="bi bi-calendar2-check me-2 text-info"></i>Leave Requests
+          </a>
+          <a href="reports-attendance.html" class="btn btn-outline-secondary text-start w-100 small py-2">
+            <i class="bi bi-bar-chart-line me-2 text-danger"></i>View Reports
+          </a>
+        </div>
+      </div>
+
+      <!-- Attendance Overview -->
+      <div class="card card-table">
+        <div class="card-header py-3">Today's Attendance</div>
+        <div class="card-body" id="attOverviewBody">
+          <div class="text-center text-muted small py-2"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+if (!requireAuth(['admin','superadmin'])) throw new Error('unauthorized');
+
+const name = localStorage.getItem('hrms_name') || sessionStorage.getItem('hrms_name') || 'Admin';
+const role = localStorage.getItem('hrms_role') || sessionStorage.getItem('hrms_role') || 'admin';
+
+populateTopnav();
+
+const h = new Date().getHours();
+document.getElementById('greeting').textContent = h < 12 ? 'Morning' : h < 18 ? 'Afternoon' : 'Evening';
+document.getElementById('welcomeName').textContent = name;
+document.getElementById('welcomeRole').textContent = role.charAt(0).toUpperCase() + role.slice(1);
+document.getElementById('rolePill').textContent    = role.charAt(0).toUpperCase() + role.slice(1);
+
+async function loadDashboard() {
+  const res = await HrmsApi.adminDashboard();
+  const d = res.data || {};
+  document.getElementById('statEmployees').textContent = d.totalEmployees ?? '—';
+  document.getElementById('statPresent').textContent   = d.presentToday ?? '—';
+  document.getElementById('statLeaves').textContent    = d.pendingLeaves ?? '—';
+  const netPay = d.monthlyNetPay ?? d.monthlyPayroll ?? 0;
+  document.getElementById('statPayroll').textContent   = netPay ? '₹' + Number(netPay).toLocaleString('en-IN') : '—';
+
+  // Attendance overview
+  const total = (d.presentToday ?? 0) + (d.absentToday ?? 0) + (d.halfDayToday ?? 0);
+  const pPct = total ? Math.round((d.presentToday ?? 0) * 100 / total) : 0;
+  const aPct = total ? Math.round((d.absentToday ?? 0) * 100 / total) : 0;
+  const hPct = total ? Math.round((d.halfDayToday ?? 0) * 100 / total) : 0;
+  document.getElementById('attOverviewBody').innerHTML = `
+    <div class="mb-3">
+      <div class="d-flex justify-content-between small mb-1"><span>Present</span><span>${d.presentToday ?? 0} (${pPct}%)</span></div>
+      <div class="progress" style="height:8px;"><div class="progress-bar bg-success" style="width:${pPct}%"></div></div>
+    </div>
+    <div class="mb-3">
+      <div class="d-flex justify-content-between small mb-1"><span>Absent</span><span>${d.absentToday ?? 0} (${aPct}%)</span></div>
+      <div class="progress" style="height:8px;"><div class="progress-bar bg-danger" style="width:${aPct}%"></div></div>
+    </div>
+    <div>
+      <div class="d-flex justify-content-between small mb-1"><span>Half Day</span><span>${d.halfDayToday ?? 0} (${hPct}%)</span></div>
+      <div class="progress" style="height:8px;"><div class="progress-bar bg-warning" style="width:${hPct}%"></div></div>
+    </div>`;
+}
+
+async function loadRecentEmployees() {
+  const res = await HrmsApi.listEmployees();
+  const emps = (res.data || []).slice(0, 10);
+  const body = document.getElementById('empTableBody');
+  body.innerHTML = emps.length
+    ? emps.map(e => {
+        const initials = (e.fullName || 'U').split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+        return `<tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar-circle">${initials}</div>
+              <div>
+                <div class="fw-semibold small">${e.fullName}</div>
+                <div class="text-muted" style="font-size:11px;">${e.department || ''}</div>
+              </div>
+            </div>
+          </td>
+          <td><code class="small">${e.employeeId}</code></td>
+          <td class="small">${e.designation || '—'}</td>
+          <td class="small">${e.department || '—'}</td>
+          <td><span class="badge ${e.isActive ? 'bg-success-subtle text-success-emphasis' : 'bg-danger-subtle text-danger-emphasis'} small">${e.isActive ? 'Active' : 'Inactive'}</span></td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="5" class="text-center text-muted small py-3">No employees found.</td></tr>';
+}
+
+fetch('includes/sidebar-admin.html').then(r => r.text()).then(html => {
+  document.getElementById('sidebarHolder').innerHTML = html;
+  document.querySelectorAll('#sidebar .nav-link').forEach(a => {
+    if (a.getAttribute('href') === 'admin-dashboard.html') a.classList.add('active');
+  });
+});
+
+Promise.all([loadDashboard(), loadRecentEmployees()]);
+</script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

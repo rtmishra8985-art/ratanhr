@@ -1,0 +1,129 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║                     ✅ ON-PREMISE TEST EMAIL READY                           ║
+║                                                                               ║
+║                            START NOW!                                         ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+                        FILE TO RUN
+═══════════════════════════════════════════════════════════════════════════════
+
+File: SEND_ON_PREMISE_TEST_EMAIL.bat
+Location: C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR\
+
+═══════════════════════════════════════════════════════════════════════════════
+                        3-STEP QUICK START
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1: Open File Explorer
+  └─ Press: Windows Key + E
+
+STEP 2: Navigate to Folder
+  └─ Paste: C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR
+
+STEP 3: Double-Click Script
+  └─ Find: SEND_ON_PREMISE_TEST_EMAIL.bat
+  └─ Double-click
+  └─ Command window opens
+  └─ Wait for: ✅ SUCCESS - ON-PREMISE EMAIL SENT TO BREVO
+
+═══════════════════════════════════════════════════════════════════════════════
+                        THEN CHECK EMAIL
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Open: https://mail.google.com
+2. Login: rtmishra7040@gmail.com
+3. Wait: 1-2 minutes
+4. Look for:
+   - From: rtmishra8985@gmail.com
+   - Subject: 🟢 RatanHR On-Premise TEST EMAIL
+
+═══════════════════════════════════════════════════════════════════════════════
+                        WHAT YOU'LL SEE
+═══════════════════════════════════════════════════════════════════════════════
+
+Command Window Output:
+
+╔════════════════════════════════════════════════════════════╗
+║  RatanHR Phase 8 - ON-PREMISE TEST EMAIL (Brevo SMTP)   ║
+╚════════════════════════════════════════════════════════════╝
+
+[1/3] Configuration Check
+  SMTP Host: smtp-relay.brevo.com
+  SMTP Port: 587
+  Protocol: STARTTLS
+
+[2/3] Connecting to Brevo SMTP...
+  [Connecting...]
+  [Authenticating...]
+  [Sending email...]
+  ✓ Email sent successfully!
+
+╔════════════════════════════════════════════════════════════╗
+║  ✅ SUCCESS - ON-PREMISE EMAIL SENT TO BREVO             ║
+╚════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+                        IF EMAIL ARRIVES ✅
+═══════════════════════════════════════════════════════════════════════════════
+
+What It Means:
+  ✅ On-premise SMTP working
+  ✅ Brevo connection successful
+  ✅ STARTTLS encryption working
+  ✅ Authentication successful
+  ✅ Ready for production deployment
+
+═══════════════════════════════════════════════════════════════════════════════
+                        IF EMAIL DOESN'T ARRIVE ❌
+═══════════════════════════════════════════════════════════════════════════════
+
+Check:
+  1. Gmail spam/junk folder
+  2. Wait 5-10 minutes (sometimes delayed)
+  3. Firewall blocking port 587
+  4. Internet connection
+  5. Brevo credentials correct
+
+═══════════════════════════════════════════════════════════════════════════════
+                        DOCUMENTATION
+═══════════════════════════════════════════════════════════════════════════════
+
+Read These:
+  1. READY_ON_PREMISE_TEST.txt (this file - overview)
+  2. QUICK_GUIDE_ON_PREMISE_TEST.txt (quick reference)
+  3. ON_PREMISE_TEST_EMAIL_GUIDE.txt (detailed guide)
+
+═══════════════════════════════════════════════════════════════════════════════
+                        KEY INFO
+═══════════════════════════════════════════════════════════════════════════════
+
+From:          rtmishra8985@gmail.com
+To:            rtmishra7040@gmail.com
+SMTP:          smtp-relay.brevo.com:587
+Protocol:      STARTTLS
+Authentication: Yes (Brevo credentials)
+Real Email:    Yes (not captured, actually sent)
+
+═══════════════════════════════════════════════════════════════════════════════
+                        TEST PATH
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Test 1: Local (MailHog)
+   File: SEND_TEST_EMAIL_TO_MAILHOG.bat
+   Status: ALREADY DONE & WORKING
+
+→ Test 2: On-Premise (Brevo) ← YOU ARE HERE
+   File: SEND_ON_PREMISE_TEST_EMAIL.bat
+   Status: READY TO RUN NOW!
+
+→ Test 3: Cloud/AWS (Brevo)
+   Status: Will work after on-premise verified
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 RUN THE TEST NOW! Double-click: SEND_ON_PREMISE_TEST_EMAIL.bat
+
+═══════════════════════════════════════════════════════════════════════════════

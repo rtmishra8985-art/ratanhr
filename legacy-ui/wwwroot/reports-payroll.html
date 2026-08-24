@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>Payroll Report – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <style>
+    @media print {
+      .sidebar, .topnav, .no-print { display: none !important; }
+      .main-panel { margin-left: 0 !important; padding: 0 !important; }
+    }
+  </style>
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<div id="sidebarHolder"></div>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Payroll Report</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="text-end d-none d-sm-block">
+      <div class="fw-semibold small" id="navUserName"></div>
+      <div class="text-muted" style="font-size:11px;" id="navUserRole"></div>
+    </div>
+    <div class="avatar-circle ad" id="navAvatar">A</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<div class="main-panel">
+
+  <!-- Filters -->
+  <div class="card card-table mb-4 no-print">
+    <div class="card-body">
+      <form class="row g-2 align-items-end" id="filterForm">
+        <div class="col-md-2">
+          <label class="form-label fw-semibold small">Month</label>
+          <select class="form-select form-select-sm" id="fMonth">
+            <option value="">All Months</option>
+            <option value="1">January</option><option value="2">February</option>
+            <option value="3">March</option><option value="4">April</option>
+            <option value="5">May</option><option value="6">June</option>
+            <option value="7">July</option><option value="8">August</option>
+            <option value="9">September</option><option value="10">October</option>
+            <option value="11">November</option><option value="12">December</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-semibold small">Year</label>
+          <input type="number" class="form-control form-control-sm" id="fYear" placeholder="e.g. 2025">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold small">Employee ID</label>
+          <input type="text" class="form-control form-control-sm" id="fEmployee" placeholder="EMP1234">
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-sm btn-warning w-100">
+            <i class="bi bi-search me-1"></i>Filter
+          </button>
+        </div>
+        <div class="col-md-2">
+          <!--
+            Fix: Export now calls GET /api/reports/payroll/export/stream
+            (server-side streaming via OpenXmlWriter) instead of the in-memory
+            ClosedXML path. The streaming endpoint is O(batch) memory and safe
+            for large payrolls. Month + Year are taken from the filter inputs.
+          -->
+          <button type="button" class="btn btn-sm btn-success w-100" onclick="exportReport()" id="exportBtn">
+            <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+          </button>
+        </div>
+        <div class="col-md-1">
+          <button type="button" class="btn btn-sm btn-outline-secondary w-100" onclick="printReport()">
+            <i class="bi bi-printer"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Summary Row -->
+  <div class="row g-3 mb-4" id="summaryRow" style="display:none!important">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-label">Total Payslips</div>
+        <div class="stat-value" id="sumCount">0</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-label">Total Gross Earnings</div>
+        <div class="stat-value" style="font-size:20px;" id="sumGross">₹0</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-label">Total Deductions</div>
+        <div class="stat-value text-danger" style="font-size:20px;" id="sumDed">₹0</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-label">Total Net Pay</div>
+        <div class="stat-value text-success" style="font-size:20px;" id="sumNet">₹0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card card-table">
+    <div class="card-header py-3 fw-semibold">Payroll Report</div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Employee ID</th>
+              <th>Month</th>
+              <th>Year</th>
+              <th>Working Days</th>
+              <th>Days Present</th>
+              <th>Basic Pay</th>
+              <th>Gross Earnings</th>
+              <th>Total Deductions</th>
+              <th class="text-success">Net Pay</th>
+            </tr>
+          </thead>
+          <tbody id="reportBody">
+            <tr><td colspan="9" class="text-center text-muted small py-4">Apply filters and click <strong>Filter</strong> to load report.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+if (!requireAuth(['admin','superadmin'])) throw new Error('unauthorized');
+populateTopnav();
+
+const months = ['','January','February','March','April','May','June',
+                 'July','August','September','October','November','December'];
+
+function fmt(v) { return '₹' + (Number(v) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
+
+document.getElementById('filterForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  await loadReport();
+});
+
+async function loadReport() {
+  const params = {};
+  const month = document.getElementById('fMonth').value;
+  const year  = document.getElementById('fYear').value;
+  const emp   = document.getElementById('fEmployee').value.trim();
+  if (month) params.month = month;
+  if (year)  params.year  = year;
+  if (emp)   params.employeeId = emp;
+
+  document.getElementById('reportBody').innerHTML =
+    '<tr><td colspan="9" class="text-center text-muted small py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</td></tr>';
+
+  const res = await HrmsApi.listPayslips(params);
+  const rows = res.data || [];
+
+  const sumGross = rows.reduce((s, r) => s + (r.grossEarnings || 0), 0);
+  const sumDed   = rows.reduce((s, r) => s + (r.totalDeductions || 0), 0);
+  const sumNet   = rows.reduce((s, r) => s + (r.netPay || 0), 0);
+
+  document.getElementById('sumCount').textContent = rows.length;
+  document.getElementById('sumGross').textContent = fmt(sumGross);
+  document.getElementById('sumDed').textContent   = fmt(sumDed);
+  document.getElementById('sumNet').textContent   = fmt(sumNet);
+  document.getElementById('summaryRow').style.display = rows.length ? '' : 'none!important';
+
+  const body = document.getElementById('reportBody');
+  body.innerHTML = rows.length
+    ? rows.map(r => `
+        <tr>
+          <td><code class="small">${r.employeeId}</code></td>
+          <td class="small">${months[r.month] || r.month}</td>
+          <td class="small">${r.year}</td>
+          <td class="small">${r.workingDays}</td>
+          <td class="small">${r.daysPresent}</td>
+          <td class="small">${fmt(r.basicPay)}</td>
+          <td class="small">${fmt(r.grossEarnings)}</td>
+          <td class="small text-danger">${fmt(r.totalDeductions)}</td>
+          <td class="small text-success fw-bold">${fmt(r.netPay)}</td>
+        </tr>`).join('')
+    : '<tr><td colspan="9" class="text-center text-muted small py-4">No payslips found for the selected filters.</td></tr>';
+}
+
+function printReport() { window.print(); }
+
+/**
+ * exportReport — Fix: downloads the payroll report via the server-side streaming
+ * endpoint GET /api/reports/payroll/export/stream?month=M&year=Y.
+ *
+ * Why streaming instead of the original /export endpoint?
+ *   - /export uses ClosedXML which builds the entire workbook in RAM first.
+ *     For large payrolls (500+ employees) this causes server OOM.
+ *   - /export/stream uses OpenXmlWriter which writes rows directly to the ZIP
+ *     stream — memory usage is O(batch), not O(total rows).
+ */
+async function exportReport() {
+  const month = document.getElementById('fMonth').value;
+  const year  = document.getElementById('fYear').value;
+
+  if (!month || !year) {
+    alert('Please select both a Month and a Year before exporting.');
+    return;
+  }
+
+  const btn = document.getElementById('exportBtn');
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Exporting…';
+
+  try {
+    const url = `/api/reports/payroll/export/stream?month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}`;
+    const res = await fetch(url, { credentials: 'include' });
+
+    if (!res.ok) {
+      const msg = await res.text().catch(() => `HTTP ${res.status}`);
+      throw new Error(msg);
+    }
+
+    const blob = await res.blob();
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Payroll_${year}_${month.padStart(2, '0')}.xlsx`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  } catch (err) {
+    alert('Export failed: ' + (err && err.message ? err.message : String(err)));
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+}
+
+// Prefill current month/year
+const now = new Date();
+document.getElementById('fMonth').value = now.getMonth() + 1;
+document.getElementById('fYear').value  = now.getFullYear();
+
+fetch('includes/sidebar-admin.html').then(r => r.text()).then(html => {
+  document.getElementById('sidebarHolder').innerHTML = html;
+});
+</script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

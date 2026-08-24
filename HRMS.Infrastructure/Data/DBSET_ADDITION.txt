@@ -1,0 +1,6 @@
+// ── ADD THIS TO ApplicationDbContext.cs (around line 50-100 with other DbSet declarations) ────
+
+// Demo Mode
+public DbSet<HRMS.Domain.Entities.Demo.DemoSeedTracker> DemoSeedTrackers { get; set; } = null!;
+
+// ── END ADDITION ────

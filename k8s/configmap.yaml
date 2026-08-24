@@ -1,0 +1,28 @@
+# Phase 7: Updated from PostgreSQL to MySQL 8.4.
+# DB_HOST changed from postgres-svc to mysql-svc.
+# DB_PORT changed from 5432 to 3306.
+# POSTGRES_* keys replaced with MYSQL_* keys.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hrms-config
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  ASPNETCORE_URLS: "http://+:8080"
+  Jwt__Issuer:   "HRMS.API"
+  Jwt__Audience: "HRMS.Client"
+  Database__AutoMigrate: "false"
+  Database__EnableReadReplica: "false"
+  Serilog__MinimumLevel__Default: "Warning"
+  FileUpload__MaxFileSizeMB: "10"
+  Attendance__BackDateEditWindowDays: "7"
+  # Database host/port (MySQL 8.4)
+  DB_HOST: "mysql-svc"
+  DB_PORT: "3306"
+  DB_NAME: "hrms_db"
+  # Must be set to the actual production hostname(s).
+  # EnvironmentValidator.cs rejects the wildcard "*" at startup in Production.
+  APP_HOST: "app.yourcompany.com;api.yourcompany.com"

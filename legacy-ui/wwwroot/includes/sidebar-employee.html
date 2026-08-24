@@ -1,0 +1,57 @@
+<!-- EMPLOYEE SIDEBAR - Include this in all employee pages -->
+<nav class="sidebar" id="sidebar">
+  <div class="brand">
+    <img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR
+  </div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="emp-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+
+    <div class="nav-label">My Profile</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseEmpDetails" role="button">
+      <i class="bi bi-person-vcard"></i> My Details <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseEmpDetails">
+      <a href="add-emp-details.html" class="sub-link">Add Employee Details</a>
+      <a href="view-emp-details.html" class="sub-link">View Employee Details</a>
+    </div>
+
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseEmpAtt" role="button">
+      <i class="bi bi-clock"></i> Attendance <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseEmpAtt">
+      <a href="emp-web-attendance.html" class="sub-link">Web Attendance</a>
+    </div>
+
+    <div class="nav-label">Payroll</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseEmpPay" role="button">
+      <i class="bi bi-receipt"></i> My Payslip <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseEmpPay">
+      <a href="emp-payslip.html" class="sub-link">View My Payslips</a>
+    </div>
+
+    <div class="nav-label">Leave</div>
+    <a href="leave.html" class="nav-link"><i class="bi bi-calendar2-check"></i> My Leave</a>
+
+    <div class="nav-label">Organisation</div>
+    <a href="holidays.html" class="nav-link"><i class="bi bi-calendar-heart"></i> Holiday Calendar</a>
+
+    <div class="nav-label">Documents</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseCompanyDocs" role="button">
+      <i class="bi bi-folder"></i> Company Docs <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseCompanyDocs">
+      <a href="company-docs.html" class="sub-link">View Company Docs</a>
+    </div>
+
+    <div class="nav-label">Rewards</div>
+    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#collapseApprec" role="button">
+      <i class="bi bi-trophy"></i> Appreciation <i class="bi bi-chevron-down ms-auto small"></i>
+    </a>
+    <div class="collapse" id="collapseApprec">
+      <a href="emp-appreciation.html" class="sub-link">My Appreciation</a>
+    </div>
+  </div>
+</nav>

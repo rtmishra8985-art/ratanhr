@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Dashboard – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Sales</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapseSales"><i class="bi bi-graph-up-arrow"></i> Sales <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseSales">
+      <a href="sales-dashboard.html" class="sub-link" style="color:#f7b731;">Dashboard</a>
+      <a href="sales-leads.html" class="sub-link">Leads</a>
+      <a href="sales-customers.html" class="sub-link">Customers</a>
+      <a href="sales-followups.html" class="sub-link">Follow Ups</a>
+      <a href="sales-meetings.html" class="sub-link">Meetings</a>
+      <a href="sales-visits.html" class="sub-link">Field Visits</a>
+      <a href="sales-quotations.html" class="sub-link">Quotations</a>
+      <a href="sales-tasks.html" class="sub-link">Tasks</a>
+      <a href="sales-reports.html" class="sub-link">Reports</a>
+    </div>
+  </div>
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Sales Dashboard</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-muted" id="navUserName"></span>
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <!-- KPI Cards Row 1 -->
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-md-3"><div class="card text-center py-3"><div class="fw-bold fs-2 text-warning" id="kpiTodayLeads">—</div><div class="small text-muted">Today's Leads</div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center py-3"><div class="fw-bold fs-2 text-info" id="kpiTodayFollowUps">—</div><div class="small text-muted">Today's Follow-ups</div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center py-3"><div class="fw-bold fs-2 text-primary" id="kpiMeetings">—</div><div class="small text-muted">Upcoming Meetings</div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center py-3"><div class="fw-bold fs-2 text-success" id="kpiClosedDeals">—</div><div class="small text-muted">Closed Deals</div></div></div>
+  </div>
+  <!-- KPI Cards Row 2 -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="card text-center py-3"><div class="fw-bold fs-2 text-danger" id="kpiPendingTasks">—</div><div class="small text-muted">Pending Tasks</div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center py-3"><div class="fw-bold fs-2 text-success" id="kpiMonthRevenue">—</div><div class="small text-muted">Monthly Revenue (₹)</div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center py-3"><div class="fw-bold fs-2 text-info" id="kpiPipeline">—</div><div class="small text-muted">Pipeline Value (₹)</div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center py-3"><div class="fw-bold fs-2 text-warning" id="kpiConversion">—%</div><div class="small text-muted">Lead Conversion %</div></div></div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Lead Status Chart -->
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-header fw-semibold py-3">Lead Status</div>
+        <div class="card-body" id="leadStatusBody">
+          <div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div>
+        </div>
+      </div>
+    </div>
+    <!-- Sales Funnel -->
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-header fw-semibold py-3">Sales Funnel</div>
+        <div class="card-body" id="funnelBody">
+          <div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div>
+        </div>
+      </div>
+    </div>
+    <!-- Monthly Deals -->
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-header fw-semibold py-3">Monthly Won Deals</div>
+        <div class="card-body" id="monthlyDealsBody">
+          <div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row g-3 mt-2">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body d-flex flex-wrap gap-2">
+          <a href="sales-leads.html" class="btn btn-warning"><i class="bi bi-plus-circle me-1"></i>New Lead</a>
+          <a href="sales-customers.html" class="btn btn-outline-primary"><i class="bi bi-people me-1"></i>Customers</a>
+          <a href="sales-followups.html" class="btn btn-outline-info"><i class="bi bi-bell me-1"></i>Follow Ups</a>
+          <a href="sales-meetings.html" class="btn btn-outline-success"><i class="bi bi-calendar-event me-1"></i>Schedule Meeting</a>
+          <a href="sales-tasks.html" class="btn btn-outline-secondary"><i class="bi bi-check2-square me-1"></i>Tasks</a>
+          <a href="sales-reports.html" class="btn btn-outline-danger"><i class="bi bi-bar-chart-line me-1"></i>Reports</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script>
+const role = sessionStorage.getItem('hrms_role') || localStorage.getItem('hrms_role');
+const name = sessionStorage.getItem('hrms_name') || localStorage.getItem('hrms_name') || 'User';
+if (!role) { window.location.replace('/login.html'); }
+document.getElementById('navUserName').textContent = name;
+document.getElementById('navAvatar').textContent   = name.charAt(0).toUpperCase();
+
+const STATUS_COLORS = {
+  'New':'primary','Contacted':'info','Qualified':'warning','Proposal Sent':'secondary',
+  'Negotiation':'danger','Won':'success','Lost':'dark'
+};
+const FUNNEL_COLORS = ['#3a86ff','#06d6a0','#ffd166','#ef476f','#118ab2','#06d6a0','#073b4c'];
+
+function fmt(n) {
+  if (n >= 1e7) return '₹' + (n/1e7).toFixed(1) + 'Cr';
+  if (n >= 1e5) return '₹' + (n/1e5).toFixed(1) + 'L';
+  return '₹' + n.toLocaleString('en-IN');
+}
+
+async function loadDashboard() {
+  const res = await HrmsApi.salesDashboard();
+  if (!res || !res.success) return;
+  const d = res.data;
+  document.getElementById('kpiTodayLeads').textContent    = d.todaysLeads;
+  document.getElementById('kpiTodayFollowUps').textContent = d.todaysFollowUps;
+  document.getElementById('kpiMeetings').textContent      = d.meetings;
+  document.getElementById('kpiClosedDeals').textContent   = d.closedDeals;
+  document.getElementById('kpiPendingTasks').textContent  = d.pendingTasks;
+  document.getElementById('kpiMonthRevenue').textContent  = fmt(d.monthlyRevenue);
+  document.getElementById('kpiPipeline').textContent      = fmt(d.pipelineValue);
+  document.getElementById('kpiConversion').textContent    = d.conversionPct + '%';
+
+  // Lead status bars
+  const leadStatusBody = document.getElementById('leadStatusBody');
+  if (d.leadsByStatus && d.leadsByStatus.length) {
+    const max = Math.max(...d.leadsByStatus.map(x => x.count));
+    leadStatusBody.innerHTML = d.leadsByStatus.map(x => `
+      <div class="mb-2">
+        <div class="d-flex justify-content-between small mb-1">
+          <span>${x.status}</span><span class="fw-semibold">${x.count}</span>
+        </div>
+        <div class="progress" style="height:6px">
+          <div class="progress-bar bg-${STATUS_COLORS[x.status]||'secondary'}"
+               style="width:${max?Math.round(x.count/max*100):0}%"></div>
+        </div>
+      </div>`).join('');
+  } else { leadStatusBody.innerHTML = '<p class="text-muted small text-center">No data</p>'; }
+
+  // Funnel
+  const funnelBody = document.getElementById('funnelBody');
+  if (d.funnel && d.funnel.length) {
+    const max = Math.max(...d.funnel.map(x => x.count), 1);
+    funnelBody.innerHTML = d.funnel.map((x,i) => `
+      <div class="mb-2">
+        <div class="d-flex justify-content-between small mb-1">
+          <span>${x.status}</span><span class="fw-semibold">${x.count}</span>
+        </div>
+        <div class="progress" style="height:8px">
+          <div class="progress-bar" style="width:${Math.round(x.count/max*100)}%;background:${FUNNEL_COLORS[i%FUNNEL_COLORS.length]}"></div>
+        </div>
+      </div>`).join('');
+  } else { funnelBody.innerHTML = '<p class="text-muted small text-center">No data</p>'; }
+
+  // Monthly deals
+  const monthlyBody = document.getElementById('monthlyDealsBody');
+  if (d.monthlyDeals && d.monthlyDeals.length) {
+    const max = Math.max(...d.monthlyDeals.map(x => x.count), 1);
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    monthlyBody.innerHTML = d.monthlyDeals.map(x => `
+      <div class="mb-2">
+        <div class="d-flex justify-content-between small mb-1">
+          <span>${months[x.month-1]} ${x.year}</span><span class="fw-semibold">${x.count}</span>
+        </div>
+        <div class="progress" style="height:6px">
+          <div class="progress-bar bg-success" style="width:${Math.round(x.count/max*100)}%"></div>
+        </div>
+      </div>`).join('');
+  } else { monthlyBody.innerHTML = '<p class="text-muted small text-center">No deals yet</p>'; }
+}
+
+loadDashboard();
+</script>
+</body>
+</html>

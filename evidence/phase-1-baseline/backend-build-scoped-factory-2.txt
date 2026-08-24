@@ -1,0 +1,11 @@
+  HRMS.Domain -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Domain/bin/Debug/net8.0/HRMS.Domain.dll
+  HRMS.Application -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Application/bin/Debug/net8.0/HRMS.Application.dll
+  HRMS.Infrastructure -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Infrastructure/bin/Debug/net8.0/HRMS.Infrastructure.dll
+  HRMS.API -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/bin/Debug/net8.0/HRMS.API.dll
+  HRMS.Tests -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/bin/Debug/net8.0/HRMS.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:11.01

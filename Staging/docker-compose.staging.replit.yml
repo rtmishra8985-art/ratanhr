@@ -1,0 +1,119 @@
+# =============================================================
+# docker-compose.staging.replit.yml — Replit host-networking override
+#
+# Replit's sandbox blocks two things:
+#   1. Docker bridge inter-container networking (iptables)
+#   2. docker exec / setns — so healthcheck CMD-SHELL probes never run
+#
+# This override fixes both:
+#   - network_mode: "host" on every service
+#   - healthcheck: disable: true   (daemon can't exec into containers)
+#   - depends_on conditions → service_started  (healthchecks unused)
+#   - ports: removed               (not needed with host networking)
+#   - networks: removed            (not needed with host networking)
+#   - Container-name hostnames → 127.0.0.1
+#   - MySQL listens on --port=3307 (matches runbook DB_PORT=3307)
+#   - Redis listens on --port 6380 (matches runbook REDIS_PORT=6380)
+#
+# Manual readiness gates are handled by start-replit.sh instead.
+# =============================================================
+
+services:
+
+  # ── MySQL ────────────────────────────────────────────────────
+  hrms_staging_db:
+    network_mode: "host"
+    ports: !reset []
+    networks: !reset []
+    healthcheck:
+      disable: true
+    # Use default port 3306 in Replit: the runbook's mysql_query function
+    # calls "docker run mysql:8.4 mysql -h127.0.0.1" without -P, so it
+    # always connects to port 3306 (MySQL default). No production MySQL
+    # conflicts exist in this isolated workspace.
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-time-zone=+05:30
+      --max_connections=200
+      --innodb_buffer_pool_size=256M
+
+  # ── Redis ────────────────────────────────────────────────────
+  hrms_staging_redis:
+    network_mode: "host"
+    ports: !reset []
+    networks: !reset []
+    healthcheck:
+      disable: true
+    command: >
+      redis-server
+      --requirepass ${STAGING_REDIS_PASSWORD}
+      --appendonly yes
+      --maxmemory 128mb
+      --maxmemory-policy allkeys-lru
+      --port 6380
+
+  # ── MailHog ──────────────────────────────────────────────────
+  hrms_staging_mailhog:
+    network_mode: "host"
+    ports: !reset []
+    networks: !reset []
+    healthcheck:
+      disable: true
+
+  # ── EF Core migration job ────────────────────────────────────
+  hrms_staging_migrate:
+    network_mode: "host"
+    ports: !reset []
+    networks: !reset []
+    healthcheck:
+      disable: true
+    # Relax depends_on — healthchecks are disabled; start_replit.sh gates readiness
+    depends_on:
+      hrms_staging_db:
+        condition: service_started
+    environment:
+      ConnectionStrings__DefaultConnection: >-
+        Server=127.0.0.1;Port=3306;Database=${STAGING_DB_NAME:-hrms_staging};
+        Uid=${STAGING_DB_USER:-hrms_staging};Pwd=${STAGING_DB_PASSWORD};CharSet=utf8mb4;
+      Redis__ConnectionString: >-
+        127.0.0.1:6380,password=${STAGING_REDIS_PASSWORD},defaultDatabase=1
+
+  # ── ASP.NET Core API ─────────────────────────────────────────
+  hrms_staging_api:
+    network_mode: "host"
+    ports: !reset []
+    networks: !reset []
+    healthcheck:
+      disable: true
+    # Relax all conditions — start_replit.sh polls /healthz manually
+    depends_on:
+      hrms_staging_db:
+        condition: service_started
+      hrms_staging_redis:
+        condition: service_started
+      hrms_staging_mailhog:
+        condition: service_started
+      hrms_staging_migrate:
+        condition: service_completed_successfully
+    environment:
+      # Port 8081 is occupied by Replit's mockup-sandbox service; use 9090
+      # (matches the runbook default API_HOST=127.0.0.1:9090)
+      ASPNETCORE_URLS: http://+:9090
+      ConnectionStrings__DefaultConnection: >-
+        Server=127.0.0.1;Port=3306;Database=${STAGING_DB_NAME:-hrms_staging};
+        Uid=${STAGING_DB_USER:-hrms_staging};Pwd=${STAGING_DB_PASSWORD};CharSet=utf8mb4;
+      Redis__ConnectionString: >-
+        127.0.0.1:6380,password=${STAGING_REDIS_PASSWORD},defaultDatabase=1
+      Email__Host: ${SMTP_HOST:-127.0.0.1}
+
+  # ── Frontend ─────────────────────────────────────────────────
+  hrms_staging_frontend:
+    network_mode: "host"
+    ports: !reset []
+    networks: !reset []
+    healthcheck:
+      disable: true
+    depends_on:
+      hrms_staging_api:
+        condition: service_started

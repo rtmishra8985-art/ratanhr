@@ -1,0 +1,10 @@
+Command: dotnet --info
+Result: FAILED — dotnet not installed
+
+Command: apt-get install -y dotnet-sdk-8.0 (attempt to obtain SDK per global.json)
+Result: FAILED — see ../backend/dotnet-install-attempt.txt for full output (404 Not Found
+from security.ubuntu.com/archive.ubuntu.com for all dotnet8 packages).
+
+Because dotnet is unavailable, the following could NOT be executed:
+  dotnet ef migrations list --project HRMS.Infrastructure --startup-project HRMS.API --context ApplicationDbContext
+  dotnet ef migrations has-pending-model-changes --project HRMS.Infrastructure --startup-project HRMS.API --context ApplicationDbContext

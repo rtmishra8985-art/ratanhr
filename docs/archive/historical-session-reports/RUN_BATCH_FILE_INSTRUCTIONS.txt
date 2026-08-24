@@ -1,0 +1,214 @@
+═══════════════════════════════════════════════════════════════════════════════
+                    HOW TO RUN THE BATCH FILE
+═══════════════════════════════════════════════════════════════════════════════
+
+FILE TO RUN: SEND_LIVE_TEST_EMAIL_NOW.bat
+LOCATION: C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR\
+
+═══════════════════════════════════════════════════════════════════════════════
+                    METHOD 1: DOUBLE-CLICK (EASIEST)
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1: Open File Explorer
+  - Press: Windows Key + E
+  - Or click the folder icon on taskbar
+
+STEP 2: Navigate to the folder
+  - Paste this in address bar:
+    C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR
+  - Press: Enter
+
+STEP 3: Find the file
+  - Look for: SEND_LIVE_TEST_EMAIL_NOW.bat
+  - It will have a bat/script file icon
+
+STEP 4: Double-click the file
+  - Just double-click it
+  - A command window will open
+  - Script will run automatically
+
+STEP 5: Wait for completion
+  - Wait for: ✅ SUCCESS message
+  - Email will be sent
+
+═══════════════════════════════════════════════════════════════════════════════
+                    METHOD 2: COMMAND PROMPT
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1: Open Command Prompt
+  - Press: Windows Key + R
+  - Type: cmd
+  - Press: Enter
+
+STEP 2: Navigate to folder (copy and paste this):
+  cd C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR
+
+  Then press: Enter
+
+STEP 3: Run the batch file (type this):
+  SEND_LIVE_TEST_EMAIL_NOW.bat
+
+  Then press: Enter
+
+STEP 4: Wait for completion
+  - Script will run
+  - You'll see: ✅ SUCCESS - LIVE TEST EMAIL SENT
+  - Email will be sent
+
+═══════════════════════════════════════════════════════════════════════════════
+                    METHOD 3: POWERSHELL (ADVANCED)
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1: Open PowerShell
+  - Press: Windows Key + X
+  - Select: Windows PowerShell
+  - Or: Right-click Start menu → Windows PowerShell
+
+STEP 2: Run this command (copy and paste):
+  cd C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR; .\SEND_LIVE_TEST_EMAIL_NOW.bat
+
+  Then press: Enter
+
+STEP 3: Wait for completion
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SCREENSHOT GUIDE - METHOD 1 (EASIEST)
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────┐
+│ Step 1: Press Windows Key + E                           │
+│         This opens File Explorer                        │
+└─────────────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────────────┐
+│ Step 2: Click address bar (top)                         │
+│         Copy & paste this path:                         │
+│         C:\Users\karun\Downloads\RatanHR_Run8_Final\... │
+│         Press Enter                                     │
+└─────────────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────────────┐
+│ Step 3: Look for file:                                  │
+│         📄 SEND_LIVE_TEST_EMAIL_NOW.bat                │
+│         (It's a batch/script file)                     │
+└─────────────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────────────┐
+│ Step 4: DOUBLE-CLICK the file                           │
+│         Or: Right-click → Open                         │
+└─────────────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────────────┐
+│ Step 5: Command window opens                            │
+│         Script runs automatically                       │
+│         Wait for: ✅ SUCCESS message                    │
+└─────────────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────────────┐
+│ Step 6: EMAIL SENT! ✅                                  │
+│         Check: rtmishra7040@gmail.com                   │
+│         Wait: 1-2 minutes for delivery                  │
+└─────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+                    WHAT YOU'LL SEE IN COMMAND WINDOW
+═══════════════════════════════════════════════════════════════════════════════
+
+When you run the batch file, you'll see:
+
+╔════════════════════════════════════════════════════════╗
+║   RatanHR Phase 8 - SEND LIVE TEST EMAIL NOW          ║
+║   Testing: Is SMTP Email Working LIVE?                ║
+║   NO PYTHON REQUIRED                                  ║
+╚════════════════════════════════════════════════════════╝
+
+[LIVE TEST - Starting immediately]
+
+Configuration:
+  From: rtmishra8985@gmail.com
+  To: rtmishra7040@gmail.com
+  Via: Brevo SMTP (smtp-relay.brevo.com:587)
+  Time: [Current date/time]
+
+[Step 1/3] Script created...
+
+[Step 2/3] Sending email via Brevo SMTP (LIVE)...
+[✓] Email sent successfully!
+
+[Step 3/3] Finalizing...
+
+╔════════════════════════════════════════════════════════╗
+║   ✅ SUCCESS - LIVE TEST EMAIL SENT                   ║
+╚════════════════════════════════════════════════════════╝
+
+[✓✓✓] SMTP EMAIL SYSTEM IS LIVE & WORKING ✓✓✓
+
+[VERIFICATION]:
+  ✓ Brevo SMTP Connection: SUCCESS
+  ✓ TLS/STARTTLS: WORKING
+  ✓ Authentication: SUCCESSFUL
+  ✓ Email Delivery: CONFIRMED SENT
+
+[RESULT]:
+  Email sent to: rtmishra7040@gmail.com
+  From: rtmishra8985@gmail.com
+  Status: ✅ LIVE TEST SUCCESSFUL
+
+[NEXT STEP]:
+  1. Check email inbox: rtmishra7040@gmail.com
+  2. Wait 1-2 minutes for delivery
+  3. Verify email from: rtmishra8985@gmail.com
+  4. Confirm Phase 8 SMTP is working
+
+🟢 PHASE 8 SMTP: LIVE TEST COMPLETED SUCCESSFULLY
+
+Press any key to continue . . .
+
+═══════════════════════════════════════════════════════════════════════════════
+                    AFTER RUNNING THE SCRIPT
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Command window will show: ✅ SUCCESS
+2. Press any key to close the window
+3. Go to: https://mail.google.com
+4. Login to: rtmishra7040@gmail.com
+5. Look for email from: rtmishra8985@gmail.com
+6. Subject: 🟢 RatanHR Phase 8 - LIVE TEST EMAIL
+7. Email should arrive within 1-2 minutes
+
+═══════════════════════════════════════════════════════════════════════════════
+                    TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+If window closes too fast:
+  - Use Method 2 (Command Prompt) instead
+  - This keeps the window open so you can see the output
+
+If you get an error:
+  - Check internet connection
+  - Verify firewall allows port 587
+  - The error will be shown in the window
+
+═══════════════════════════════════════════════════════════════════════════════
+                    QUICK COPY-PASTE COMMANDS
+═══════════════════════════════════════════════════════════════════════════════
+
+For Command Prompt, copy all and paste at once:
+
+cd C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR && SEND_LIVE_TEST_EMAIL_NOW.bat
+
+Then press Enter.
+
+═══════════════════════════════════════════════════════════════════════════════
+                    READY? START HERE
+═══════════════════════════════════════════════════════════════════════════════
+
+EASIEST WAY:
+1. Press: Windows Key + E
+2. Paste in address bar: C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR
+3. Find: SEND_LIVE_TEST_EMAIL_NOW.bat
+4. Double-click it
+5. Wait for ✅ SUCCESS
+6. Done!
+
+═══════════════════════════════════════════════════════════════════════════════

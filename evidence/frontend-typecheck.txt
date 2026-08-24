@@ -1,0 +1,9 @@
+$ bun run typecheck
+
+--- STDOUT ---
+
+--- STDERR ---
+$ tsc -p tsconfig.json --noEmit
+
+--- EXIT CODE ---
+0

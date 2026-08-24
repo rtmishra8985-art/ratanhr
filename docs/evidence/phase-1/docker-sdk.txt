@@ -1,0 +1,10 @@
+Command: grep for dotnet SDK image tags
+Date (UTC): Mon Aug 10 06:31:41 UTC 2026
+----
+Dockerfile:25:FROM mcr.microsoft.com/dotnet/sdk:8.0.416-alpine3.21 AS build
+Dockerfile:57:FROM mcr.microsoft.com/dotnet/sdk:8.0.416-alpine3.21 AS migrate
+scripts/pin-docker-digests.sh:10:# Dockerfile FROM line (mcr.microsoft.com/dotnet/sdk:8.0.416).
+scripts/pin-docker-digests.sh:25:SDK_TAG="mcr.microsoft.com/dotnet/sdk:8.0.416"
+scripts/pin-docker-digests.sh:40:  "s|FROM mcr.microsoft.com/dotnet/sdk:8.0.416(@sha256:[a-f0-9]+)? AS build|FROM mcr.microsoft.com/dotnet/sdk:8.0.416@${SDK_DIGEST} AS build|" \
+
+Stale 8.0.303 references remain ONLY in evidence/docker-build-*.txt (historical logs).

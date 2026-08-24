@@ -1,0 +1,14 @@
+  HRMS.Domain -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Domain/bin/Debug/net8.0/HRMS.Domain.dll
+  HRMS.Application -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Application/bin/Debug/net8.0/HRMS.Application.dll
+/home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Infrastructure/Biometric/ZKTecoProvider.cs(86,28): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread. [/home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Infrastructure/HRMS.Infrastructure.csproj]
+  HRMS.Infrastructure -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Infrastructure/bin/Debug/net8.0/HRMS.Infrastructure.dll
+  HRMS.API -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/bin/Debug/net8.0/HRMS.API.dll
+  HRMS.Tests -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Tests/bin/Debug/net8.0/HRMS.Tests.dll
+
+Build succeeded.
+
+/home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Infrastructure/Biometric/ZKTecoProvider.cs(86,28): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread. [/home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Infrastructure/HRMS.Infrastructure.csproj]
+    1 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:26.55

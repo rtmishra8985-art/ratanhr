@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offer Letters – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Recruitment</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapseRecruit"><i class="bi bi-briefcase"></i> Recruitment <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseRecruit">
+      <a href="recruitment-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="recruitment-requisitions.html" class="sub-link">Job Openings</a>
+      <a href="recruitment-candidates.html" class="sub-link">Candidates</a>
+      <a href="recruitment-interviews.html" class="sub-link">Interviews</a>
+      <a href="recruitment-offers.html" class="sub-link" style="color:#f7b731;">Offer Letters</a>
+    </div>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Offer Letters</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-muted" id="navUserName"></span>
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+<div class="main-panel">
+  <div class="card card-table">
+    <div class="card-header d-flex justify-content-between align-items-center py-3">
+      <span class="fw-semibold">All Offer Letters</span>
+      <button class="btn btn-sm btn-warning" onclick="openCreateModal()"><i class="bi bi-plus-circle me-1"></i>Create Offer</button>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Candidate</th><th>Designation</th><th>Department</th><th>Salary</th><th>Joining Date</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="offerTbody"><tr><td colspan="8" class="text-center py-3 text-muted">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Offer Modal -->
+<div class="modal fade" id="createModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Create Offer Letter</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body row g-3">
+        <div class="col-12"><label class="form-label">Candidate *</label><select class="form-select" id="oCandId"><option value="">Select Candidate</option></select></div>
+        <div class="col-md-6"><label class="form-label">Offered Designation *</label><input type="text" class="form-control" id="oDesig" required></div>
+        <div class="col-md-6"><label class="form-label">Department</label><input type="text" class="form-control" id="oDept"></div>
+        <div class="col-md-4"><label class="form-label">Offered Salary *</label><input type="number" class="form-control" id="oSalary" required></div>
+        <div class="col-md-4"><label class="form-label">Joining Date *</label><input type="date" class="form-control" id="oJoining" required></div>
+        <div class="col-md-4"><label class="form-label">Offer Expiry Date *</label><input type="date" class="form-control" id="oExpiry" required></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning" onclick="createOffer()">Create Offer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Approve Offer Letter</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <input type="hidden" id="approveOfferId">
+        <div class="mb-3"><label class="form-label">Approval Notes</label><textarea class="form-control" id="approveNotes" rows="3"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" onclick="approveOffer()">Approve</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script>
+requireAuth(['admin','superadmin']);
+populateTopnav();
+const STATUS_BADGE = { 'Pending Approval':'warning','Approved':'success','Issued':'info','Accepted':'success','Rejected':'danger','Expired':'secondary' };
+let createModal, approveModal;
+
+async function populateCandidates() {
+  const res = await HrmsApi.listCandidates({ status: 'Shortlisted' });
+  const all  = await HrmsApi.listCandidates();
+  const sel  = document.getElementById('oCandId');
+  (all?.data||[]).forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id;
+    o.textContent = `${c.firstName} ${c.lastName} – ${c.currentDesignation||c.email}`;
+    sel.appendChild(o);
+  });
+}
+
+function openCreateModal() { document.getElementById('oCandId').value=''; createModal.show(); }
+
+async function createOffer() {
+  const dto = {
+    candidateId:      parseInt(document.getElementById('oCandId').value),
+    jobRequisitionId: null,
+    offeredDesignation: document.getElementById('oDesig').value,
+    offeredDepartment:  document.getElementById('oDept').value,
+    offeredSalary:    parseFloat(document.getElementById('oSalary').value),
+    joiningDate:      document.getElementById('oJoining').value,
+    expiryDate:       document.getElementById('oExpiry').value,
+  };
+  if (!dto.candidateId) { alert('Please select a candidate.'); return; }
+  const res = await HrmsApi.createOffer(dto);
+  if (res && res.success) { createModal.hide(); loadOffers(); }
+  else alert((res && res.message) || 'Failed.');
+}
+
+function openApproveModal(id) {
+  document.getElementById('approveOfferId').value = id;
+  document.getElementById('approveNotes').value   = '';
+  approveModal.show();
+}
+
+async function approveOffer() {
+  const id    = document.getElementById('approveOfferId').value;
+  const notes = document.getElementById('approveNotes').value;
+  const res   = await HrmsApi.approveOffer(id, { approvalNotes: notes });
+  if (res && res.success) { approveModal.hide(); loadOffers(); }
+  else alert((res && res.message) || 'Failed.');
+}
+
+async function updateOfferStatus(id, status) {
+  if (!confirm(`Set offer status to "${status}"?`)) return;
+  const res = await HrmsApi.updateOfferStatus(id, status);
+  if (res && res.success) loadOffers();
+  else alert((res && res.message) || 'Failed.');
+}
+
+async function loadOffers() {
+  const tbody = document.getElementById('offerTbody');
+  tbody.innerHTML = '<tr><td colspan="8" class="text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</td></tr>';
+  const res = await HrmsApi.listOffers();
+  if (!res || !res.success || !res.data.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-3 text-muted">No offers yet.</td></tr>'; return;
+  }
+  tbody.innerHTML = res.data.map(o => `<tr>
+    <td><strong>${o.candidateName||'—'}</strong></td>
+    <td>${o.offeredDesignation}</td>
+    <td>${o.offeredDepartment||'—'}</td>
+    <td>₹${Number(o.offeredSalary).toLocaleString()}/mo</td>
+    <td>${o.joiningDate.substring(0,10)}</td>
+    <td>${o.expiryDate.substring(0,10)}</td>
+    <td><span class="badge bg-${STATUS_BADGE[o.status]||'secondary'}">${o.status}</span></td>
+    <td class="text-nowrap">
+      ${o.status==='Pending Approval'?`<button class="btn btn-xs btn-outline-success py-0 px-1 me-1" onclick="openApproveModal(${o.id})"><i class="bi bi-check2-circle"></i> Approve</button>`:''}
+      ${o.status==='Approved'?`<button class="btn btn-xs btn-outline-info py-0 px-1 me-1" onclick="updateOfferStatus(${o.id},'Issued')">Issue</button>`:''}
+      ${o.status==='Issued'?`<button class="btn btn-xs btn-outline-success py-0 px-1 me-1" onclick="updateOfferStatus(${o.id},'Accepted')">Accepted</button>
+        <button class="btn btn-xs btn-outline-danger py-0 px-1 me-1" onclick="updateOfferStatus(${o.id},'Rejected')">Rejected</button>`:''}
+    </td>
+  </tr>`).join('');
+}
+
+createModal  = new bootstrap.Modal(document.getElementById('createModal'));
+approveModal = new bootstrap.Modal(document.getElementById('approveModal'));
+populateCandidates();
+loadOffers();
+</script>
+</body>
+</html>

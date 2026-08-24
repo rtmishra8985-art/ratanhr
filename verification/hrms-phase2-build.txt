@@ -1,0 +1,11 @@
+  HRMS.Domain -> /tmp/hrms-phase2-fix/HRMS.Domain/bin/Debug/net8.0/HRMS.Domain.dll
+  HRMS.Application -> /tmp/hrms-phase2-fix/HRMS.Application/bin/Debug/net8.0/HRMS.Application.dll
+  HRMS.Infrastructure -> /tmp/hrms-phase2-fix/HRMS.Infrastructure/bin/Debug/net8.0/HRMS.Infrastructure.dll
+  HRMS.API -> /tmp/hrms-phase2-fix/HRMS.API/bin/Debug/net8.0/HRMS.API.dll
+  HRMS.Tests -> /tmp/hrms-phase2-fix/HRMS.Tests/bin/Debug/net8.0/HRMS.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.53

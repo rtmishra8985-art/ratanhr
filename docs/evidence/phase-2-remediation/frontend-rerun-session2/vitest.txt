@@ -1,0 +1,11 @@
+Command: npx vitest run
+ ✓ src/__tests__/AuthGuard.phase2.test.tsx (6 tests) 49ms
+ ✓ src/__tests__/utils/profileHelpers.test.ts (43 tests) 25ms
+ ✓ src/__tests__/utils/apiError.test.ts (22 tests) 7ms
+ ✓ src/__tests__/utils/tokenStorage.test.ts (4 tests) 5ms
+
+ Test Files  5 passed (5)
+      Tests  82 passed (82)
+   Start at  09:32:02
+   Duration  5.52s (transform 463ms, setup 1.04s, collect 484ms, tests 194ms, environment 2.37s, prepare 533ms)
+

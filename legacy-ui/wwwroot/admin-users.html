@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>Admin Users – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Registration</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r1"><i class="bi bi-person-plus"></i> Registration <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r1"><a href="add-employee.html" class="sub-link">Register</a><a href="view-employees.html" class="sub-link">View All</a></div>
+    <div class="nav-label">Company</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r2"><i class="bi bi-building"></i> Company <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r2"><a href="add-company.html" class="sub-link">Add</a><a href="view-company.html" class="sub-link">View</a></div>
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r3"><i class="bi bi-globe"></i> Web Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r3"><a href="web-attendance-admin.html" class="sub-link">View</a></div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r4"><i class="bi bi-file-earmark-spreadsheet"></i> Excel Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r4"><a href="upload-attendance.html" class="sub-link">Upload</a><a href="view-attendance.html" class="sub-link">View</a></div>
+
+    <div class="nav-label">Payroll</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapsePayroll"><i class="bi bi-cash-stack"></i> Payroll <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapsePayroll">
+      <a href="payroll.html" class="sub-link">View Payroll</a>
+      <a href="add-payroll.html" class="sub-link">Generate Payslip</a>
+    </div>
+    <div class="nav-label">Reports</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseReports"><i class="bi bi-bar-chart-line"></i> Reports <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseReports">
+      <a href="reports-attendance.html" class="sub-link">Attendance Report</a>
+      <a href="reports-employee.html" class="sub-link">Employee Report</a>
+    </div>
+    <div class="nav-label">Others</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r5"><i class="bi bi-star"></i> Appreciation <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r5"><a href="appreciation.html" class="sub-link">Appreciate</a></div>
+    <a href="admin-users.html" class="nav-link active"><i class="bi bi-people"></i> Admin Users</a>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Admin Users</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+<div class="main-panel">
+  <div class="card card-table">
+    <div class="card-header d-flex justify-content-between align-items-center py-3">
+      <span>Registered Users</span>
+      <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#addUserModal">+ Add User</button>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>User ID</th><th>Name</th><th>Email</th><th>Role</th><th>Mobile</th><th>Reg Date</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <!-- BACKEND: {% for user in users %} -->
+            <tr>
+              <td><code>{{user.id}}</code></td>
+              <td>{{user.name}}</td>
+              <td>{{user.email}}</td>
+              <td>
+                <!-- BACKEND: Conditional badge -->
+                <span class="badge {{user.role == 'admin' ? 'bg-primary' : 'bg-success'}}">{{user.role | capitalize}}</span>
+              </td>
+              <td>{{user.mobnumber}}</td>
+              <td>{{user.reg_date}}</td>
+              <td>
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" {{user.status == 1 ? 'checked' : ''}}
+                    onchange="updateUserStatus('{{user.id}}', this.checked ? 1 : 0)">
+                </div>
+              </td>
+            </tr>
+            <!-- BACKEND: {% endfor %} -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <!-- BACKEND: POST /api/admin-users -->
+      <form id="addUserForm" onsubmit="submitAddUser(event)">
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+            <input class="form-control" name="name" required></div>
+          <div class="mb-3"><label class="form-label fw-semibold small">Email <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" name="email" required></div>
+          <div class="mb-3"><label class="form-label fw-semibold small">Password <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" name="password" required minlength="6"></div>
+          <div class="mb-3"><label class="form-label fw-semibold small">Role <span class="text-danger">*</span></label>
+            <select class="form-select" name="role" required><option value="admin">Admin</option><option value="employee">Employee</option></select></div>
+          <div class="mb-3"><label class="form-label fw-semibold small">Mobile Number</label>
+            <input class="form-control" name="mobnumber" placeholder="+91 XXXXXXXXXX"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-warning">Add User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+/**
+ * updateUserStatus — Fix: replaced legacy GET /update-user-status?userId=…&status=…
+ * with the correct REST call: PATCH /api/admin-users/{id}/status  { isActive: bool }.
+ * Uses apiFetch() from api.js which injects X-XSRF-TOKEN automatically (CSRF safe).
+ */
+function updateUserStatus(userId, status) {
+  const checkbox = event && event.target;
+  apiFetch(`/admin-users/${userId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ isActive: status === 1 || status === true })
+  }).catch(function(e) {
+    console.error('Failed to update user status', e);
+    // Revert the checkbox to its previous state on failure
+    if (checkbox) checkbox.checked = !checkbox.checked;
+  });
+}
+
+/**
+ * submitAddUser — Fix: replaced legacy <form action="/add-user"> POST-redirect
+ * with AJAX call to the correct REST endpoint: POST /api/admin-users.
+ * Uses apiFetch() from api.js (CSRF-safe, credentials: include).
+ */
+function submitAddUser(e) {
+  e.preventDefault();
+  const form = document.getElementById('addUserForm');
+  const fd   = new FormData(form);
+  apiFetch('/admin-users', {
+    method: 'POST',
+    body: JSON.stringify({
+      fullName:  fd.get('name'),
+      email:     fd.get('email'),
+      password:  fd.get('password'),
+      adminRole: fd.get('role'),
+      companyId: null
+    })
+  }).then(function() {
+    bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+    location.reload();
+  }).catch(function(e) {
+    alert('Failed to add user: ' + (e && e.message ? e.message : String(e)));
+  });
+}
+</script>
+</body>
+</html>

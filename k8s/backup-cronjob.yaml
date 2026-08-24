@@ -1,0 +1,87 @@
+# Phase 7: MySQL Backup CronJob — replaces pg_dump with mysqldump.
+# Runs mysqldump daily at 02:00 UTC, stores dumps on a PVC,
+# prunes backups older than 14 days.
+#
+# NOTE: scripts/mysql-backup.sh is for LOCAL / Docker Compose use only.
+#       In Kubernetes, this CronJob handles backups instead.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hrms-mysql-backup
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+    app.kubernetes.io/component: backup
+spec:
+  schedule: "0 2 * * *"          # 02:00 UTC every day
+  timeZone: "Asia/Kolkata"        # display in IST in logs
+  concurrencyPolicy: Forbid       # never run two backup jobs simultaneously
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: mysql-backup
+              image: mysql:8.4.6
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: MYSQL_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: hrms-secrets
+                      key: MYSQL_USER
+                - name: MYSQL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: hrms-secrets
+                      key: MYSQL_PASSWORD
+                - name: MYSQL_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: hrms-secrets
+                      key: MYSQL_DATABASE
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  TIMESTAMP=$(date -u '+%Y%m%d_%H%M%S')
+                  BACKUP_FILE="/backups/hrms_${TIMESTAMP}.sql.gz"
+                  echo "[$(date -u '+%Y-%m-%d %H:%M UTC')] Starting backup → $BACKUP_FILE"
+                  mysqldump -h mysql-svc -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" \
+                    | gzip > "$BACKUP_FILE"
+                  SIZE=$(du -sh "$BACKUP_FILE" | cut -f1)
+                  echo "[$(date -u '+%Y-%m-%d %H:%M UTC')] ✅ Backup complete — $SIZE"
+                  PRUNED=$(find /backups -name "hrms_*.sql.gz" -mtime +14 -print -delete | wc -l)
+                  [ "$PRUNED" -gt 0 ] && echo "[$(date -u '+%Y-%m-%d %H:%M UTC')] 🗑️  Pruned $PRUNED old backup(s)."
+                  echo "Done."
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: hrms-backup-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hrms-backup-pvc
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+    app.kubernetes.io/component: backup
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard      # replace with your cluster StorageClass

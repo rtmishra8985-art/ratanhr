@@ -1,0 +1,903 @@
+$ docker compose -f docker-compose.yml config
+name: ratanhr-work-fixed-updated
+services:
+  alertmanager:
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+      - --web.listen-address=:9093
+    image: prom/alertmanager:v0.27.0
+    networks:
+      hrms_internal: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 9093
+        published: "9093"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/monitoring/alertmanager.yml
+        target: /etc/alertmanager/alertmanager.yml
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: volume
+        source: hrms_alertmanager
+        target: /alertmanager
+        volume: {}
+  api:
+    build:
+      context: /home/runner/workspace/RatanHR-work-fixed-updated
+      dockerfile: Dockerfile
+      target: runtime
+    depends_on:
+      clamav:
+        condition: service_healthy
+        required: true
+      migrate:
+        condition: service_completed_successfully
+        required: true
+      mysql:
+        condition: service_healthy
+        required: true
+      redis:
+        condition: service_healthy
+        required: true
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: "536870912"
+        reservations:
+          cpus: 0.25
+          memory: "134217728"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      AllowedHosts: audit.local
+      App__CompanyName: HRMS System
+      App__SupportEmail: support@yourdomain.com
+      App__SupportName: HRMS Support
+      Compliance__ComplianceRegime: dpdp
+      Compliance__DpoEmail: audit@example.invalid
+      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=hrms;User ID=hrms;Password=[REDACTED-VALUE]-PASSWORD];AllowPublicKeyRetrieval=True;SslMode=None
+      Cors__AllowedOrigins: http://audit.local
+      Database__AutoMigrate: "false"
+      Email__AppBaseUrl: ""
+      Email__FromAddress: noreply@hrms.com
+      Email__FromName: HRMS System
+      Email__Host: ""
+      Email__Password: ""
+      Email__Port: "587"
+      Email__UseSsl: "false"
+      Email__Username: ""
+      Jwt__Audience: HRMS.Client
+      Jwt__Issuer: HRMS.API
+      Jwt__PrivateKeyPem: [REDACTED-VALUE]-PRIVATE-KEY]
+      Jwt__PublicKeyPem: [REDACTED-VALUE]-PUBLIC-KEY]
+      Monitoring__SeqUrl: ""
+      Network__KnownProxyCidrs: 172.18.0.0/16
+      OpenTelemetry__JaegerEndpoint: ""
+      OpenTelemetry__OtlpEndpoint: ""
+      OpenTelemetry__ServiceName: hrms-api
+      OpenTelemetry__ServiceVersion: 1.0.0
+      OpenTelemetry__ZipkinEndpoint: ""
+      Redis__ConnectionString: redis:6379,password=[REDACTED-VALUE]-REDIS-PASSWORD],abortConnect=false
+      Security__EncryptionKey: [REDACTED-VALUE]-ENCRYPTION-KEY]
+      Webhook__AllowedDomainSuffixes: ""
+    expose:
+      - "8080"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://localhost:8080/health || exit 1
+      timeout: 10s
+      interval: 30s
+      retries: 5
+      start_period: 1m0s
+    networks:
+      default: null
+    restart: unless-stopped
+    stop_grace_period: 30s
+    volumes:
+      - type: volume
+        source: hrms_uploads
+        target: /app/wwwroot/uploads
+        volume: {}
+      - type: volume
+        source: hrms_logs
+        target: /app/Logs
+        volume: {}
+  backfill:
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        export MYSQL_PWD="$${MYSQL_PASSWORD}"
+        has_table() {
+          [ "$$(mysql --protocol=TCP -hmysql -u"$${MYSQL_USER}" -Nse \
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$${MYSQL_DATABASE}' AND table_name='$$1'")" = "1" ]
+        }
+        if has_table companies && has_table employees; then
+          has_column="$$(mysql --protocol=TCP -hmysql -u"$${MYSQL_USER}" -Nse \
+            "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='$${MYSQL_DATABASE}' AND table_name='employees' AND column_name='company_id'")"
+          if [ "$${has_column}" = "1" ]; then
+            mysql --protocol=TCP -hmysql -u"$${MYSQL_USER}" "$${MYSQL_DATABASE}" -e \
+              "UPDATE employees e JOIN (SELECT id FROM companies ORDER BY id LIMIT 1) c
+               SET e.company_id = c.id WHERE e.company_id IS NULL;"
+            echo "Company backfill completed."
+          else
+            echo "employees.company_id is not present; skipping backfill."
+          fi
+        else
+          echo "Fresh database detected; skipping pre-migration company backfill."
+        fi
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: true
+    environment:
+      MYSQL_DATABASE: hrms
+      MYSQL_PASSWORD: [REDACTED-VALUE]-PASSWORD]
+      MYSQL_USER: hrms
+    image: mysql:8.4@sha256:1d6b6a8fcee8ff758ff151d017f5203cd06792a0e698f0a593c9dfcb14609cf0
+    networks:
+      default: null
+    restart: "no"
+  backup:
+    command:
+      - |
+        set -e
+        echo "Backup service started (MySQL encrypted mode)."
+        echo "Schedule: $${BACKUP_CRON_SCHEDULE} (UTC).  Retention: $${RETAIN_DAYS} days."
+
+        # Fail fast if the encryption key is missing or empty.
+        if [ -z "$${BACKUP_ENCRYPTION_KEY}" ]; then
+          echo "FATAL: BACKUP_ENCRYPTION_KEY is not set. Refusing to write unencrypted backups." >&2
+          exit 1
+        fi
+
+        # Write the crontab for the root user.
+        mkdir -p /var/spool/cron/crontabs
+        printf '%s /bin/sh /backup.sh\n' "$${BACKUP_CRON_SCHEDULE}" \
+            > /var/spool/cron/crontabs/root
+
+        # Write the backup script.
+        cat > /backup.sh << 'SCRIPT'
+        #!/bin/sh
+        set -e
+        BASENAME="/backups/hrms_$$(date -u '+%Y%m%d_%H%M%S')"
+        OUTFILE="$${BASENAME}.sql.gz.enc"
+
+        # Dump → compress → encrypt (AES-256-CBC, PBKDF2 with 600 000 iterations).
+        mysqldump -h mysql -u "$$MYSQL_USER" -p"$$MYSQL_PASSWORD" "$$MYSQL_DATABASE" \
+          | gzip \
+          | openssl enc -aes-256-cbc -pbkdf2 -iter 600000 \
+              -pass "env:BACKUP_ENCRYPTION_KEY" \
+              -out "$$OUTFILE"
+
+        echo "$$(date -u) Encrypted backup written: $$OUTFILE ($$(du -sh "$$OUTFILE" | cut -f1))"
+
+        # Prune old encrypted backups.
+        find /backups -name 'hrms_*.sql.gz.enc' -mtime +"$$RETAIN_DAYS" -delete
+        echo "$$(date -u) Old backups pruned (retention: $$RETAIN_DAYS days)."
+        SCRIPT
+        chmod +x /backup.sh
+
+        # Run crond in the foreground (-f) with logging to stderr (-d 8).
+        exec crond -f -d 8
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: true
+    entrypoint:
+      - /bin/sh
+      - -c
+    environment:
+      BACKUP_CRON_SCHEDULE: 0 2 * * *
+      BACKUP_ENCRYPTION_KEY: [REDACTED-VALUE]-BACKUP-KEY]
+      MYSQL_DATABASE: hrms
+      MYSQL_PASSWORD: [REDACTED-VALUE]-PASSWORD]
+      MYSQL_USER: hrms
+      RETAIN_DAYS: "14"
+    image: mysql:8.4@sha256:1d6b6a8fcee8ff758ff151d017f5203cd06792a0e698f0a593c9dfcb14609cf0
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/backups
+        target: /backups
+        bind:
+          create_host_path: true
+  certbot:
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |2
+          trap exit TERM;
+          while :; do
+            certbot renew --webroot --webroot-path=/var/www/certbot --quiet;
+            sleep 12h & wait $$!;
+          done
+    image: certbot/certbot:v2.11.0@sha256:534384860340f96acbb098e1581961d4656b7fa6e8a485fb625e9c33c4df3842
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_certbot_conf
+        target: /etc/letsencrypt
+        volume: {}
+      - type: volume
+        source: hrms_certbot_www
+        target: /var/www/certbot
+        volume: {}
+  clamav:
+    environment:
+      CLAMAV_NO_CLAMD: "false"
+      CLAMAV_NO_FRESHCLAMD: "false"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - clamdscan --ping 3 || exit 1
+      timeout: 10s
+      interval: 30s
+      retries: 5
+      start_period: 1m30s
+    image: clamav/clamav:1.4_base
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_clamav
+        target: /var/lib/clamav
+        volume: {}
+  grafana:
+    depends_on:
+      prometheus:
+        condition: service_started
+        required: true
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/hrms-dashboard.json
+      GF_SECURITY_ADMIN_PASSWORD: [REDACTED-VALUE]-GRAFANA-PASSWORD]
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SERVER_ROOT_URL: http://localhost:3000
+    image: grafana/grafana:11.1.0
+    networks:
+      hrms_internal: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 3000
+        published: "3000"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_grafana
+        target: /var/lib/grafana
+        volume: {}
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/monitoring/grafana-dashboard.json
+        target: /var/lib/grafana/dashboards/hrms-dashboard.json
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/grafana/provisioning
+        target: /etc/grafana/provisioning
+        read_only: true
+        bind:
+          create_host_path: true
+  jaeger:
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+      MEMORY_MAX_TRACES: "50000"
+      SPAN_STORAGE_TYPE: memory
+    image: jaegertracing/all-in-one:1.58
+    networks:
+      hrms_internal: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 16686
+        published: "16686"
+        protocol: tcp
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 4317
+        published: "4317"
+        protocol: tcp
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 4318
+        published: "4318"
+        protocol: tcp
+    restart: unless-stopped
+  migrate:
+    build:
+      context: /home/runner/workspace/RatanHR-work-fixed-updated
+      dockerfile: Dockerfile
+      target: migrate
+    depends_on:
+      backfill:
+        condition: service_completed_successfully
+        required: true
+    environment:
+      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=hrms;User ID=hrms;Password=[REDACTED-VALUE]-PASSWORD];AllowPublicKeyRetrieval=True;SslMode=None
+    networks:
+      default: null
+    restart: "no"
+  mysql:
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: "1073741824"
+        reservations:
+          cpus: 0.25
+          memory: "268435456"
+    environment:
+      MYSQL_DATABASE: hrms
+      MYSQL_PASSWORD: [REDACTED-VALUE]-PASSWORD]
+      MYSQL_ROOT_PASSWORD: [REDACTED-VALUE]-ROOT-PASSWORD]
+      MYSQL_USER: hrms
+    healthcheck:
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - -h
+        - localhost
+        - -u
+        - hrms
+        - --password=[REDACTED-VALUE]-PASSWORD]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 1m0s
+    image: mysql:8.4@sha256:1d6b6a8fcee8ff758ff151d017f5203cd06792a0e698f0a593c9dfcb14609cf0
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_mysqldata
+        target: /var/lib/mysql
+        volume: {}
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/scripts/db-init.sql
+        target: /docker-entrypoint-initdb.d/00-init.sql
+        read_only: true
+        bind:
+          create_host_path: true
+  nginx:
+    depends_on:
+      api:
+        condition: service_started
+        required: true
+    entrypoint:
+      - /bin/sh
+      - /etc/nginx/entrypoint.sh
+    environment:
+      API_URL: https://audit.local/api
+      APP_ENV: production
+      DOMAIN_NAME: audit.local
+      SSL_CERT_PATH: /etc/letsencrypt/live/audit.local/fullchain.pem
+      SSL_KEY_PATH: /etc/letsencrypt/live/audit.local/privkey.pem
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://localhost/health || exit 1
+      timeout: 5s
+      interval: 30s
+      retries: 3
+    image: nginx:1.27.0-alpine@sha256:63ffc0d1f14e4082b832c6a42e606e9a0384a526f16ddd720af7c1f018f2f7c4
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "80"
+        protocol: tcp
+      - mode: ingress
+        target: 443
+        published: "443"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/nginx/nginx.conf.template
+        target: /etc/nginx/nginx.conf.template
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/nginx/entrypoint.sh
+        target: /etc/nginx/entrypoint.sh
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: volume
+        source: hrms_certbot_conf
+        target: /etc/letsencrypt
+        read_only: true
+        volume: {}
+      - type: volume
+        source: hrms_certbot_www
+        target: /var/www/certbot
+        read_only: true
+        volume: {}
+      - type: volume
+        source: hrms_uploads
+        target: /app/wwwroot/uploads
+        read_only: true
+        volume: {}
+  prometheus:
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+      - --web.enable-lifecycle
+      - --web.listen-address=:9090
+    image: prom/prometheus:v2.53.0
+    networks:
+      hrms_internal: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 9090
+        published: "9090"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/monitoring/prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/monitoring/alerts.yml
+        target: /etc/prometheus/alerts.yml
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: volume
+        source: hrms_prometheus
+        target: /prometheus
+        volume: {}
+  redis:
+    command:
+      - redis-server
+      - --requirepass
+      - [REDACTED-VALUE]-REDIS-PASSWORD]
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - allkeys-lru
+      - --save
+      - "60"
+      - "1"
+      - --appendonly
+      - "yes"
+    deploy:
+      resources:
+        limits:
+          cpus: 0.5
+          memory: "335544320"
+        reservations:
+          cpus: 0.05
+          memory: "67108864"
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - -a
+        - [REDACTED-VALUE]-REDIS-PASSWORD]
+        - ping
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+    image: redis:7.4-alpine@sha256:b1addbe72465a718643cff9e60a58e6df1841e29d6d7d60c9a85d8d72f08d1a7
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_redis
+        target: /data
+        volume: {}
+networks:
+  default:
+    name: ratanhr-work-fixed-updated_default
+  hrms_internal:
+    name: ratanhr-work-fixed-updated_hrms_internal
+    driver: bridge
+volumes:
+  hrms_alertmanager:
+    name: ratanhr-work-fixed-updated_hrms_alertmanager
+  hrms_certbot_conf:
+    name: ratanhr-work-fixed-updated_hrms_certbot_conf
+  hrms_certbot_www:
+    name: ratanhr-work-fixed-updated_hrms_certbot_www
+  hrms_clamav:
+    name: ratanhr-work-fixed-updated_hrms_clamav
+  hrms_grafana:
+    name: ratanhr-work-fixed-updated_hrms_grafana
+  hrms_logs:
+    name: ratanhr-work-fixed-updated_hrms_logs
+  hrms_mysqldata:
+    name: ratanhr-work-fixed-updated_hrms_mysqldata
+  hrms_prometheus:
+    name: ratanhr-work-fixed-updated_hrms_prometheus
+  hrms_redis:
+    name: ratanhr-work-fixed-updated_hrms_redis
+  hrms_uploads:
+    name: ratanhr-work-fixed-updated_hrms_uploads
+--- EXIT CODE ---
+0
+$ docker compose -f docker-compose.yml up -d mysql redis
+ mysql Pulling 
+ redis Pulling 
+ 897d797d2723 Pulling fs layer 
+ c14c7509f545 Pulling fs layer 
+ f546396032e0 Pulling fs layer 
+ a300455a02bb Pulling fs layer 
+ 941ebb020cf0 Pulling fs layer 
+ 4f4fb700ef54 Pulling fs layer 
+ 677c7c5aa821 Pulling fs layer 
+ 941ebb020cf0 Waiting 
+ 4f4fb700ef54 Waiting 
+ 677c7c5aa821 Waiting 
+ a300455a02bb Waiting 
+ 30627cea5424 Pulling fs layer 
+ a8ca58bc6ea9 Pulling fs layer 
+ 30627cea5424 Waiting 
+ d0f44f87b588 Pulling fs layer 
+ 3efae9596a0b Pulling fs layer 
+ a8ca58bc6ea9 Waiting 
+ d0f44f87b588 Waiting 
+ 860b7bc67210 Pulling fs layer 
+ a5cddd18da97 Pulling fs layer 
+ 3efae9596a0b Waiting 
+ 289dbe2b4aa0 Pulling fs layer 
+ 860b7bc67210 Waiting 
+ 289dbe2b4aa0 Waiting 
+ a5cddd18da97 Waiting 
+ 01cb8e5472ee Pulling fs layer 
+ e31ea7613c63 Pulling fs layer 
+ 9bebc71cfb90 Pulling fs layer 
+ 01cb8e5472ee Waiting 
+ e31ea7613c63 Waiting 
+ 9bebc71cfb90 Waiting 
+ c14c7509f545 Download complete 
+ f546396032e0 Downloading [>                                                  ]  3.458kB/194.9kB
+ f546396032e0 Downloading [============>                                      ]  48.51kB/194.9kB
+ 897d797d2723 Downloading [>                                                  ]  48.51kB/3.647MB
+ f546396032e0 Downloading [=============================>                     ]    114kB/194.9kB
+ 897d797d2723 Downloading [==>                                                ]  146.8kB/3.647MB
+ f546396032e0 Verifying Checksum 
+ f546396032e0 Download complete 
+ 897d797d2723 Downloading [====>                                              ]  294.3kB/3.647MB
+ 897d797d2723 Downloading [=======>                                           ]    540kB/3.647MB
+ 897d797d2723 Downloading [==============>                                    ]  1.032MB/3.647MB
+ 897d797d2723 Downloading [=========================>                         ]  1.867MB/3.647MB
+ 897d797d2723 Downloading [==============================================>    ]  3.391MB/3.647MB
+ 897d797d2723 Verifying Checksum 
+ 897d797d2723 Download complete 
+ 897d797d2723 Extracting [>                                                  ]  65.54kB/3.647MB
+ 897d797d2723 Extracting [============================>                      ]  2.097MB/3.647MB
+ 897d797d2723 Extracting [==================================================>]  3.647MB/3.647MB
+ 897d797d2723 Extracting [==================================================>]  3.647MB/3.647MB
+ 897d797d2723 Pull complete 
+ c14c7509f545 Extracting [==================================================>]     948B/948B
+ c14c7509f545 Extracting [==================================================>]     948B/948B
+ c14c7509f545 Pull complete 
+ f546396032e0 Extracting [========>                                          ]  32.77kB/194.9kB
+ f546396032e0 Extracting [==================================================>]  194.9kB/194.9kB
+ f546396032e0 Extracting [==================================================>]  194.9kB/194.9kB
+ f546396032e0 Pull complete 
+ a300455a02bb Downloading [>                                                  ]  128.2kB/12.41MB
+ 941ebb020cf0 Downloading [==================================================>]     101B/101B
+ 941ebb020cf0 Download complete 
+ a300455a02bb Downloading [=>                                                 ]  257.7kB/12.41MB
+ a300455a02bb Downloading [==>                                                ]  519.9kB/12.41MB
+ a300455a02bb Downloading [====>                                              ]  1.044MB/12.41MB
+ a300455a02bb Downloading [=======>                                           ]  1.959MB/12.41MB
+ a300455a02bb Downloading [==============>                                    ]  3.532MB/12.41MB
+ 4f4fb700ef54 Downloading [==================================================>]      32B/32B
+ 4f4fb700ef54 Verifying Checksum 
+ 4f4fb700ef54 Download complete 
+ a300455a02bb Downloading [=========================>                         ]  6.276MB/12.41MB
+ a300455a02bb Downloading [============================================>      ]  11.07MB/12.41MB
+ a300455a02bb Verifying Checksum 
+ a300455a02bb Download complete 
+ a300455a02bb Extracting [>                                                  ]  131.1kB/12.41MB
+ a300455a02bb Extracting [===============>                                   ]  3.932MB/12.41MB
+ a300455a02bb Extracting [==============================>                    ]  7.602MB/12.41MB
+ 677c7c5aa821 Downloading [==================================================>]     603B/603B
+ 677c7c5aa821 Verifying Checksum 
+ 677c7c5aa821 Download complete 
+ a300455a02bb Extracting [=============================================>     ]   11.4MB/12.41MB
+ a300455a02bb Extracting [==================================================>]  12.41MB/12.41MB
+ a300455a02bb Pull complete 
+ 941ebb020cf0 Extracting [==================================================>]     101B/101B
+ 941ebb020cf0 Extracting [==================================================>]     101B/101B
+ 941ebb020cf0 Pull complete 
+ 4f4fb700ef54 Extracting [==================================================>]      32B/32B
+ 4f4fb700ef54 Extracting [==================================================>]      32B/32B
+ 4f4fb700ef54 Pull complete 
+ 677c7c5aa821 Extracting [==================================================>]     603B/603B
+ 677c7c5aa821 Extracting [==================================================>]     603B/603B
+ 677c7c5aa821 Pull complete 
+ redis Pulled 
+ a8ca58bc6ea9 Downloading [==================================================>]     883B/883B
+ a8ca58bc6ea9 Verifying Checksum 
+ a8ca58bc6ea9 Download complete 
+ 30627cea5424 Downloading [>                                                  ]  486.6kB/47.93MB
+ d0f44f87b588 Downloading [=>                                                 ]  16.38kB/783.6kB
+ 30627cea5424 Downloading [=>                                                 ]  978.1kB/47.93MB
+ d0f44f87b588 Downloading [===>                                               ]  49.15kB/783.6kB
+ 30627cea5424 Downloading [==>                                                ]  1.961MB/47.93MB
+ d0f44f87b588 Downloading [========>                                          ]  129.8kB/783.6kB
+ 30627cea5424 Downloading [====>                                              ]  3.918MB/47.93MB
+ d0f44f87b588 Downloading [================>                                  ]  251.4kB/783.6kB
+ 30627cea5424 Downloading [=======>                                           ]  7.331MB/47.93MB
+ d0f44f87b588 Downloading [=============================>                     ]  462.4kB/783.6kB
+ 30627cea5424 Downloading [=============>                                     ]  13.15MB/47.93MB
+ d0f44f87b588 Verifying Checksum 
+ d0f44f87b588 Download complete 
+ 30627cea5424 Downloading [========================>                          ]   23.9MB/47.93MB
+ 30627cea5424 Downloading [=====================================>             ]  35.62MB/47.93MB
+ 30627cea5424 Downloading [===============================================>   ]  45.84MB/47.93MB
+ 30627cea5424 Verifying Checksum 
+ 30627cea5424 Download complete 
+ 30627cea5424 Extracting [>                                                  ]  491.5kB/47.93MB
+ 3efae9596a0b Downloading [>                                                  ]  64.94kB/6.193MB
+ 30627cea5424 Extracting [=>                                                 ]  1.475MB/47.93MB
+ 3efae9596a0b Downloading [=>                                                 ]  130.5kB/6.193MB
+ 30627cea5424 Extracting [=====>                                             ]  5.407MB/47.93MB
+ 3efae9596a0b Downloading [==>                                                ]  261.5kB/6.193MB
+ 3efae9596a0b Downloading [====>                                              ]  523.7kB/6.193MB
+ 30627cea5424 Extracting [=======>                                           ]  7.373MB/47.93MB
+ 3efae9596a0b Downloading [=======>                                           ]  982.4kB/6.193MB
+ 30627cea5424 Extracting [===========>                                       ]   11.3MB/47.93MB
+ 3efae9596a0b Downloading [==============>                                    ]  1.834MB/6.193MB
+ 30627cea5424 Extracting [===============>                                   ]  15.24MB/47.93MB
+ 3efae9596a0b Downloading [==========================>                        ]  3.342MB/6.193MB
+ 30627cea5424 Extracting [===================>                               ]  19.17MB/47.93MB
+ 860b7bc67210 Downloading [==================================================>]  2.607kB/2.607kB
+ 860b7bc67210 Verifying Checksum 
+ 860b7bc67210 Download complete 
+ 3efae9596a0b Downloading [================================================>  ]  6.029MB/6.193MB
+ 3efae9596a0b Verifying Checksum 
+ 3efae9596a0b Download complete 
+ 30627cea5424 Extracting [=======================>                           ]  22.61MB/47.93MB
+ 30627cea5424 Extracting [===========================>                       ]  26.54MB/47.93MB
+ a5cddd18da97 Downloading [==================================================>]     332B/332B
+ a5cddd18da97 Verifying Checksum 
+ a5cddd18da97 Download complete 
+ 30627cea5424 Extracting [===============================>                   ]  29.98MB/47.93MB
+ 30627cea5424 Extracting [=================================>                 ]  32.44MB/47.93MB
+ 30627cea5424 Extracting [======================================>            ]  36.86MB/47.93MB
+ 30627cea5424 Extracting [===========================================>       ]  41.78MB/47.93MB
+ 30627cea5424 Extracting [=============================================>     ]  43.75MB/47.93MB
+ 01cb8e5472ee Downloading [==================================================>]     321B/321B
+ 01cb8e5472ee Verifying Checksum 
+ 01cb8e5472ee Download complete 
+ 30627cea5424 Extracting [==============================================>    ]  44.73MB/47.93MB
+ 30627cea5424 Extracting [==================================================>]  47.93MB/47.93MB
+ 30627cea5424 Pull complete 
+ a8ca58bc6ea9 Extracting [==================================================>]     883B/883B
+ a8ca58bc6ea9 Extracting [==================================================>]     883B/883B
+ a8ca58bc6ea9 Pull complete 
+ d0f44f87b588 Extracting [==>                                                ]  32.77kB/783.6kB
+ d0f44f87b588 Extracting [==================================================>]  783.6kB/783.6kB
+ d0f44f87b588 Extracting [==================================================>]  783.6kB/783.6kB
+ d0f44f87b588 Pull complete 
+ 3efae9596a0b Extracting [>                                                  ]  65.54kB/6.193MB
+ 3efae9596a0b Extracting [================>                                  ]  2.097MB/6.193MB
+ 289dbe2b4aa0 Downloading [>                                                  ]  521.5kB/51.63MB
+ 3efae9596a0b Extracting [===================================>               ]  4.391MB/6.193MB
+ 3efae9596a0b Extracting [==================================================>]  6.193MB/6.193MB
+ 3efae9596a0b Pull complete 
+ 860b7bc67210 Extracting [==================================================>]  2.607kB/2.607kB
+ 860b7bc67210 Extracting [==================================================>]  2.607kB/2.607kB
+ 289dbe2b4aa0 Downloading [=>                                                 ]  1.047MB/51.63MB
+ 860b7bc67210 Pull complete 
+ a5cddd18da97 Extracting [==================================================>]     332B/332B
+ a5cddd18da97 Extracting [==================================================>]     332B/332B
+ a5cddd18da97 Pull complete 
+ 289dbe2b4aa0 Downloading [==>                                                ]  2.096MB/51.63MB
+ e31ea7613c63 Downloading [>                                                  ]  539.4kB/132.4MB
+ 289dbe2b4aa0 Downloading [====>                                              ]  4.188MB/51.63MB
+ e31ea7613c63 Downloading [>                                                  ]   1.08MB/132.4MB
+ 289dbe2b4aa0 Downloading [=======>                                           ]  7.872MB/51.63MB
+ e31ea7613c63 Downloading [>                                                  ]  2.151MB/132.4MB
+ 289dbe2b4aa0 Downloading [=============>                                     ]  14.18MB/51.63MB
+ 9bebc71cfb90 Downloading [=================================>                 ]  3.502kB/5.23kB
+ 9bebc71cfb90 Downloading [==================================================>]   5.23kB/5.23kB
+ 9bebc71cfb90 Verifying Checksum 
+ 9bebc71cfb90 Download complete 
+ e31ea7613c63 Downloading [=>                                                 ]  4.298MB/132.4MB
+ 289dbe2b4aa0 Downloading [=======================>                           ]  24.68MB/51.63MB
+ e31ea7613c63 Downloading [===>                                               ]  8.037MB/132.4MB
+ 289dbe2b4aa0 Downloading [====================================>              ]  37.33MB/51.63MB
+ e31ea7613c63 Downloading [=====>                                             ]  14.43MB/132.4MB
+ 289dbe2b4aa0 Downloading [=============================================>     ]  47.31MB/51.63MB
+ 289dbe2b4aa0 Download complete 
+ 289dbe2b4aa0 Extracting [>                                                  ]  524.3kB/51.63MB
+ e31ea7613c63 Downloading [==========>                                        ]   26.7MB/132.4MB
+ 289dbe2b4aa0 Extracting [===>                                               ]   3.67MB/51.63MB
+ e31ea7613c63 Downloading [=============>                                     ]  35.26MB/132.4MB
+ e31ea7613c63 Downloading [=================>                                 ]  47.52MB/132.4MB
+ 289dbe2b4aa0 Extracting [======>                                            ]  6.816MB/51.63MB
+ e31ea7613c63 Downloading [======================>                            ]  58.73MB/132.4MB
+ 289dbe2b4aa0 Extracting [=========>                                         ]  9.437MB/51.63MB
+ 289dbe2b4aa0 Extracting [============>                                      ]  12.58MB/51.63MB
+ e31ea7613c63 Downloading [============================>                      ]  74.73MB/132.4MB
+ e31ea7613c63 Downloading [=================================>                 ]  88.58MB/132.4MB
+ 289dbe2b4aa0 Extracting [===============>                                   ]  15.73MB/51.63MB
+ e31ea7613c63 Downloading [====================================>              ]  97.63MB/132.4MB
+ 289dbe2b4aa0 Extracting [==================>                                ]  18.87MB/51.63MB
+ e31ea7613c63 Downloading [========================================>          ]  108.2MB/132.4MB
+ 289dbe2b4aa0 Extracting [====================>                              ]  20.97MB/51.63MB
+ e31ea7613c63 Downloading [=============================================>     ]  119.9MB/132.4MB
+ 289dbe2b4aa0 Extracting [=======================>                           ]  24.12MB/51.63MB
+ e31ea7613c63 Downloading [=================================================> ]  132.2MB/132.4MB
+ e31ea7613c63 Verifying Checksum 
+ e31ea7613c63 Download complete 
+ 289dbe2b4aa0 Extracting [===========================>                       ]  28.31MB/51.63MB
+ 289dbe2b4aa0 Extracting [===============================>                   ]  32.51MB/51.63MB
+ 289dbe2b4aa0 Extracting [===================================>               ]   36.7MB/51.63MB
+ 289dbe2b4aa0 Extracting [======================================>            ]  39.32MB/51.63MB
+ 289dbe2b4aa0 Extracting [=========================================>         ]  42.47MB/51.63MB
+ 289dbe2b4aa0 Extracting [===========================================>       ]  45.09MB/51.63MB
+ 289dbe2b4aa0 Extracting [=============================================>     ]  47.19MB/51.63MB
+ 289dbe2b4aa0 Extracting [===============================================>   ]  49.28MB/51.63MB
+ 289dbe2b4aa0 Extracting [==================================================>]  51.63MB/51.63MB
+ 289dbe2b4aa0 Pull complete 
+ 01cb8e5472ee Extracting [==================================================>]     321B/321B
+ 01cb8e5472ee Extracting [==================================================>]     321B/321B
+ 01cb8e5472ee Pull complete 
+ e31ea7613c63 Extracting [>                                                  ]  557.1kB/132.4MB
+ e31ea7613c63 Extracting [=>                                                 ]  3.899MB/132.4MB
+ e31ea7613c63 Extracting [==>                                                ]  7.799MB/132.4MB
+ e31ea7613c63 Extracting [====>                                              ]  11.14MB/132.4MB
+ e31ea7613c63 Extracting [=====>                                             ]  13.93MB/132.4MB
+ e31ea7613c63 Extracting [======>                                            ]  16.71MB/132.4MB
+ e31ea7613c63 Extracting [=======>                                           ]  20.05MB/132.4MB
+ e31ea7613c63 Extracting [========>                                          ]  21.73MB/132.4MB
+ e31ea7613c63 Extracting [=========>                                         ]  23.95MB/132.4MB
+ e31ea7613c63 Extracting [==========>                                        ]  26.74MB/132.4MB
+ e31ea7613c63 Extracting [===========>                                       ]  29.52MB/132.4MB
+ e31ea7613c63 Extracting [===========>                                       ]   31.2MB/132.4MB
+ e31ea7613c63 Extracting [============>                                      ]  33.42MB/132.4MB
+ e31ea7613c63 Extracting [=============>                                     ]  34.54MB/132.4MB
+ e31ea7613c63 Extracting [=============>                                     ]  35.09MB/132.4MB
+ e31ea7613c63 Extracting [=============>                                     ]  35.65MB/132.4MB
+ e31ea7613c63 Extracting [=============>                                     ]  36.21MB/132.4MB
+ e31ea7613c63 Extracting [=============>                                     ]  36.77MB/132.4MB
+ e31ea7613c63 Extracting [==============>                                    ]  37.32MB/132.4MB
+ e31ea7613c63 Extracting [==============>                                    ]  37.88MB/132.4MB
+ e31ea7613c63 Extracting [==============>                                    ]  38.44MB/132.4MB
+ e31ea7613c63 Extracting [==============>                                    ]  38.99MB/132.4MB
+ e31ea7613c63 Extracting [==============>                                    ]  39.55MB/132.4MB
+ e31ea7613c63 Extracting [===============>                                   ]  40.11MB/132.4MB
+ e31ea7613c63 Extracting [===============>                                   ]  40.67MB/132.4MB
+ e31ea7613c63 Extracting [===============>                                   ]  41.22MB/132.4MB
+ e31ea7613c63 Extracting [===============>                                   ]  41.78MB/132.4MB
+ e31ea7613c63 Extracting [===============>                                   ]  42.34MB/132.4MB
+ e31ea7613c63 Extracting [================>                                  ]  42.89MB/132.4MB
+ e31ea7613c63 Extracting [================>                                  ]  43.45MB/132.4MB
+ e31ea7613c63 Extracting [================>                                  ]  44.01MB/132.4MB
+ e31ea7613c63 Extracting [================>                                  ]  44.56MB/132.4MB
+ e31ea7613c63 Extracting [=================>                                 ]  45.12MB/132.4MB
+ e31ea7613c63 Extracting [=================>                                 ]  45.68MB/132.4MB
+ e31ea7613c63 Extracting [=================>                                 ]  46.24MB/132.4MB
+ e31ea7613c63 Extracting [=================>                                 ]  46.79MB/132.4MB
+ e31ea7613c63 Extracting [=================>                                 ]  47.35MB/132.4MB
+ e31ea7613c63 Extracting [==================>                                ]  47.91MB/132.4MB
+ e31ea7613c63 Extracting [==================>                                ]  48.46MB/132.4MB
+ e31ea7613c63 Extracting [==================>                                ]  49.02MB/132.4MB
+ e31ea7613c63 Extracting [===================>                               ]  50.69MB/132.4MB
+ e31ea7613c63 Extracting [===================>                               ]  51.81MB/132.4MB
+ e31ea7613c63 Extracting [===================>                               ]  52.92MB/132.4MB
+ e31ea7613c63 Extracting [====================>                              ]  55.15MB/132.4MB
+ e31ea7613c63 Extracting [======================>                            ]  58.49MB/132.4MB
+ e31ea7613c63 Extracting [=======================>                           ]  61.83MB/132.4MB
+ e31ea7613c63 Extracting [========================>                          ]  65.18MB/132.4MB
+ e31ea7613c63 Extracting [=========================>                         ]  68.52MB/132.4MB
+ e31ea7613c63 Extracting [===========================>                       ]  71.86MB/132.4MB
+ e31ea7613c63 Extracting [============================>                      ]  75.76MB/132.4MB
+ e31ea7613c63 Extracting [=============================>                     ]   79.1MB/132.4MB
+ e31ea7613c63 Extracting [===============================>                   ]  82.44MB/132.4MB
+ e31ea7613c63 Extracting [================================>                  ]  85.79MB/132.4MB
+ e31ea7613c63 Extracting [=================================>                 ]  89.13MB/132.4MB
+ e31ea7613c63 Extracting [===================================>               ]  93.03MB/132.4MB
+ e31ea7613c63 Extracting [====================================>              ]  96.37MB/132.4MB
+ e31ea7613c63 Extracting [=====================================>             ]  99.71MB/132.4MB
+ e31ea7613c63 Extracting [=======================================>           ]  103.6MB/132.4MB
+ e31ea7613c63 Extracting [========================================>          ]    107MB/132.4MB
+ e31ea7613c63 Extracting [=========================================>         ]  108.6MB/132.4MB
+ e31ea7613c63 Extracting [=========================================>         ]  110.3MB/132.4MB
+ e31ea7613c63 Extracting [===========================================>       ]  114.2MB/132.4MB
+ e31ea7613c63 Extracting [============================================>      ]  118.7MB/132.4MB
+ e31ea7613c63 Extracting [==============================================>    ]  124.2MB/132.4MB
+ e31ea7613c63 Extracting [===============================================>   ]    127MB/132.4MB
+ e31ea7613c63 Extracting [=================================================> ]  129.8MB/132.4MB
+ e31ea7613c63 Extracting [==================================================>]  132.4MB/132.4MB
+ e31ea7613c63 Pull complete 
+ 9bebc71cfb90 Extracting [==================================================>]   5.23kB/5.23kB
+ 9bebc71cfb90 Extracting [==================================================>]   5.23kB/5.23kB
+ 9bebc71cfb90 Pull complete 
+ mysql Pulled 
+ Network ratanhr-work-fixed-updated_default  Creating
+ Network ratanhr-work-fixed-updated_default  Created
+ Volume "ratanhr-work-fixed-updated_hrms_mysqldata"  Creating
+ Volume "ratanhr-work-fixed-updated_hrms_mysqldata"  Created
+ Volume "ratanhr-work-fixed-updated_hrms_redis"  Creating
+ Volume "ratanhr-work-fixed-updated_hrms_redis"  Created
+ Container ratanhr-work-fixed-updated-redis-1  Creating
+ Container ratanhr-work-fixed-updated-mysql-1  Creating
+ Container ratanhr-work-fixed-updated-redis-1  Created
+ Container ratanhr-work-fixed-updated-mysql-1  Created
+ Container ratanhr-work-fixed-updated-mysql-1  Starting
+ Container ratanhr-work-fixed-updated-redis-1  Starting
+ Container ratanhr-work-fixed-updated-redis-1  Started
+ Container ratanhr-work-fixed-updated-mysql-1  Started
+--- EXIT CODE ---
+0
+$ docker compose -f docker-compose.yml ps
+NAME                                 IMAGE                                                                                      COMMAND                  SERVICE   CREATED        STATUS                                     PORTS
+ratanhr-work-fixed-updated-mysql-1   mysql:8.4@sha256:1d6b6a8fcee8ff758ff151d017f5203cd06792a0e698f0a593c9dfcb14609cf0          "docker-entrypoint.s…"   mysql     1 second ago   Up Less than a second (health: starting)   3306/tcp, 33060/tcp
+ratanhr-work-fixed-updated-redis-1   redis:7.4-alpine@sha256:b1addbe72465a718643cff9e60a58e6df1841e29d6d7d60c9a85d8d72f08d1a7   "docker-entrypoint.s…"   redis     1 second ago   Up Less than a second (health: starting)   6379/tcp
+--- EXIT CODE ---
+0
+$ docker compose -f docker-compose.yml exec -T mysql mysql -uhrms -p[REDACTED-VALUE]-PASSWORD] -e "SELECT 1;"
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)
+
+--- EXIT CODE ---
+0
+$ docker compose -f docker-compose.yml exec -T redis redis-cli ping
+OCI runtime exec failed: exec failed: unable to start container process: error executing setns process: exit status 1: unknown
+
+--- EXIT CODE ---
+0
+$ docker compose -f docker-compose.yml run --rm migrate
+ Container ratanhr-work-fixed-updated-mysql-1  Running
+ Container ratanhr-work-fixed-updated-backfill-1  Creating
+ Container ratanhr-work-fixed-updated-backfill-1  Created
+ Container ratanhr-work-fixed-updated-mysql-1  Waiting
+ Container ratanhr-work-fixed-updated-mysql-1  Error
+dependency failed to start: container ratanhr-work-fixed-updated-mysql-1 is unhealthy
+--- EXIT CODE ---
+0
+$ docker compose -f docker-compose.yml down -v --remove-orphans
+ Container ratanhr-work-fixed-updated-backfill-1  Stopping
+ Container ratanhr-work-fixed-updated-redis-1  Stopping
+ Container ratanhr-work-fixed-updated-backfill-1  Stopped
+ Container ratanhr-work-fixed-updated-backfill-1  Removing
+ Container ratanhr-work-fixed-updated-backfill-1  Removed
+ Container ratanhr-work-fixed-updated-mysql-1  Stopping
+ Container ratanhr-work-fixed-updated-redis-1  Stopped
+ Container ratanhr-work-fixed-updated-redis-1  Removing
+ Container ratanhr-work-fixed-updated-redis-1  Removed
+ Container ratanhr-work-fixed-updated-mysql-1  Stopped
+ Container ratanhr-work-fixed-updated-mysql-1  Removing
+ Container ratanhr-work-fixed-updated-mysql-1  Removed
+ Volume ratanhr-work-fixed-updated_hrms_redis  Removing
+ Volume ratanhr-work-fixed-updated_hrms_mysqldata  Removing
+ Network ratanhr-work-fixed-updated_default  Removing
+ Volume ratanhr-work-fixed-updated_hrms_redis  Removed
+ Volume ratanhr-work-fixed-updated_hrms_mysqldata  Removed
+ Network ratanhr-work-fixed-updated_default  Removed
+--- EXIT CODE ---
+0

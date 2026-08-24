@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>Companies – Super Admin</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar sidebar-superadmin" id="sidebar">
+  <div class="brand"><span style="background:#9b59b6;color:#fff;">SA</span> Super Admin</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="superadmin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">System Management</div>
+    <a href="superadmin-companies.html" class="nav-link active"><i class="bi bi-buildings"></i> Companies</a>
+    <a href="superadmin-manage-admins.html" class="nav-link"><i class="bi bi-people-fill"></i> Admin Users</a>
+    <a href="superadmin-permissions.html" class="nav-link"><i class="bi bi-shield-check"></i> Permission Matrix</a>
+    <a href="superadmin-superadmins.html" class="nav-link"><i class="bi bi-person-badge"></i> Super Admins</a>
+    <div class="nav-label">Global Data</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#e1"><i class="bi bi-person-lines-fill"></i> All Employees <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="e1"><a href="view-employees.html" class="sub-link">View All</a></div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r1"><i class="bi bi-bar-chart-line"></i> Reports <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r1"><a href="reports-attendance.html" class="sub-link">Attendance</a><a href="reports-employee.html" class="sub-link">Employee</a></div>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Company Management</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="role-badge superadmin">Super Admin</span>
+    <div class="avatar-circle sa">SA</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+<div class="main-panel">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-semibold mb-0">All Registered Companies</h6>
+    <a href="add-company.html" class="btn btn-sm fw-bold" style="background:#9b59b6;color:#fff;">+ Add Company</a>
+  </div>
+
+  <!-- BACKEND: {% for company in companies %} -->
+  <div class="card mb-3 shadow-sm border-0">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <h6 class="fw-bold mb-1"><i class="bi bi-building me-2" style="color:#9b59b6;"></i>{{company.company_name}}</h6>
+          <div class="d-flex flex-wrap gap-3 small text-muted mt-1">
+            <span><i class="bi bi-person me-1"></i>{{company.company_founder_name}}</span>
+            <span><i class="bi bi-telephone me-1"></i>{{company.phone_number}}</span>
+            <span><i class="bi bi-envelope me-1"></i>{{company.email_address}}</span>
+            <span><i class="bi bi-briefcase me-1"></i>{{company.industry_type}}</span>
+          </div>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <span class="badge bg-success-subtle text-success">Active</span>
+          <a href="edit-company.html?userId={{company.user_id}}" class="btn btn-sm btn-outline-warning">
+            <i class="bi bi-pencil me-1"></i>Edit
+          </a>
+          <!-- BACKEND: POST /superadmin/delete-company with confirmation -->
+          <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete('{{company.id}}','{{company.company_name}}')">
+            <i class="bi bi-trash me-1"></i>Delete
+          </button>
+        </div>
+      </div>
+      <hr class="my-2">
+      <div class="row g-2 small">
+        <div class="col-md-2 col-4"><span class="text-muted d-block" style="font-size:10px;">ADMINS</span><strong>{{company.admin_count}}</strong></div>
+        <div class="col-md-2 col-4"><span class="text-muted d-block" style="font-size:10px;">EMPLOYEES</span><strong>{{company.employee_count}}</strong></div>
+        <div class="col-md-2 col-4"><span class="text-muted d-block" style="font-size:10px;">CIN</span><strong>{{company.CIN}}</strong></div>
+        <div class="col-md-2 col-4"><span class="text-muted d-block" style="font-size:10px;">PAN</span><strong>{{company.pan}}</strong></div>
+        <div class="col-md-2 col-4"><span class="text-muted d-block" style="font-size:10px;">TYPE</span><strong>{{company.business_type}}</strong></div>
+        <div class="col-md-2 col-4"><span class="text-muted d-block" style="font-size:10px;">CITY</span><strong>{{company.city}}</strong></div>
+      </div>
+    </div>
+  </div>
+  <!-- BACKEND: {% endfor %} -->
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h6 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body small">
+        Are you sure you want to delete <strong id="deleteCompanyName"></strong>?
+        This will remove all associated admin users and data.
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <!-- BACKEND: POST /superadmin/delete-company -->
+        <form id="deleteForm" method="POST" action="/superadmin/delete-company">
+          <input type="hidden" name="company_id" id="deleteCompanyId">
+          <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+function confirmDelete(id, name) {
+  document.getElementById('deleteCompanyId').value = id;
+  document.getElementById('deleteCompanyName').textContent = name;
+  new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+</script>
+</body>
+</html>

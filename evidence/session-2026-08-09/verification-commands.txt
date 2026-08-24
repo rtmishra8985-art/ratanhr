@@ -1,0 +1,8 @@
+dotnet restore HRMS.sln
+dotnet test HRMS.sln --logger "console;verbosity=detailed"
+dotnet test HRMS.Tests/HRMS.Tests.csproj --filter 'FullyQualifiedName~PayrollGenerateCrossTenantTests.Generate_SuperAdmin_CrossTenantAllowed|FullyQualifiedName~BackgroundJobPhase2Tests.EmailQueue_PermanentlyFails_AfterThreeRetries' --logger 'console;verbosity=minimal'
+dotnet tool restore
+dotnet ef migrations has-pending-model-changes --context ApplicationDbContext --project HRMS.Infrastructure/HRMS.Infrastructure.csproj --startup-project HRMS.API/HRMS.API.csproj
+docker build -t hrms:verify .
+docker compose --env-file <temporary verification env> -f <compose file> config -q
+npx playwright test

@@ -1,0 +1,9 @@
+$ docker --version
+
+--- STDOUT ---
+Docker version 27.5.1, build v27.5.1
+
+--- STDERR ---
+
+--- EXIT CODE ---
+0

@@ -1,0 +1,53 @@
+# Requires: nginx ingress controller + cert-manager with Let's Encrypt ClusterIssuer.
+# Install cert-manager: https://cert-manager.io/docs/installation/
+# Create a ClusterIssuer named "letsencrypt-prod" before applying this file.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hrms-ingress
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect:          "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect:    "true"
+    nginx.ingress.kubernetes.io/proxy-body-size:       "15m"   # accommodate file uploads
+    nginx.ingress.kubernetes.io/proxy-read-timeout:    "120"   # streaming exports can be slow
+    nginx.ingress.kubernetes.io/proxy-send-timeout:    "120"
+    # TLS — cert-manager issues + auto-renews the Let's Encrypt cert
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # Security headers via ingress annotation
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+      add_header X-Content-Type-Options    nosniff                                always;
+      add_header X-Frame-Options           SAMEORIGIN                             always;
+      add_header Referrer-Policy           strict-origin-when-cross-origin        always;
+    # Restrict Prometheus /metrics to internal cluster IPs only
+    nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - app.ratanhr.com        # ← replace with your domain
+      secretName: hrms-tls-cert
+  rules:
+    - host: app.ratanhr.com      # ← replace with your domain
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: hrms-api-svc
+                port:
+                  name: http
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                # The published API image serves the built SPA from wwwroot.
+                # Keeping this on the API service avoids rendering a reference
+                # to a frontend Service that is not part of this release.
+                name: hrms-api-svc
+                port:
+                  name: http

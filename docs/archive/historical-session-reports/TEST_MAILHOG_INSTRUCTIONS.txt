@@ -1,0 +1,17 @@
+═══════════════════════════════════════════════════════════════════════════════
+        NOW TEST YOUR EMAIL WITH MAILHOG - SEND TEST EMAIL
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ .env file updated to use MailHog (localhost:1025)
+✅ MailHog is running on your machine
+✅ Ready to send test email!
+
+═══════════════════════════════════════════════════════════════════════════════
+                    STEP 1: CREATE TEST EMAIL SCRIPT
+═══════════════════════════════════════════════════════════════════════════════
+
+Create file: test_mailhog_email.py
+
+Copy and paste this code:
+
+═══════════════════════════════════════════════════════════════════════════════

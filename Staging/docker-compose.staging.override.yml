@@ -1,0 +1,35 @@
+# docker-compose.staging.override.yml
+#
+# Phase 4 acceptance gate override — host OCI workaround
+#
+# Context:
+#   This host's container runtime returns:
+#     OCI runtime exec failed: unable to start container process:
+#     error executing setns process: exit status 1: unknown
+#   when Docker attempts to exec healthcheck commands inside running containers.
+#   The healthcheck definitions are preserved on each service for monitoring
+#   visibility; only the depends_on conditions are relaxed from service_healthy
+#   to service_started so that dependent services are not held indefinitely.
+#
+# Evidence is gathered via independent TCP/HTTP probes from the host
+# (see Phase 4 audit) rather than Docker's internal exec mechanism.
+#
+# This file is supplemental to the staged acceptance gate.
+# It must never be used in production.
+
+services:
+  hrms_staging_migrate:
+    depends_on:
+      hrms_staging_db:
+        condition: service_started
+
+  hrms_staging_api:
+    depends_on:
+      hrms_staging_db:
+        condition: service_started
+      hrms_staging_redis:
+        condition: service_started
+      hrms_staging_mailhog:
+        condition: service_started
+      hrms_staging_migrate:
+        condition: service_completed_successfully

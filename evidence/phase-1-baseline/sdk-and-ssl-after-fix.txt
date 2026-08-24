@@ -1,0 +1,5 @@
+SDK references after fix:
+./global.json:3:    "version": "8.0.416",
+./Dockerfile:25:FROM mcr.microsoft.com/dotnet/sdk:8.0.416-alpine3.20 AS build
+./Dockerfile:57:FROM mcr.microsoft.com/dotnet/sdk:8.0.416-alpine3.20 AS migrate
+SslMode=None in runtime config files:

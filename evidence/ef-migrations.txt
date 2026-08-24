@@ -1,0 +1,12 @@
+$ dotnet ef migrations list --project HRMS.API --startup-project HRMS.API --context ApplicationDbContext
+
+--- STDOUT ---
+Build started...
+Build succeeded.
+An error occurred while accessing the Microsoft.Extensions.Hosting services. Continuing without the application service provider. Error: Value cannot be null. (Parameter 'connectionString')
+No DbContext named 'ApplicationDbContext' was found.
+
+--- STDERR ---
+
+--- EXIT CODE ---
+1

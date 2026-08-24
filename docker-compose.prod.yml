@@ -1,0 +1,226 @@
+# docker-compose.prod.yml – RatanHR HRMS production stack
+# Phase 2: ClamAV added as mandatory service; migrate runs all DB setup automatically;
+# ALLOWED_HOSTS + Hangfire Redis enforced; no optional/commented-out services.
+
+x-common-env: &common-env
+  ASPNETCORE_ENVIRONMENT: Production
+  ConnectionStrings__DefaultConnection: "Server=${MYSQL_HOST:-mysql};Port=3306;Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};AllowPublicKeyRetrieval=true;SslMode=Required;"
+  REDIS_CONNECTION_STRING: "${REDIS_HOST:-redis}:6379,password=${REDIS_PASSWORD},ssl=False,abortConnect=False"
+  MYSQL_HOST: "${MYSQL_HOST:-mysql}"
+  MYSQL_PORT: "3306"
+  MYSQL_USER: "${MYSQL_USER}"
+  MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+  MYSQL_DATABASE: "${MYSQL_DATABASE}"
+
+services:
+
+  # ── MySQL 8.4 ──────────────────────────────────────────────
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+    volumes:
+      - hrms_mysqldata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1",
+             "-u", "${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - hrms_internal
+
+  # ── Redis 7.4 ──────────────────────────────────────────────
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: >
+      redis-server
+        --requirepass ${REDIS_PASSWORD}
+        --appendonly yes
+        --appendfsync everysec
+    volumes:
+      - hrms_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - hrms_internal
+
+  # ── ClamAV (antivirus) ────────────────────────────────────
+  # MANDATORY — file uploads are fail-closed against ClamAV.
+  # The API will not accept file uploads when ClamAV is unreachable.
+  # Do NOT mark this service as optional or comment it out.
+  clamav:
+    image: clamav/clamav:1.3
+    restart: unless-stopped
+    volumes:
+      - hrms_clamav_db:/var/lib/clamav
+    environment:
+      CLAMAV_NO_FRESHCLAMD: "false"
+    healthcheck:
+      # clamdscan --ping exits 0 when clamd is ready
+      test: ["CMD", "clamdscan", "--ping", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s   # freshclam signature download on first start
+    networks:
+      - hrms_internal
+
+  # ── EF Core migrations ─────────────────────────────────────
+  # Runs once per deployment; applies all DB changes then exits 0.
+  # The former supplementary SQL files were folded into the migration chain
+  # (20260811080000_FoldDbScriptIndexes) — operators never run SQL manually.
+  migrate:
+    image: "${HRMS_MIGRATE_IMAGE:-hrms-api-migrate:0.0.0}"
+    build:
+      context: .
+      target: migrate
+      args:
+        APP_VERSION: "${APP_VERSION:-1.0.4}"
+        BUILD_TIMESTAMP: "${BUILD_TIMESTAMP:-unknown}"
+        GIT_SHA: "${GIT_SHA:-unknown}"
+    restart: "no"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+    networks:
+      - hrms_internal
+
+  # ── ASP.NET Core API ───────────────────────────────────────
+  api:
+    image: "${HRMS_API_IMAGE:-hrms-api:0.0.0}"
+    build:
+      context: .
+      target: runtime
+      args:
+        APP_VERSION: "${APP_VERSION:-1.0.4}"
+        BUILD_TIMESTAMP: "${BUILD_TIMESTAMP:-unknown}"
+        GIT_SHA: "${GIT_SHA:-unknown}"
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      clamav:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      # ALLOWED_HOSTS: semicolon-separated permitted Host header values.
+      # Must NOT be *, empty, or a placeholder. Startup fails if invalid.
+      ALLOWED_HOSTS: "${ALLOWED_HOSTS}"
+      DOMAIN_NAME: "${DOMAIN_NAME}"
+      APP_BASE_URL: "https://${DOMAIN_NAME}"
+      JWT_PRIVATE_KEY_PEM: "${JWT_PRIVATE_KEY_PEM}"
+      JWT_PUBLIC_KEY_PEM: "${JWT_PUBLIC_KEY_PEM}"
+      ENCRYPTION_KEY: "${ENCRYPTION_KEY}"
+      Database__AutoMigrate: "false"
+      Hangfire__UseRedis: "true"
+      Hangfire__RedisConnectionString: "${REDIS_HOST:-redis}:6379,password=${REDIS_PASSWORD},ssl=False,abortConnect=False"
+      ClamAv__Host: "clamav"
+      ClamAv__Port: "3310"
+      ClamAv__TimeoutSeconds: "30"
+      # Feature flags
+      Features__BiometricRealtime: "false"
+    volumes:
+      # BUGFIX: PayslipPdfJob writes generated payslip PDFs to
+      # IWebHostEnvironment.WebRootPath + "/uploads/payslip-pdfs" (i.e.
+      # /app/wwwroot/uploads), a DIFFERENT directory from the general
+      # FileStorageService upload root (/app/uploads, used for resumes, employee
+      # documents, profile photos, company logos, expense receipts). Only the
+      # general path was mounted here, so every generated payslip PDF was written
+      # to the container's ephemeral filesystem and lost on every
+      # restart/redeploy. Both paths must be persisted.
+      - hrms_uploads:/app/uploads
+      - hrms_uploads_wwwroot:/app/wwwroot/uploads
+      - hrms_logs:/app/Logs
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - hrms_internal
+
+  # ── nginx (TLS termination + SPA serving) ──────────────────
+  nginx:
+    image: nginx:1.27.0-alpine
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN_NAME: "${DOMAIN_NAME}"
+    volumes:
+      - ./nginx/nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
+      - hrms_certbot_conf:/etc/letsencrypt:ro
+      - hrms_certbot_www:/var/www/certbot:ro
+    networks:
+      - hrms_internal
+
+  # ── Certbot (Let's Encrypt auto-renewal) ───────────────────
+  certbot:
+    image: certbot/certbot:v2.11.0
+    restart: unless-stopped
+    volumes:
+      - hrms_certbot_conf:/etc/letsencrypt
+      - hrms_certbot_www:/var/www/certbot
+    entrypoint: >
+      /bin/sh -c "trap exit TERM; while :;
+        do certbot renew --webroot -w /var/www/certbot --quiet;
+        sleep 12h & wait $${!}; done"
+    networks:
+      - hrms_internal
+
+  # ── Daily MySQL backup ─────────────────────────────────────
+  backup:
+    image: mysql:8.4
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_HOST: mysql
+    volumes:
+      - hrms_backups:/backups
+      - ./scripts/mysql-backup.sh:/mysql-backup.sh:ro
+    entrypoint: >
+      /bin/sh -c "trap exit TERM; while :;
+        do /mysql-backup.sh;
+        sleep 86400 & wait $${!}; done"
+    networks:
+      - hrms_internal
+
+volumes:
+  hrms_mysqldata:
+  hrms_redis:
+  hrms_clamav_db:
+  hrms_uploads:
+  hrms_uploads_wwwroot:
+  hrms_logs:
+  hrms_certbot_conf:
+  hrms_certbot_www:
+  hrms_backups:
+
+networks:
+  hrms_internal:
+    driver: bridge

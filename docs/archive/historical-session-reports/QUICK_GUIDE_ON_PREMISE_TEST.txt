@@ -1,0 +1,132 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║              🟢 SEND TEST EMAIL FOR ON-PREMISE (BREVO SMTP)                  ║
+║                                                                               ║
+║                             QUICK START GUIDE                                ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    FILE TO RUN - 3 CLICKS!                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  File: SEND_ON_PREMISE_TEST_EMAIL.bat                                       │
+│  Location: C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR\            │
+│                                                                             │
+│  Click 1: Press Windows Key + E (File Explorer)                            │
+│  Click 2: Paste: C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR      │
+│  Click 3: Double-click: SEND_ON_PREMISE_TEST_EMAIL.bat                    │
+│                                                                             │
+│  Result: Email sent to rtmishra7040@gmail.com via Brevo                    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       WHAT HAPPENS NEXT                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Command Window Opens:                                                      │
+│  ════════════════════════════════════════════════════════════════════      │
+│    RatanHR Phase 8 - ON-PREMISE TEST EMAIL (Brevo SMTP)                   │
+│                                                                             │
+│    [1/3] Configuration Check                                              │
+│      SMTP Host: smtp-relay.brevo.com                                       │
+│      SMTP Port: 587                                                        │
+│      Protocol: STARTTLS                                                    │
+│                                                                             │
+│    [2/3] Connecting to Brevo SMTP...                                      │
+│      [Connecting...]                                                       │
+│      [Authenticating...]                                                   │
+│      [Sending email...]                                                    │
+│      ✓ Email sent successfully!                                            │
+│                                                                             │
+│    ✅ SUCCESS - ON-PREMISE EMAIL SENT TO BREVO                            │
+│                                                                             │
+│    [3/3] Finalizing...                                                     │
+│                                                                             │
+│  Then: Window stays open - Press any key to close                          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    THEN: CHECK YOUR EMAIL                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. Open Gmail: https://mail.google.com                                    │
+│  2. Login to: rtmishra7040@gmail.com                                       │
+│  3. Wait: 1-2 minutes for email to arrive                                  │
+│  4. Look for: Email from rtmishra8985@gmail.com                           │
+│  5. Subject: 🟢 RatanHR On-Premise TEST EMAIL                             │
+│                                                                             │
+│  Email Content:                                                             │
+│    ├─ Title: "RatanHR On-Premise Email Test"                             │
+│    ├─ Status: "ON-PREMISE BREVO SMTP CONFIGURED"                         │
+│    ├─ From: rtmishra8985@gmail.com                                        │
+│    ├─ SMTP Server: smtp-relay.brevo.com:587                               │
+│    ├─ Protocol: STARTTLS                                                  │
+│    └─ Timestamp: (current date/time)                                      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                        TEST RESULTS CHART                                    ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                               ┃
+┃  ✅ EMAIL ARRIVED IN INBOX                                                  ┃
+┃  └─ What it means:                                                          ┃
+┃     ✓ On-premise SMTP configuration working                                 ┃
+┃     ✓ Brevo connection successful                                           ┃
+┃     ✓ STARTTLS encryption working                                           ┃
+┃     ✓ Authentication successful                                             ┃
+┃     ✓ Email delivery working                                                ┃
+┃     ✓ Ready for production on-premise deployment!                          ┃
+┃                                                                               ┃
+┃  ❌ EMAIL DID NOT ARRIVE                                                    ┃
+┃  └─ Check:                                                                  ┃
+┃     1. Spam/Junk folder in Gmail                                            ┃
+┃     2. Command window showed errors                                         ┃
+┃     3. Firewall blocking port 587                                           ┃
+┃     4. Internet connection working                                          ┃
+┃     5. Brevo credentials correct                                            ┃
+┃                                                                               ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    COMPARISON: 3 TESTS                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Test 1: LOCAL (MailHog)                                                   │
+│  ────────────────────────                                                   │
+│  File: SEND_TEST_EMAIL_TO_MAILHOG.bat                                      │
+│  SMTP: localhost:1025                                                       │
+│  Result: Email captured in http://localhost:8025                           │
+│  Status: ✅ ALREADY DONE & WORKING                                          │
+│                                                                             │
+│  Test 2: ON-PREMISE (Brevo) ← RUN THIS NOW!                               │
+│  ────────────────────────────                                               │
+│  File: SEND_ON_PREMISE_TEST_EMAIL.bat                                      │
+│  SMTP: smtp-relay.brevo.com:587                                            │
+│  Result: Real email in Gmail inbox                                         │
+│  Status: RUN NOW!                                                           │
+│                                                                             │
+│  Test 3: CLOUD/AWS (Same as On-Premise)                                    │
+│  ──────────────────────────────────────                                     │
+│  SMTP: smtp-relay.brevo.com:587                                            │
+│  Result: Real email in Gmail inbox                                         │
+│  Status: Will work after on-premise test passes                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║                          🚀 RUN THE TEST NOW!                                ║
+║                                                                               ║
+║  1. Double-click: SEND_ON_PREMISE_TEST_EMAIL.bat                            ║
+║  2. Wait for: ✅ SUCCESS message                                             ║
+║  3. Check email: rtmishra7040@gmail.com                                      ║
+║  4. Look for: Email from rtmishra8985@gmail.com                             ║
+║  5. Verify: Subject is "🟢 RatanHR On-Premise TEST EMAIL"                  ║
+║                                                                               ║
+║  If email arrived: ✅ ON-PREMISE BREVO SMTP IS WORKING!                     ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝

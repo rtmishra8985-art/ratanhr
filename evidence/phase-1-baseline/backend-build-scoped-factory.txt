@@ -1,0 +1,12 @@
+  HRMS.Domain -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Domain/bin/Debug/net8.0/HRMS.Domain.dll
+  HRMS.Application -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Application/bin/Debug/net8.0/HRMS.Application.dll
+  HRMS.Infrastructure -> /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.Infrastructure/bin/Debug/net8.0/HRMS.Infrastructure.dll
+/home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Extensions/ServiceExtensions.cs(75,13): error CS1739: The best overload for 'AddDbContextFactory' does not have a parameter named 'optionsLifetime' [/home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/HRMS.API.csproj]
+
+Build FAILED.
+
+/home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/Extensions/ServiceExtensions.cs(75,13): error CS1739: The best overload for 'AddDbContextFactory' does not have a parameter named 'optionsLifetime' [/home/runner/workspace/RatanHR-work-fixed-updated/HRMS.API/HRMS.API.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:11.39

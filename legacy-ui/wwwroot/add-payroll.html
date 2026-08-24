@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>Generate Payslip – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <style>
+    /* Payslip print layout */
+    @media print {
+      .sidebar, .topnav, .no-print { display: none !important; }
+      .main-panel { margin-left: 0 !important; padding: 0 !important; }
+      .payslip-card { box-shadow: none !important; border: 1px solid #333 !important; }
+    }
+    .payslip-card { border-radius: 12px; overflow: hidden; }
+    .payslip-header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: #fff; padding: 24px 28px; }
+    .payslip-header .company-name { font-size: 20px; font-weight: 700; }
+    .payslip-header .slip-label { background: #f7b731; color: #000; padding: 3px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .earn-table th, .earn-table td { padding: 8px 12px; font-size: 13px; }
+    .earn-table thead th { background: #f8f9fc; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: #666; }
+    .net-pay-box { background: #f7b731; border-radius: 8px; padding: 12px 20px; text-align: right; }
+    .net-pay-box .label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #5a3e00; }
+    .net-pay-box .amount { font-size: 26px; font-weight: 700; color: #1a1a2e; }
+  </style>
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Registration</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r1"><i class="bi bi-person-plus"></i> Registration <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r1"><a href="add-employee.html" class="sub-link">Register</a><a href="view-employees.html" class="sub-link">View All</a></div>
+    <div class="nav-label">Company</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r2"><i class="bi bi-building"></i> Company <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r2"><a href="add-company.html" class="sub-link">Add</a><a href="view-company.html" class="sub-link">View</a></div>
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r3"><i class="bi bi-globe"></i> Web Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r3"><a href="web-attendance-admin.html" class="sub-link">View</a></div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r4"><i class="bi bi-file-earmark-spreadsheet"></i> Excel Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r4"><a href="upload-attendance.html" class="sub-link">Upload</a><a href="view-attendance.html" class="sub-link">View</a></div>
+    <div class="nav-label">Payroll</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapsePayroll"><i class="bi bi-cash-stack"></i> Payroll <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapsePayroll">
+      <a href="payroll.html" class="sub-link">View Payroll</a>
+      <a href="add-payroll.html" class="sub-link" style="color:#f7b731;">Generate Payslip</a>
+    </div>
+    <div class="nav-label">Reports</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseReports"><i class="bi bi-bar-chart-line"></i> Reports <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseReports">
+      <a href="reports-attendance.html" class="sub-link">Attendance Report</a>
+      <a href="reports-employee.html" class="sub-link">Employee Report</a>
+    </div>
+    <div class="nav-label">Others</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r5"><i class="bi bi-star"></i> Appreciation <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r5"><a href="appreciation.html" class="sub-link">Appreciate</a></div>
+    <a href="admin-users.html" class="nav-link"><i class="bi bi-people"></i> Admin Users</a>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav no-print">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Generate Payslip</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <div class="row g-4">
+
+    <!-- Input Form -->
+    <div class="col-lg-5 no-print">
+      <div class="card card-table">
+        <div class="card-header py-3 fw-semibold">Payslip Details</div>
+        <div class="card-body">
+          <!-- <div class="alert alert-success">Payslip saved! <a href="payroll.html">View all</a></div> -->
+
+          <form id="payslipForm">
+            <div class="mb-3">
+              <label class="form-label fw-semibold small">Employee <span class="text-danger">*</span></label>
+              <select class="form-select" name="employee_id" required id="empSelect">
+                <option value="">Choose Employee</option>
+                </select>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Month <span class="text-danger">*</span></label>
+                <select class="form-select" name="month" required>
+                  <option value="1">January</option><option value="2">February</option>
+                  <option value="3">March</option><option value="4">April</option>
+                  <option value="5">May</option><option value="6">June</option>
+                  <option value="7">July</option><option value="8">August</option>
+                  <option value="9">September</option><option value="10">October</option>
+                  <option value="11">November</option><option value="12">December</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Year <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="year" value="2025" min="2000" max="2099" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold small">Working Days</label>
+              <input type="number" class="form-control" name="working_days" id="workingDays" value="26" min="1" max="31">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold small">Days Present</label>
+              <input type="number" class="form-control" name="days_present" id="daysPresent" value="26" min="0" max="31">
+            </div>
+
+            <p class="section-title mt-3">Earnings</p>
+            <div class="row g-2 mb-2">
+              <div class="col-6"><label class="form-label small">Basic Pay (₹)</label>
+                <input type="number" class="form-control calc-input" name="basic_pay" id="basicPay" placeholder="0" oninput="calculate()"></div>
+              <div class="col-6"><label class="form-label small">HRA (₹)</label>
+                <input type="number" class="form-control calc-input" name="hra" id="hra" placeholder="0" oninput="calculate()"></div>
+              <div class="col-6"><label class="form-label small">DA (₹)</label>
+                <input type="number" class="form-control calc-input" name="da" id="da" placeholder="0" oninput="calculate()"></div>
+              <div class="col-6"><label class="form-label small">Conveyance (₹)</label>
+                <input type="number" class="form-control calc-input" name="conveyance" id="conveyance" placeholder="0" oninput="calculate()"></div>
+              <div class="col-6"><label class="form-label small">Medical Allowance (₹)</label>
+                <input type="number" class="form-control calc-input" name="medical_allowance" id="medical" placeholder="0" oninput="calculate()"></div>
+              <div class="col-6"><label class="form-label small">Other Allowances (₹)</label>
+                <input type="number" class="form-control calc-input" name="other_allowances" id="otherAllow" placeholder="0" oninput="calculate()"></div>
+            </div>
+
+            <p class="section-title mt-3">Deductions</p>
+            <div class="row g-2 mb-3">
+              <div class="col-6"><label class="form-label small">PF Employee (₹)</label>
+                <input type="number" class="form-control calc-input" name="pf_employee" id="pf" placeholder="0" oninput="calculate()"></div>
+              <div class="col-6"><label class="form-label small">PF Employer (₹)</label>
+                <input type="number" class="form-control calc-input" name="pf_employer" id="pfEmployer" placeholder="0" oninput="calculate()"></div>
+              <div class="col-6"><label class="form-label small">Income Tax (₹)</label>
+                <input type="number" class="form-control calc-input" name="income_tax" id="tax" placeholder="0" oninput="calculate()"></div>
+              <div class="col-6"><label class="form-label small">Professional Tax (₹)</label>
+                <input type="number" class="form-control calc-input" name="professional_tax" id="profTax" placeholder="0" oninput="calculate()"></div>
+              <div class="col-6"><label class="form-label small">Advance / Loan (₹)</label>
+                <input type="number" class="form-control calc-input" name="advance" id="advance" placeholder="0" oninput="calculate()"></div>
+              <div class="col-6"><label class="form-label small">Other Deductions (₹)</label>
+                <input type="number" class="form-control calc-input" name="other_deductions" id="otherDed" placeholder="0" oninput="calculate()"></div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-outline-secondary flex-fill" onclick="generatePreview()">
+                <i class="bi bi-eye me-1"></i>Preview
+              </button>
+              <button type="submit" class="btn btn-warning flex-fill fw-bold">
+                <i class="bi bi-save me-1"></i>Save
+              </button>
+              <button type="button" class="btn btn-dark flex-fill" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i>Print
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payslip Preview -->
+    <div class="col-lg-7" id="payslipPreview">
+      <div class="payslip-card card shadow">
+        <!-- Header -->
+        <div class="payslip-header d-flex justify-content-between align-items-start">
+          <div>
+            <div class="company-name" id="ps_companyName">Your Company Pvt. Ltd.</div>
+            <div class="small opacity-75 mt-1" id="ps_companyAddress">&nbsp;</div>
+            <div class="small opacity-75" id="ps_companyContact">&nbsp;</div>
+          </div>
+          <span class="slip-label">PAYSLIP</span>
+        </div>
+
+        <!-- Employee Info Bar -->
+        <div class="bg-light px-4 py-3 border-bottom">
+          <div class="row g-2">
+            <div class="col-md-3 col-6"><span class="text-muted d-block" style="font-size:10px;">EMPLOYEE NAME</span><strong class="small" id="ps_name">—</strong></div>
+            <div class="col-md-3 col-6"><span class="text-muted d-block" style="font-size:10px;">EMP ID</span><strong class="small" id="ps_id">—</strong></div>
+            <div class="col-md-3 col-6"><span class="text-muted d-block" style="font-size:10px;">DESIGNATION</span><strong class="small" id="ps_desig">—</strong></div>
+            <div class="col-md-3 col-6"><span class="text-muted d-block" style="font-size:10px;">DEPARTMENT</span><strong class="small" id="ps_dept">—</strong></div>
+            <div class="col-md-3 col-6"><span class="text-muted d-block" style="font-size:10px;">MONTH / YEAR</span><strong class="small" id="ps_period">— / —</strong></div>
+            <div class="col-md-3 col-6"><span class="text-muted d-block" style="font-size:10px;">WORKING DAYS</span><strong class="small" id="ps_wdays">—</strong></div>
+            <div class="col-md-3 col-6"><span class="text-muted d-block" style="font-size:10px;">DAYS PRESENT</span><strong class="small" id="ps_pdays">—</strong></div>
+            <div class="col-md-3 col-6"><span class="text-muted d-block" style="font-size:10px;">UAN</span><strong class="small" id="ps_uan">—</strong></div>
+          </div>
+        </div>
+
+        <!-- Earnings & Deductions Table -->
+        <div class="card-body p-0">
+          <table class="table earn-table mb-0">
+            <thead>
+              <tr>
+                <th class="w-50">Earnings</th><th class="text-end">Amount (₹)</th>
+                <th class="w-50">Deductions</th><th class="text-end">Amount (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Basic Pay</td><td class="text-end" id="r_basic">0</td><td>PF (Employee)</td><td class="text-end text-danger" id="r_pf">0</td></tr>
+              <tr><td>HRA</td><td class="text-end" id="r_hra">0</td><td>PF (Employer)</td><td class="text-end text-danger" id="r_pfEmp">0</td></tr>
+              <tr><td>DA</td><td class="text-end" id="r_da">0</td><td>Income Tax</td><td class="text-end text-danger" id="r_tax">0</td></tr>
+              <tr><td>Conveyance</td><td class="text-end" id="r_conv">0</td><td>Professional Tax</td><td class="text-end text-danger" id="r_profTax">0</td></tr>
+              <tr><td>Medical Allowance</td><td class="text-end" id="r_med">0</td><td>Advance / Loan</td><td class="text-end text-danger" id="r_adv">0</td></tr>
+              <tr><td>Other Allowances</td><td class="text-end" id="r_otherA">0</td><td>Other Deductions</td><td class="text-end text-danger" id="r_otherD">0</td></tr>
+              <tr class="table-light fw-bold">
+                <td>Total Earnings</td><td class="text-end text-success" id="r_grossTotal">0</td>
+                <td>Total Deductions</td><td class="text-end text-danger" id="r_dedTotal">0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Net Pay -->
+        <div class="px-4 py-3">
+          <div class="net-pay-box">
+            <div class="label">Net Pay (Take Home)</div>
+            <div class="amount">₹<span id="r_netPay">0</span></div>
+          </div>
+        </div>
+
+        <!-- Bank Details Footer -->
+        <div class="px-4 pb-4">
+          <div class="row g-3 small text-muted">
+            <div class="col-md-4"><span class="d-block fw-semibold text-dark">Bank Name</span><span id="ps_bank">—</span></div>
+            <div class="col-md-4"><span class="d-block fw-semibold text-dark">Account Number</span><span id="ps_acc">—</span></div>
+            <div class="col-md-4 text-end"><span class="d-block fw-semibold text-dark">Authorised Signatory</span><div class="mt-4 border-top border-dark" style="width:100px;float:right;"></div></div>
+          </div>
+          <div class="mt-3 text-muted text-center" style="font-size:11px;">
+            This is a computer generated payslip. No signature required.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+const months = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function n(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+function calculate() {
+  const gross = n('basicPay') + n('hra') + n('da') + n('conveyance') + n('medical') + n('otherAllow');
+  const deductions = n('pf') + n('pfEmployer') + n('tax') + n('profTax') + n('advance') + n('otherDed');
+  const net = gross - deductions;
+
+  // Update preview table
+  document.getElementById('r_basic').textContent = n('basicPay').toLocaleString('en-IN');
+  document.getElementById('r_hra').textContent = n('hra').toLocaleString('en-IN');
+  document.getElementById('r_da').textContent = n('da').toLocaleString('en-IN');
+  document.getElementById('r_conv').textContent = n('conveyance').toLocaleString('en-IN');
+  document.getElementById('r_med').textContent = n('medical').toLocaleString('en-IN');
+  document.getElementById('r_otherA').textContent = n('otherAllow').toLocaleString('en-IN');
+  document.getElementById('r_pf').textContent = n('pf').toLocaleString('en-IN');
+  document.getElementById('r_pfEmp').textContent = n('pfEmployer').toLocaleString('en-IN');
+  document.getElementById('r_tax').textContent = n('tax').toLocaleString('en-IN');
+  document.getElementById('r_profTax').textContent = n('profTax').toLocaleString('en-IN');
+  document.getElementById('r_adv').textContent = n('advance').toLocaleString('en-IN');
+  document.getElementById('r_otherD').textContent = n('otherDed').toLocaleString('en-IN');
+  document.getElementById('r_grossTotal').textContent = gross.toLocaleString('en-IN');
+  document.getElementById('r_dedTotal').textContent = deductions.toLocaleString('en-IN');
+  document.getElementById('r_netPay').textContent = Math.max(0, net).toLocaleString('en-IN');
+}
+
+function generatePreview() {
+  const sel = document.getElementById('empSelect');
+  const opt = sel.selectedOptions[0];
+  const monthSel = document.querySelector('select[name="month"]');
+  const yearVal = document.querySelector('input[name="year"]').value;
+
+  if (!opt.value) { alert('Please select an employee.'); return; }
+
+  document.getElementById('ps_name').textContent = opt.dataset.name || '—';
+  document.getElementById('ps_id').textContent = opt.value || '—';
+  document.getElementById('ps_desig').textContent = opt.dataset.designation || '—';
+  document.getElementById('ps_dept').textContent = opt.dataset.department || '—';
+  document.getElementById('ps_period').textContent = (months[parseInt(monthSel.value)] || '—') + ' / ' + yearVal;
+  document.getElementById('ps_wdays').textContent = document.getElementById('workingDays').value;
+  document.getElementById('ps_pdays').textContent = document.getElementById('daysPresent').value;
+  document.getElementById('ps_uan').textContent = opt.dataset.uan || '—';
+  document.getElementById('ps_bank').textContent = opt.dataset.bank || '—';
+  document.getElementById('ps_acc').textContent = opt.dataset.account || '—';
+  calculate();
+}
+
+// ── Load the logged-in admin's company details into the payslip header ────
+// (previously hardcoded placeholder text — now bound to real company data,
+// same as every other field in this preview panel)
+function getStoredCompanyId() {
+  return localStorage.getItem('hrms_companyId') || sessionStorage.getItem('hrms_companyId');
+}
+
+async function loadCompanyHeader() {
+  const companyId = getStoredCompanyId();
+  const nameEl    = document.getElementById('ps_companyName');
+  const addrEl    = document.getElementById('ps_companyAddress');
+  const contactEl = document.getElementById('ps_companyContact');
+
+  if (!companyId) return; // e.g. superadmin context with no single company
+
+  const res = await HrmsApi.getCompany(companyId);
+  if (!res || !res.success || !res.data) return;
+
+  const c = res.data;
+  nameEl.textContent = c.companyName || '—';
+  addrEl.textContent = [c.addressLine1, c.city].filter(Boolean).join(', ') || '—';
+  contactEl.textContent = [c.phoneNumber, c.emailAddress].filter(Boolean).join(' · ') || '—';
+}
+
+// Auto-calculate on page load
+calculate();
+
+// ── Load employees into dropdown ──────────────────────────────────────────
+async function loadEmployees() {
+  const sel = document.getElementById('empSelect');
+  sel.innerHTML = '<option value="">Loading employees…</option>';
+  const res = await HrmsApi.listEmployees();
+  if (!res || !res.success || !Array.isArray(res.data) || !res.data.length) {
+    sel.innerHTML = '<option value="">No employees found</option>';
+    return;
+  }
+  sel.innerHTML = '<option value="">Select employee</option>' +
+    res.data.map(e => {
+      const id = e.employeeId || e.employee_id || '';
+      const name = e.fullName || e.fullname || '';
+      return `<option value="${id}"
+        data-name="${name}"
+        data-designation="${e.designation||''}"
+        data-department="${e.department||''}"
+        data-uan="${e.uan||''}"
+        data-bank="${e.bankName||''}"
+        data-account="${e.accountNumber||''}">${name} (${id})</option>`;
+    }).join('');
+}
+
+// ── Wire form submission ──────────────────────────────────────────────────
+document.getElementById('payslipForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const sel = document.getElementById('empSelect');
+  if (!sel.value) { alert('Please select an employee.'); return; }
+  const btn = e.submitter || document.querySelector('#payslipForm [type="submit"]');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating…'; }
+
+  const dto = {
+    employeeId:       sel.value,
+    month:            parseInt(document.querySelector('select[name="month"]').value, 10),
+    year:             parseInt(document.querySelector('input[name="year"]').value, 10),
+    workingDays:      parseInt(document.getElementById('workingDays').value, 10),
+    daysPresent:      parseInt(document.getElementById('daysPresent').value, 10),
+    basicPay:         parseFloat(document.getElementById('basicPay').value) || 0,
+    hra:              parseFloat(document.getElementById('hra').value) || 0,
+    da:               parseFloat(document.getElementById('da').value) || 0,
+    conveyance:       parseFloat(document.getElementById('conveyance').value) || 0,
+    medicalAllowance: parseFloat(document.getElementById('medical').value) || 0,
+    otherAllowances:  parseFloat(document.getElementById('otherAllow').value) || 0,
+    pfEmployee:       parseFloat(document.getElementById('pf').value) || 0,
+    pfEmployer:       parseFloat(document.getElementById('pfEmployer').value) || 0,
+    incomeTax:        parseFloat(document.getElementById('tax').value) || 0,
+    professionalTax:  parseFloat(document.getElementById('profTax').value) || 0,
+    advance:          parseFloat(document.getElementById('advance').value) || 0,
+    otherDeductions:  parseFloat(document.getElementById('otherDed').value) || 0,
+    autoCalculate:    false
+  };
+
+  const res = await HrmsApi.generatePayslip(dto);
+  if (res && res.success) {
+    alert('✅ Payslip generated successfully!');
+    window.location.href = 'payroll.html';
+  } else {
+    alert('❌ ' + ((res && res.message) || 'Failed to generate payslip.'));
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-receipt me-1"></i>Save Payslip'; }
+  }
+});
+
+requireAuth(['admin','superadmin']);
+populateTopnav();
+loadEmployees();
+loadCompanyHeader();
+
+</script>
+</body>
+</html>

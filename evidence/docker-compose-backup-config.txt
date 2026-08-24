@@ -1,0 +1,9 @@
+$ docker compose -f docker-compose.backup.yml config
+
+--- STDOUT ---
+
+--- STDERR ---
+service "backup" refers to undefined network hrms_internal: invalid compose project
+
+--- EXIT CODE ---
+1

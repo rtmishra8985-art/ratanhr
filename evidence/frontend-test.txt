@@ -1,0 +1,23 @@
+$ bun run test
+
+--- STDOUT ---
+
+ RUN  v3.2.7 /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.SPA.Source
+
+ ✓ src/__tests__/utils/apiError.test.ts (22 tests) 5ms
+ ✓ src/__tests__/utils/profileHelpers.test.ts (43 tests) 32ms
+ ✓ src/__tests__/AuthGuard.phase2.test.tsx (6 tests) 50ms
+ ✓ src/__tests__/utils/tokenStorage.test.ts (4 tests) 4ms
+ ✓ src/__tests__/components/SafeAvatar.test.tsx (7 tests) 97ms
+
+ Test Files  5 passed (5)
+      Tests  82 passed (82)
+   Start at  12:44:46
+   Duration  1.74s (transform 155ms, setup 844ms, collect 220ms, tests 188ms, environment 1.69s, prepare 350ms)
+
+
+--- STDERR ---
+$ vitest run
+
+--- EXIT CODE ---
+0

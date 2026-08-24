@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leave Balance Adjustment | HRMS</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/hrms.css">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<div id="sidebarHolder"></div>
+
+<div class="main-content">
+  <div class="container-fluid py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h4 class="fw-bold mb-0"><i class="bi bi-sliders me-2 text-primary"></i>Leave Balance Adjustment</h4>
+        <small class="text-muted">Manually credit or debit an employee's annual leave balance</small>
+      </div>
+    </div>
+
+    <div id="alertBox" class="alert d-none"></div>
+
+    <div class="row g-4">
+      <!-- Adjustment Form -->
+      <div class="col-md-5">
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white fw-semibold border-bottom">
+            <i class="bi bi-pencil-square me-1"></i>New Adjustment
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Employee ID <span class="text-danger">*</span></label>
+              <input type="text" id="empId" class="form-control" placeholder="e.g. EMP1001">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Leave Type <span class="text-danger">*</span></label>
+              <select id="leaveTypeId" class="form-select"><option value="">— select —</option></select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Year <span class="text-danger">*</span></label>
+              <select id="adjYear" class="form-select"></select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Days <span class="text-danger">*</span></label>
+              <input type="number" id="adjDays" class="form-control" placeholder="Positive = credit, Negative = debit" min="-365" max="365">
+              <div class="form-text">
+                <span class="text-success">Positive</span> values add days; <span class="text-danger">negative</span> values remove days.
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Reason <span class="text-danger">*</span></label>
+              <textarea id="adjReason" class="form-control" rows="2" maxlength="500" placeholder="e.g. Carry forward from previous year"></textarea>
+            </div>
+            <div class="d-grid">
+              <button class="btn btn-primary" onclick="submitAdjustment()">
+                <i class="bi bi-check-lg me-1"></i>Apply Adjustment
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carry Forward section -->
+        <div class="card shadow-sm border-0 mt-3">
+          <div class="card-header bg-white fw-semibold border-bottom">
+            <i class="bi bi-arrow-right-circle me-1 text-info"></i>Year-End Carry Forward
+          </div>
+          <div class="card-body">
+            <p class="text-muted small">Carry unused leave balances from one year to the next for all active employees.</p>
+            <div class="row g-2 mb-3">
+              <div class="col"><label class="form-label small fw-semibold">From Year</label>
+                <select id="cfFrom" class="form-select form-select-sm"></select></div>
+              <div class="col"><label class="form-label small fw-semibold">To Year</label>
+                <select id="cfTo" class="form-select form-select-sm"></select></div>
+              <div class="col"><label class="form-label small fw-semibold">Max Days</label>
+                <input type="number" id="cfMax" class="form-control form-control-sm" value="0" min="0" placeholder="0 = unlimited"></div>
+            </div>
+            <button class="btn btn-info btn-sm w-100" onclick="runCarryForward()">
+              <i class="bi bi-arrow-right-circle me-1"></i>Run Carry Forward
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- History table -->
+      <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white fw-semibold border-bottom d-flex align-items-center gap-2">
+            <i class="bi bi-clock-history me-1"></i>Adjustment History
+            <input type="text" id="histEmpId" class="form-control form-control-sm ms-auto" style="max-width:160px" placeholder="Employee ID">
+            <select id="histYear" class="form-select form-select-sm" style="max-width:90px"></select>
+            <button class="btn btn-sm btn-outline-secondary" onclick="loadHistory()">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+          <div class="card-body">
+            <table id="histTable" class="table table-striped table-hover w-100">
+              <thead class="table-dark">
+                <tr><th>#</th><th>Employee</th><th>Leave Type</th><th>Year</th><th>Days</th><th>Reason</th><th>Date</th></tr>
+              </thead>
+              <tbody><tr><td colspan="7" class="text-center text-muted">Search by Employee ID to view history</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="/js/api.js"></script>
+<script>
+// FIX CRITICAL-1: Load sidebar dynamically (replaces missing assets/js/sidebar.js)
+(function() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = user.role || 'admin';
+  const file = role === 'employee'
+    ? '/includes/sidebar-employee.html'
+    : '/includes/sidebar-admin.html';
+  fetch(file)
+    .then(r => r.text())
+    .then(html => {
+      const el = document.getElementById('sidebarHolder');
+      if (el) el.innerHTML = html;
+    })
+    .catch(() => {});
+})();
+</script>
+<script>
+const token   = null /* token is in HttpOnly cookie, no JS access needed */;
+const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+let dt;
+
+const cy = new Date().getFullYear();
+['adjYear','cfFrom','cfTo','histYear'].forEach(id => {
+  const sel = document.getElementById(id);
+  for (let y = cy - 2; y <= cy + 2; y++) {
+    const o = new Option(y, y); if (y === cy) o.selected = true; sel.appendChild(o);
+  }
+});
+document.getElementById('cfTo').value  = cy + 1;
+document.getElementById('cfFrom').value = cy;
+
+// Load leave types
+(async () => {
+  const res  = await fetch('/api/leave/types', { headers });
+  const json = await res.json();
+  const sel  = document.getElementById('leaveTypeId');
+  (json.data || []).forEach(t => sel.appendChild(new Option(t.name, t.id)));
+})();
+
+async function submitAdjustment() {
+  const empId      = document.getElementById('empId').value.trim();
+  const leaveTypeId = parseInt(document.getElementById('leaveTypeId').value);
+  const year       = parseInt(document.getElementById('adjYear').value);
+  const days       = parseInt(document.getElementById('adjDays').value);
+  const reason     = document.getElementById('adjReason').value.trim();
+
+  if (!empId || !leaveTypeId || isNaN(days) || !reason)
+    return showAlert('All fields are required.', 'danger');
+
+  const payload = { employeeId: empId, leaveTypeId, year, days, reason };
+  const res  = await fetch('/api/leave/balance/adjust', {
+    method: 'POST', headers, body: JSON.stringify(payload)
+  });
+  const json = await res.json();
+  showAlert(json.message, json.success ? 'success' : 'danger');
+  if (json.success) {
+    document.getElementById('empId').value = '';
+    document.getElementById('adjDays').value = '';
+    document.getElementById('adjReason').value = '';
+    if (document.getElementById('histEmpId').value === empId) loadHistory();
+  }
+}
+
+async function runCarryForward() {
+  const from = parseInt(document.getElementById('cfFrom').value);
+  const to   = parseInt(document.getElementById('cfTo').value);
+  const max  = parseInt(document.getElementById('cfMax').value) || 0;
+  if (to <= from) return showAlert('To Year must be greater than From Year.', 'danger');
+  if (!confirm(`Carry forward unused leave from ${from} → ${to} for ALL active employees?`)) return;
+
+  const res  = await fetch('/api/leave/carry-forward', {
+    method: 'POST', headers,
+    body: JSON.stringify({ fromYear: from, toYear: to, maxDays: max })
+  });
+  const json = await res.json();
+  showAlert(json.message, json.success ? 'success' : 'danger');
+}
+
+async function loadHistory() {
+  const empId = document.getElementById('histEmpId').value.trim();
+  const year  = document.getElementById('histYear').value;
+  if (!empId) return showAlert('Enter an Employee ID to search.', 'warning');
+
+  const res  = await fetch(`/api/leave/balance/adjustments/${empId}?year=${year}`, { headers });
+  const json = await res.json();
+  const data = json.data || [];
+
+  if (dt) dt.destroy();
+  const tbody = document.querySelector('#histTable tbody');
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No adjustments found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map((r, i) => `<tr>
+    <td>${i+1}</td><td>${r.employeeId}</td><td>${r.leaveTypeName||'—'}</td>
+    <td>${r.year}</td>
+    <td class="${r.days > 0 ? 'text-success' : 'text-danger'} fw-bold">${r.days > 0 ? '+' : ''}${r.days}</td>
+    <td class="text-muted small">${r.reason}</td>
+    <td>${new Date(r.createdAt).toLocaleDateString('en-IN')}</td>
+  </tr>`).join('');
+  dt = new DataTable('#histTable', { pageLength: 20 });
+}
+
+function showAlert(msg, type) {
+  const el = document.getElementById('alertBox');
+  el.className = `alert alert-${type}`; el.textContent = msg; el.classList.remove('d-none');
+  setTimeout(() => el.classList.add('d-none'), 5000);
+}
+</script>
+</body>
+</html>

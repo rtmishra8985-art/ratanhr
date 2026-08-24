@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Performance Reviews – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Performance</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapsePerf"><i class="bi bi-trophy"></i> Performance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapsePerf">
+      <a href="performance-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="performance-cycles.html" class="sub-link">Review Cycles</a>
+      <a href="performance-goals.html" class="sub-link">Goals</a>
+      <a href="performance-reviews.html" class="sub-link" style="color:#f7b731;">Reviews</a>
+      <a href="performance-feedback.html" class="sub-link">Feedback</a>
+    </div>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Performance Reviews</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-muted" id="navUserName"></span>
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+<div class="main-panel">
+  <div class="card mb-3">
+    <div class="card-body py-2">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3"><select class="form-select form-select-sm" id="filterCycle"><option value="">All Cycles</option></select></div>
+        <div class="col-md-2"><button class="btn btn-sm btn-warning w-100" onclick="loadReviews()">Filter</button></div>
+        <div class="col-md-7 text-end"><button class="btn btn-sm btn-primary" onclick="openInitiateModal()"><i class="bi bi-plus-circle me-1"></i>Initiate Review</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="card card-table">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Employee ID</th><th>Cycle</th><th>Type</th><th>Self Rating</th><th>Manager Rating</th><th>Final Rating</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="reviewTbody"><tr><td colspan="9" class="text-center py-3 text-muted">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Initiate Review Modal -->
+<div class="modal fade" id="initiateModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Initiate Performance Review</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body row g-3">
+        <div class="col-12"><label class="form-label">Employee ID *</label><input type="text" class="form-control" id="iEmpId"></div>
+        <div class="col-md-6"><label class="form-label">Cycle</label><select class="form-select" id="iCycleId"><option value="">— None —</option></select></div>
+        <div class="col-md-6"><label class="form-label">Review Type</label>
+          <select class="form-select" id="iRevType"><option>Manager</option><option>Self</option><option>Peer</option><option>360</option></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="initiateReview()">Initiate</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Manager Review Modal -->
+<div class="modal fade" id="managerModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Submit Manager Review</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body row g-3">
+        <input type="hidden" id="mgrRevId">
+        <div class="col-12"><label class="form-label">Manager Rating (1–5)</label><input type="number" class="form-control" id="mgrRating" min="1" max="5" step="0.5"></div>
+        <div class="col-12"><label class="form-label">Manager Comments</label><textarea class="form-control" id="mgrComments" rows="3"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning" onclick="submitManagerReview()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Finalize Modal -->
+<div class="modal fade" id="finalizeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Finalize Review (HR)</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body row g-3">
+        <input type="hidden" id="finRevId">
+        <div class="col-12"><label class="form-label">Final Rating (1–5)</label><input type="number" class="form-control" id="finRating" min="1" max="5" step="0.5"></div>
+        <div class="col-12"><label class="form-label">HR Comments</label><textarea class="form-control" id="finComments" rows="3"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" onclick="finalizeReview()">Finalize</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script>
+requireAuth(['admin','superadmin']);
+populateTopnav();
+const STATUS_BADGE = { 'Pending':'warning','In Progress':'primary','Submitted':'info','Acknowledged':'success' };
+let initiateModal, managerModal, finalizeModal;
+
+async function loadCycleDropdown() {
+  const res = await HrmsApi.listPerformanceCycles();
+  const opts = (res?.data||[]).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('filterCycle').innerHTML = '<option value="">All Cycles</option>' + opts;
+  document.getElementById('iCycleId').innerHTML    = '<option value="">— None —</option>' + opts;
+}
+
+function openInitiateModal() { document.getElementById('iEmpId').value=''; initiateModal.show(); }
+
+async function initiateReview() {
+  const dto = {
+    employeeId:          document.getElementById('iEmpId').value,
+    reviewerId:          0, // current user – server resolves
+    performanceCycleId:  parseInt(document.getElementById('iCycleId').value)||null,
+    reviewType:          document.getElementById('iRevType').value,
+  };
+  const res = await HrmsApi.createReview(dto);
+  if (res && res.success) { initiateModal.hide(); loadReviews(); }
+  else alert((res && res.message) || 'Failed.');
+}
+
+function openManagerModal(id) {
+  document.getElementById('mgrRevId').value     = id;
+  document.getElementById('mgrRating').value    = '';
+  document.getElementById('mgrComments').value  = '';
+  managerModal.show();
+}
+
+async function submitManagerReview() {
+  const id  = document.getElementById('mgrRevId').value;
+  const dto = { managerRating: parseFloat(document.getElementById('mgrRating').value), managerComments: document.getElementById('mgrComments').value };
+  const res = await HrmsApi.submitManagerReview(id, dto);
+  if (res && res.success) { managerModal.hide(); loadReviews(); }
+  else alert((res && res.message) || 'Failed.');
+}
+
+function openFinalizeModal(id) {
+  document.getElementById('finRevId').value     = id;
+  document.getElementById('finRating').value    = '';
+  document.getElementById('finComments').value  = '';
+  finalizeModal.show();
+}
+
+async function finalizeReview() {
+  const id  = document.getElementById('finRevId').value;
+  const dto = { finalRating: parseFloat(document.getElementById('finRating').value), hrComments: document.getElementById('finComments').value };
+  const res = await HrmsApi.finalizeReview(id, dto);
+  if (res && res.success) { finalizeModal.hide(); loadReviews(); }
+  else alert((res && res.message) || 'Failed.');
+}
+
+async function loadReviews() {
+  const tbody = document.getElementById('reviewTbody');
+  tbody.innerHTML = '<tr><td colspan="9" class="text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</td></tr>';
+  const cycleId = document.getElementById('filterCycle').value;
+  const params  = cycleId ? { cycleId } : {};
+  const res = await HrmsApi.listReviews(params);
+  if (!res || !res.success || !res.data.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-3 text-muted">No reviews found.</td></tr>'; return;
+  }
+  tbody.innerHTML = res.data.map(r => `<tr>
+    <td><code>${r.employeeId}</code></td>
+    <td>${r.cycleName||'—'}</td>
+    <td><span class="badge bg-secondary">${r.reviewType}</span></td>
+    <td>${r.selfRating ?? '—'}</td>
+    <td>${r.managerRating ?? '—'}</td>
+    <td>${r.finalRating ? '<strong>'+r.finalRating+'</strong>' : '—'}</td>
+    <td>${r.submittedAt ? r.submittedAt.substring(0,10) : '—'}</td>
+    <td><span class="badge bg-${STATUS_BADGE[r.status]||'secondary'}">${r.status}</span></td>
+    <td class="text-nowrap">
+      ${r.status==='In Progress'||r.status==='Pending' ? `<button class="btn btn-xs btn-outline-warning py-0 px-1 me-1" onclick="openManagerModal(${r.id})"><i class="bi bi-star"></i> Review</button>` : ''}
+      ${r.status==='Submitted' ? `<button class="btn btn-xs btn-outline-success py-0 px-1 me-1" onclick="openFinalizeModal(${r.id})"><i class="bi bi-check2-all"></i> Finalize</button>` : ''}
+    </td>
+  </tr>`).join('');
+}
+
+initiateModal = new bootstrap.Modal(document.getElementById('initiateModal'));
+managerModal  = new bootstrap.Modal(document.getElementById('managerModal'));
+finalizeModal = new bootstrap.Modal(document.getElementById('finalizeModal'));
+loadCycleDropdown().then(() => loadReviews());
+</script>
+</body>
+</html>

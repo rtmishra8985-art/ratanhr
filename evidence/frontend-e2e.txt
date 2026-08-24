@@ -1,0 +1,25 @@
+$ bun run e2e
+
+--- STDOUT ---
+Error: globalSetup: .env.e2e not found at /home/runner/workspace/RatanHR-work-fixed-updated/HRMS.SPA.Source/.env.e2e
+Copy .env.e2e.template to .env.e2e and fill in real staging values.
+Add .env.e2e to .gitignore — never commit real credentials.
+
+   at ../global-setup.ts:57
+
+  55 |   const envPath = path.resolve(process.cwd(), '.env.e2e');
+  56 |   if (!fs.existsSync(envPath)) {
+> 57 |     throw new Error(
+     |           ^
+  58 |       `globalSetup: .env.e2e not found at ${envPath}\n` +
+  59 |       'Copy .env.e2e.template to .env.e2e and fill in real staging values.\n' +
+  60 |       'Add .env.e2e to .gitignore — never commit real credentials.',
+    at globalSetup (/home/runner/workspace/RatanHR-work-fixed-updated/HRMS.SPA.Source/global-setup.ts:57:11)
+
+
+--- STDERR ---
+$ playwright test
+error: script "e2e" exited with code 1
+
+--- EXIT CODE ---
+1

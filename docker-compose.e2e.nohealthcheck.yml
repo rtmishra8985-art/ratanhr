@@ -1,0 +1,51 @@
+# =============================================================================
+# docker-compose.e2e.nohealthcheck.yml — fallback overlay
+#
+# Purpose
+#   Some hosts (older runc/containerd against a newer kernel, or hardened
+#   seccomp/AppArmor profiles) cannot run `docker exec`, which is how Docker
+#   executes container healthchecks. Symptom:
+#
+#     OCI runtime exec failed: unable to start container process:
+#     error executing setns process: exit status 1: unknown
+#
+#   The containers themselves are fine — MySQL and Redis log "ready for
+#   connections" — but every healthcheck exec fails, Compose marks the
+#   services unhealthy, and `up --wait` never starts dependent services.
+#
+#   The real fix is to upgrade the host (runc >= 1.1.12 / Docker >= 25).
+#   Where that is not possible, this overlay disables in-container
+#   healthchecks and relaxes depends_on to service_started; readiness is then
+#   asserted from the host by scripts/e2e-up.sh over TCP/HTTP instead.
+#
+# Usage
+#   docker compose -f docker-compose.e2e.yml \
+#                  -f docker-compose.e2e.nohealthcheck.yml \
+#                  --env-file .env.e2e up -d
+#   ./scripts/e2e-up.sh          # does this automatically on fallback
+# =============================================================================
+
+services:
+  mysql:
+    healthcheck:
+      disable: true
+
+  redis:
+    healthcheck:
+      disable: true
+
+  api:
+    healthcheck:
+      disable: true
+    depends_on:
+      mysql:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  spa:
+    healthcheck:
+      disable: true
+    depends_on:
+      api:
+        condition: service_started

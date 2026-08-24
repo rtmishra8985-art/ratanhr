@@ -1,0 +1,114 @@
+$ docker build --target migrate -t ratanhr-migrate .
+
+--- STDOUT ---
+
+--- STDERR ---
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.82kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/dotnet/sdk:8.0.303-alpine3.20
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 1.49kB done
+#3 DONE 0.0s
+
+#4 [build  1/16] FROM mcr.microsoft.com/dotnet/sdk:8.0.303-alpine3.20@sha256:6e8997576d16a6d7b4e6ba7ac0956d3ae46cb7a376581c40eabd20fbc5c28b8d
+#4 DONE 0.0s
+
+#5 [build  2/16] WORKDIR /src
+#5 CACHED
+
+#6 [internal] load build context
+#6 transferring context: 84.48kB 0.1s done
+#6 DONE 0.1s
+
+#7 [build  5/16] COPY HRMS.Infrastructure/HRMS.Infrastructure.csproj HRMS.Infrastructure/
+#7 CACHED
+
+#8 [build  7/16] COPY HRMS.Domain/HRMS.Domain.csproj                 HRMS.Domain/
+#8 CACHED
+
+#9 [build  9/16] COPY HRMS.API/packages.lock.json            HRMS.API/
+#9 CACHED
+
+#10 [build 10/16] COPY HRMS.Infrastructure/packages.lock.json HRMS.Infrastructure/
+#10 CACHED
+
+#11 [build 11/16] COPY HRMS.Application/packages.lock.json    HRMS.Application/
+#11 CACHED
+
+#12 [build  4/16] COPY HRMS.API/HRMS.API.csproj                       HRMS.API/
+#12 CACHED
+
+#13 [build  6/16] COPY HRMS.Application/HRMS.Application.csproj       HRMS.Application/
+#13 CACHED
+
+#14 [build  8/16] COPY HRMS.Tests/HRMS.Tests.csproj                   HRMS.Tests/
+#14 CACHED
+
+#15 [build 12/16] COPY HRMS.Domain/packages.lock.json         HRMS.Domain/
+#15 CACHED
+
+#16 [build 13/16] COPY HRMS.Tests/packages.lock.json          HRMS.Tests/
+#16 CACHED
+
+#17 [build  3/16] COPY *.sln ./
+#17 CACHED
+
+#18 [build 14/16] RUN dotnet restore --locked-mode
+#18 CACHED
+
+#19 [build 15/16] COPY . .
+#19 DONE 0.4s
+
+#20 [build 16/16] RUN dotnet publish HRMS.API/HRMS.API.csproj       --configuration Release       --no-restore       --output /app/publish       -p:AssemblyVersion=1.0.0.0       -p:FileVersion=1.0.0.0       -p:InformationalVersion="unknown+unknown"
+#20 0.454 The command could not be loaded, possibly because:
+#20 0.454   * You intended to execute a .NET application:
+#20 0.454       The application 'publish' does not exist.
+#20 0.454   * You intended to execute a .NET SDK command:
+#20 0.454       A compatible .NET SDK was not found.
+#20 0.454 
+#20 0.454 Requested SDK version: 8.0.416
+#20 0.454 global.json file: /src/global.json
+#20 0.454 
+#20 0.454 Installed SDKs:
+#20 0.454 
+#20 0.454 Install the [8.0.416] .NET SDK or update [/src/global.json] to match an installed SDK.
+#20 0.454 
+#20 0.454 Learn about SDK resolution:
+#20 0.454 https://aka.ms/dotnet/sdk-not-found
+#20 0.454 8.0.303 [/usr/share/dotnet/sdk]
+#20 ERROR: process "/bin/sh -c dotnet publish HRMS.API/HRMS.API.csproj       --configuration Release       --no-restore       --output /app/publish       -p:AssemblyVersion=1.0.0.0       -p:FileVersion=1.0.0.0       -p:InformationalVersion=\"${GIT_SHA}+${BUILD_TIMESTAMP}\"" did not complete successfully: exit code: 145
+------
+ > [build 16/16] RUN dotnet publish HRMS.API/HRMS.API.csproj       --configuration Release       --no-restore       --output /app/publish       -p:AssemblyVersion=1.0.0.0       -p:FileVersion=1.0.0.0       -p:InformationalVersion="unknown+unknown":
+0.454 Requested SDK version: 8.0.416
+0.454 global.json file: /src/global.json
+0.454 
+0.454 Installed SDKs:
+0.454 
+0.454 Install the [8.0.416] .NET SDK or update [/src/global.json] to match an installed SDK.
+0.454 
+0.454 Learn about SDK resolution:
+0.454 https://aka.ms/dotnet/sdk-not-found
+0.454 8.0.303 [/usr/share/dotnet/sdk]
+------
+Dockerfile:48
+--------------------
+  47 |     COPY . .
+  48 | >>> RUN dotnet publish HRMS.API/HRMS.API.csproj \
+  49 | >>>       --configuration Release \
+  50 | >>>       --no-restore \
+  51 | >>>       --output /app/publish \
+  52 | >>>       -p:AssemblyVersion=1.0.0.0 \
+  53 | >>>       -p:FileVersion=1.0.0.0 \
+  54 | >>>       -p:InformationalVersion="${GIT_SHA}+${BUILD_TIMESTAMP}"
+  55 |     
+--------------------
+ERROR: failed to solve: process "/bin/sh -c dotnet publish HRMS.API/HRMS.API.csproj       --configuration Release       --no-restore       --output /app/publish       -p:AssemblyVersion=1.0.0.0       -p:FileVersion=1.0.0.0       -p:InformationalVersion=\"${GIT_SHA}+${BUILD_TIMESTAMP}\"" did not complete successfully: exit code: 145
+
+--- EXIT CODE ---
+1

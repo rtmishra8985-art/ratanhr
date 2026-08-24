@@ -1,0 +1,30 @@
+# ── secrets / environment (NEVER commit) ─────────────────────────────────────
+.env
+.env.*
+!.env.example
+!.env.e2e.example
+*.pem
+!**/testdata/*.pem
+
+# ── build output ─────────────────────────────────────────────────────────────
+bin/
+obj/
+dist/
+node_modules/
+HRMS.SPA.Source/dist/
+HRMS.SPA.Source/node_modules/
+HRMS.SPA.Source/playwright-report/
+HRMS.SPA.Source/test-results/
+
+# ── local runtime artefacts ──────────────────────────────────────────────────
+# RHR-014 FIX: previously only Logs/*.log was ignored; ad-hoc root-level
+# log dumps (api.log, debug.log, etc.) from manual dotnet run/test sessions
+# were slipping through and getting committed. Ignore *.log anywhere too.
+Logs/*.log
+*.log
+TestResults/
+coverage/
+*.user
+.vs/
+.idea/
+.DS_Store

@@ -1,0 +1,17 @@
+# PodDisruptionBudget — ensures at least 1 API pod stays running during
+# node drains, cluster upgrades, and rolling deployments.
+# Companion to k8s/hpa.yaml (minReplicas: 2, maxReplicas: 10).
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hrms-api-pdb
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+    app.kubernetes.io/component: api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hrms
+      app.kubernetes.io/component: api

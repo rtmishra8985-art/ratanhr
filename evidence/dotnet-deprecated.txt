@@ -1,0 +1,25 @@
+$ dotnet list HRMS.sln package --deprecated
+
+--- STDOUT ---
+
+The following sources were used:
+   https://api.nuget.org/v3/index.json
+
+The given project `HRMS.Domain` has no deprecated packages given the current sources.
+The given project `HRMS.Application` has no deprecated packages given the current sources.
+The given project `HRMS.Infrastructure` has no deprecated packages given the current sources.
+Project `HRMS.API` has the following deprecated packages
+   [net8.0]: 
+   Top-level Package                  Requested   Resolved   Reason(s)   Alternative
+   > FluentValidation.AspNetCore      11.3.0      11.3.0     Legacy                 
+
+Project `HRMS.Tests` has the following deprecated packages
+   [net8.0]: 
+   Top-level Package      Requested   Resolved   Reason(s)   Alternative      
+   > xunit                2.9.0       2.9.0      Legacy      xunit.v3 >= 0.0.0
+
+
+--- STDERR ---
+
+--- EXIT CODE ---
+0

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidates – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Recruitment</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapseRecruit"><i class="bi bi-briefcase"></i> Recruitment <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseRecruit">
+      <a href="recruitment-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="recruitment-requisitions.html" class="sub-link">Job Openings</a>
+      <a href="recruitment-candidates.html" class="sub-link" style="color:#f7b731;">Candidates</a>
+      <a href="recruitment-interviews.html" class="sub-link">Interviews</a>
+      <a href="recruitment-offers.html" class="sub-link">Offer Letters</a>
+    </div>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Candidate Database</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-muted" id="navUserName"></span>
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <!-- Filter Bar -->
+  <div class="card mb-3">
+    <div class="card-body py-2">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <select class="form-select form-select-sm" id="filterReq">
+            <option value="">All Job Openings</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select form-select-sm" id="filterStatus">
+            <option value="">All Statuses</option>
+            <option>New</option><option>Shortlisted</option><option>Interviewed</option>
+            <option>Selected</option><option>Rejected</option><option>Hired</option>
+            <option>Offer Extended</option><option>On Hold</option>
+          </select>
+        </div>
+        <div class="col-md-2"><button class="btn btn-sm btn-warning w-100" onclick="loadCandidates()">Filter</button></div>
+        <div class="col-md-3 text-end"><button class="btn btn-sm btn-primary" onclick="openAddModal()"><i class="bi bi-person-plus me-1"></i>Add Candidate</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-table">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Phone</th><th>Current Role</th><th>Exp (yrs)</th><th>Job Applied</th><th>Source</th><th>Status</th><th>Resume</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="candTbody"><tr><td colspan="10" class="text-center py-3 text-muted">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Candidate Modal -->
+<div class="modal fade" id="addModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Add Candidate</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <form id="candForm" class="row g-3" enctype="multipart/form-data">
+          <div class="col-md-6"><label class="form-label">First Name *</label><input type="text" class="form-control" id="cFirstName" required></div>
+          <div class="col-md-6"><label class="form-label">Last Name</label><input type="text" class="form-control" id="cLastName"></div>
+          <div class="col-md-6"><label class="form-label">Email *</label><input type="email" class="form-control" id="cEmail" required></div>
+          <div class="col-md-6"><label class="form-label">Phone</label><input type="text" class="form-control" id="cPhone"></div>
+          <div class="col-md-6"><label class="form-label">Current Designation</label><input type="text" class="form-control" id="cDesig"></div>
+          <div class="col-md-6"><label class="form-label">Current Company</label><input type="text" class="form-control" id="cCompany"></div>
+          <div class="col-md-4"><label class="form-label">Experience (years)</label><input type="number" class="form-control" id="cExp" value="0" min="0" step="0.5"></div>
+          <div class="col-md-4"><label class="form-label">Source</label>
+            <select class="form-select" id="cSource"><option>Portal</option><option>LinkedIn</option><option>Referral</option><option>Agency</option><option>Direct</option></select>
+          </div>
+          <div class="col-md-4"><label class="form-label">Job Opening</label>
+            <select class="form-select" id="cReqId"><option value="">— None —</option></select>
+          </div>
+          <div class="col-12"><label class="form-label">Skills</label><input type="text" class="form-control" id="cSkills" placeholder="Comma-separated"></div>
+          <div class="col-12"><label class="form-label">Qualification Summary</label><textarea class="form-control" id="cQual" rows="2"></textarea></div>
+          <div class="col-12"><label class="form-label">Notes</label><textarea class="form-control" id="cNotes" rows="2"></textarea></div>
+          <div class="col-12"><label class="form-label">Resume (PDF/DOCX)</label><input type="file" class="form-control" id="cResume" accept=".pdf,.doc,.docx"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveCandidate()">Add Candidate</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="statusModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Update Candidate Status</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <input type="hidden" id="statusCandId">
+        <div class="mb-3"><label class="form-label">New Status</label>
+          <select class="form-select" id="newStatus">
+            <option>New</option><option>Shortlisted</option><option>Interviewed</option>
+            <option>Selected</option><option>Rejected</option><option>Hired</option>
+            <option>Offer Extended</option><option>On Hold</option><option>Withdrawn</option>
+          </select>
+        </div>
+        <div class="mb-3"><label class="form-label">Notes</label><textarea class="form-control" id="statusNotes" rows="2"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning" onclick="saveStatus()">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script>
+requireAuth(['admin','superadmin']);
+populateTopnav();
+
+const STATUS_BADGE = {
+  'New':'primary','Shortlisted':'info','Interviewed':'warning','Selected':'success',
+  'Rejected':'danger','Hired':'success','Offer Extended':'info','On Hold':'secondary','Withdrawn':'secondary'
+};
+let addModal, statusModal;
+
+async function populateReqDropdowns() {
+  const res = await HrmsApi.listRequisitions();
+  const opts = '<option value="">— None —</option>' + (res?.data||[]).map(r => `<option value="${r.id}">${r.title}</option>`).join('');
+  document.getElementById('filterReq').innerHTML = '<option value="">All Job Openings</option>' + (res?.data||[]).map(r => `<option value="${r.id}">${r.title}</option>`).join('');
+  document.getElementById('cReqId').innerHTML = opts;
+
+  // pre-fill from URL param
+  const urlReqId = new URLSearchParams(location.search).get('requisitionId');
+  if (urlReqId) { document.getElementById('filterReq').value = urlReqId; loadCandidates(); }
+}
+
+function openAddModal() {
+  document.getElementById('candForm').reset();
+  addModal.show();
+}
+
+async function saveCandidate() {
+  const fd = new FormData();
+  fd.append('firstName',           document.getElementById('cFirstName').value);
+  fd.append('lastName',            document.getElementById('cLastName').value);
+  fd.append('email',               document.getElementById('cEmail').value);
+  fd.append('phone',               document.getElementById('cPhone').value);
+  fd.append('currentDesignation',  document.getElementById('cDesig').value);
+  fd.append('currentCompany',      document.getElementById('cCompany').value);
+  fd.append('totalExperience',     document.getElementById('cExp').value);
+  fd.append('sourceChannel',       document.getElementById('cSource').value);
+  fd.append('skills',              document.getElementById('cSkills').value);
+  fd.append('qualificationSummary',document.getElementById('cQual').value);
+  fd.append('notes',               document.getElementById('cNotes').value);
+  const reqId = document.getElementById('cReqId').value;
+  if (reqId) fd.append('jobRequisitionId', reqId);
+  const file = document.getElementById('cResume').files[0];
+  if (file) fd.append('resume', file);
+
+  const res = await HrmsApi.createCandidate(fd);
+  if (res && res.success) { addModal.hide(); loadCandidates(); }
+  else alert((res && res.message) || 'Failed to add candidate.');
+}
+
+function openStatusModal(id, currentStatus) {
+  document.getElementById('statusCandId').value = id;
+  document.getElementById('newStatus').value    = currentStatus;
+  document.getElementById('statusNotes').value  = '';
+  statusModal.show();
+}
+
+async function saveStatus() {
+  const id     = document.getElementById('statusCandId').value;
+  const status = document.getElementById('newStatus').value;
+  const notes  = document.getElementById('statusNotes').value;
+  const res = await HrmsApi.updateCandidateStatus(id, status, notes);
+  if (res && res.success) { statusModal.hide(); loadCandidates(); }
+  else alert((res && res.message) || 'Failed.');
+}
+
+async function deleteCandidate(id) {
+  if (!confirm('Delete this candidate?')) return;
+  const res = await HrmsApi.deleteCandidate(id);
+  if (res && res.success) loadCandidates();
+  else alert((res && res.message) || 'Failed.');
+}
+
+async function loadCandidates() {
+  const tbody = document.getElementById('candTbody');
+  tbody.innerHTML = '<tr><td colspan="10" class="text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</td></tr>';
+  const params = {};
+  const reqId  = document.getElementById('filterReq').value;
+  const status = document.getElementById('filterStatus').value;
+  if (reqId)  params.requisitionId = reqId;
+  if (status) params.status        = status;
+  const res = await HrmsApi.listCandidates(params);
+  if (!res || !res.success || !res.data.length) {
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-3 text-muted">No candidates found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = res.data.map(c => `<tr>
+    <td><strong>${c.firstName} ${c.lastName}</strong></td>
+    <td>${c.email}</td>
+    <td>${c.phone||'—'}</td>
+    <td>${c.currentDesignation||'—'}</td>
+    <td>${c.totalExperience}</td>
+    <td>${c.jobTitle||'—'}</td>
+    <td><span class="badge bg-secondary">${c.sourceChannel}</span></td>
+    <td><span class="badge bg-${STATUS_BADGE[c.status]||'secondary'}">${c.status}</span></td>
+    <td>${c.hasResume ? '<a href="/api/recruitment/candidates/'+c.id+'" target="_blank" class="btn btn-xs btn-outline-success py-0 px-1"><i class="bi bi-file-earmark-pdf"></i></a>' : '—'}</td>
+    <td class="text-nowrap">
+      <button class="btn btn-xs btn-outline-warning py-0 px-1 me-1" onclick="openStatusModal(${c.id},'${c.status}')"><i class="bi bi-arrow-repeat"></i></button>
+      <a href="recruitment-interviews.html?candidateId=${c.id}" class="btn btn-xs btn-outline-info py-0 px-1 me-1"><i class="bi bi-calendar-check"></i></a>
+      <button class="btn btn-xs btn-outline-danger py-0 px-1" onclick="deleteCandidate(${c.id})"><i class="bi bi-trash"></i></button>
+    </td>
+  </tr>`).join('');
+}
+
+addModal    = new bootstrap.Modal(document.getElementById('addModal'));
+statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+populateReqDropdowns().then(() => loadCandidates());
+</script>
+</body>
+</html>

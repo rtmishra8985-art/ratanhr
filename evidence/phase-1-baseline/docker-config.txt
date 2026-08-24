@@ -1,0 +1,57 @@
+===== docker-compose.backup.yml =====
+error while interpolating services.backup.environment.AWS_ACCESS_KEY_ID: required variable AWS_ACCESS_KEY_ID is missing a value: set AWS_ACCESS_KEY_ID in .env
+===== docker-compose.e2e.yml =====
+time="2026-08-07T14:13:44Z" level=warning msg="The \"ENCRYPTION_KEY\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"JWT_PRIVATE_KEY_PEM\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"JWT_PUBLIC_KEY_PEM\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"SWAGGER_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_ROOT_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_ROOT_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_ROOT_PASSWORD\" variable is not set. Defaulting to a blank string."
+===== docker-compose.override.yml =====
+service "mysql" has neither an image nor a build context specified: invalid compose project
+===== docker-compose.prod.yml =====
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_USER\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_DATABASE\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_DATABASE\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_USER\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"REDIS_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"REDIS_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"REDIS_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"DOMAIN_NAME\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_DATABASE\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_DATABASE\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_USER\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"REDIS_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_USER\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"ALLOWED_HOSTS\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"JWT_PRIVATE_KEY_PEM\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"ENCRYPTION_KEY\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"REDIS_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"REDIS_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_USER\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_DATABASE\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"DOMAIN_NAME\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"JWT_PUBLIC_KEY_PEM\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_DATABASE\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_USER\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"DOMAIN_NAME\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_USER\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_DATABASE\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_ROOT_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_DATABASE\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_USER\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_PASSWORD\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_USER\" variable is not set. Defaulting to a blank string."
+time="2026-08-07T14:13:44Z" level=warning msg="The \"MYSQL_PASSWORD\" variable is not set. Defaulting to a blank string."
+===== docker-compose.replica.yml =====
+empty compose file
+===== docker-compose.yml =====
+error while interpolating services.migrate.environment.ConnectionStrings__DefaultConnection: required variable MYSQL_PASSWORD is missing a value: set MYSQL_PASSWORD in .env

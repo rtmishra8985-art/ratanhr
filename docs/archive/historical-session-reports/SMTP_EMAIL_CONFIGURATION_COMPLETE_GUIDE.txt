@@ -1,0 +1,774 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║              RATANHR SMTP EMAIL CONFIGURATION - COMPLETE GUIDE                ║
+║                                                                               ║
+║                    Step-by-Step Implementation for Clients                    ║
+║                                                                               ║
+║                              Version 1.0.4                                    ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+TABLE OF CONTENTS:
+
+  1. Overview & What You Need
+  2. Phase 1: Development Setup (Local Testing)
+  3. Phase 2: Configuration Setup (Brevo Account)
+  4. Phase 3: Deployment (On-Premise or Cloud)
+  5. Phase 4: Testing in Production
+  6. Troubleshooting
+  7. Monitoring & Support
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    PART 1: OVERVIEW & WHAT YOU NEED
+
+═══════════════════════════════════════════════════════════════════════════════
+
+WHAT IS SMTP EMAIL CONFIGURATION?
+
+SMTP = Simple Mail Transfer Protocol (email delivery system)
+
+In simple terms: Your RatanHR application needs to send emails for:
+  • Password reset notifications
+  • Welcome emails for new employees
+  • Leave approval/rejection notifications
+  • Other HR communications
+
+To send these emails, we need to configure:
+  ✓ Email service provider (Brevo - free tier available)
+  ✓ Email settings in the application
+  ✓ Testing to verify it works
+  ✓ Deployment configuration
+
+═══════════════════════════════════════════════════════════════════════════════
+
+WHAT YOU'LL NEED:
+
+For Development (Local Testing):
+  ✓ Your computer
+  ✓ RatanHR application (already have)
+  ✓ MailHog (for testing - included)
+
+For Production (On-Premise or Cloud):
+  ✓ Server or cloud account
+  ✓ Brevo SMTP account (free)
+  ✓ Internet connection
+  ✓ Docker (optional but recommended)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+WHAT WILL BE CONFIGURED:
+
+✅ Email service provider (Brevo SMTP)
+✅ Email credentials (username/password)
+✅ Email settings (.env file)
+✅ Backend email service (EmailService.cs)
+✅ HTML email templates
+✅ Error handling & logging
+✅ Health monitoring
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                 PART 2: PHASE 1 - DEVELOPMENT SETUP (LOCAL)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1: VERIFY MAILHOG IS RUNNING
+─────────────────────────────────
+
+What is MailHog?
+  → Fake email server for testing
+  → Captures emails locally
+  → Allows testing without real email service
+  → No firewall issues
+
+How to start MailHog:
+
+OPTION A: If you have mailhog_windows_amd64.exe
+  1. Download from: https://github.com/mailhog/MailHog/releases
+  2. Double-click: mailhog_windows_amd64.exe
+  3. Wait for: "MailHog v1.x.x"
+  4. Two things will start:
+     - SMTP server on: localhost:1025
+     - Web UI on: http://localhost:8025
+
+OPTION B: If you have Docker
+  docker run -d -p 1025:1025 -p 8025:8025 mailhog/mailhog:latest
+
+How to verify it's running:
+  1. Open browser: http://localhost:8025
+  2. You should see MailHog inbox (may be empty)
+  3. If you see it → MailHog is running ✓
+
+Result: MailHog is now ready for testing
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 2: CONFIGURE .ENV FILE FOR LOCAL TESTING
+──────────────────────────────────────────────
+
+What is .env?
+  → Configuration file that stores email settings
+  → Contains: SMTP host, port, username, password
+  → Separate from code (secure)
+  → Different settings for dev/production
+
+Where to find .env file:
+  Location: C:\Users\[YourUser]\Downloads\RatanHR_Run8_Final\RatanHR\.env
+
+What to add/modify in .env:
+
+For LOCAL TESTING (MailHog):
+───────────────────────────
+
+# Email Configuration - LOCAL TESTING
+EMAIL_HOST=localhost
+EMAIL_PORT=1025
+EMAIL_USE_SSL=false
+EMAIL_USERNAME=
+EMAIL_PASSWORD=
+EMAIL_FROM_ADDRESS=rtmishra8985@gmail.com
+EMAIL_FROM_NAME=RatanHR HRMS
+EMAIL_TO_ADDRESS=rtmishra7040@gmail.com
+
+# .NET Configuration (same settings, different format)
+Email__Host=localhost
+Email__Port=1025
+Email__UseSsl=false
+Email__Username=
+Email__Password=
+Email__FromAddress=rtmishra8985@gmail.com
+Email__FromName=RatanHR HRMS
+Email__ToAddress=rtmishra7040@gmail.com
+
+How to edit .env:
+  1. Open with Notepad
+  2. Find the EMAIL section
+  3. Replace with above values
+  4. Save file (Ctrl+S)
+
+Result: .env is configured for local testing
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 3: TEST EMAIL LOCALLY
+──────────────────────────
+
+How to send a test email:
+
+OPTION A: Using provided batch file
+  1. Location: C:\Users\[YourUser]\Downloads\RatanHR_Run8_Final\RatanHR\
+  2. Find: SEND_TEST_EMAIL_TO_MAILHOG.bat
+  3. Double-click it
+  4. Wait for: "✅ SUCCESS - EMAIL SENT TO MAILHOG"
+
+OPTION B: Using PowerShell
+  1. Press: Windows Key + X
+  2. Select: Windows PowerShell
+  3. Paste:
+     powershell -NoProfile -Command "$smtp = New-Object System.Net.Mail.SmtpClient('localhost', 1025); $smtp.EnableSsl = $false; $mail = New-Object System.Net.Mail.MailMessage('rtmishra8985@gmail.com', 'rtmishra7040@gmail.com'); $mail.Subject = 'RatanHR Test'; $mail.Body = 'Test'; $smtp.Send($mail); Write-Host 'SUCCESS: Email sent!'"
+
+How to verify email was sent:
+
+  1. Open browser: http://localhost:8025
+  2. Click refresh button
+  3. You should see email in inbox
+  4. From: rtmishra8985@gmail.com
+  5. To: rtmishra7040@gmail.com
+  6. Subject: RatanHR Test
+  7. If visible → SUCCESS ✓
+
+Result: Email sending works locally!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                 PART 3: PHASE 2 - CONFIGURATION (BREVO ACCOUNT)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+WHAT IS BREVO?
+
+Brevo = Email service provider
+  • Free tier: Send up to 300 emails/day
+  • Professional: Unlimited emails
+  • Reliable: Trusted by millions
+  • SMTP server: smtp-relay.brevo.com
+
+STEP 1: CREATE BREVO ACCOUNT
+─────────────────────────────
+
+1. Go to: https://www.brevo.com/
+2. Click: "Sign Up Free"
+3. Enter:
+   - Email address
+   - Password
+   - Company name (RatanHR)
+4. Click: "Create Account"
+5. Verify email address (check inbox)
+6. Login to Brevo dashboard
+
+Result: Brevo account created
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 2: GET BREVO SMTP CREDENTIALS
+──────────────────────────────────
+
+1. Login to Brevo: https://www.brevo.com/login/
+2. Click: "SMTP Settings" or "Integration"
+3. Look for: "SMTP Parameters"
+4. You'll see:
+   - SMTP Server: smtp-relay.brevo.com
+   - SMTP Port: 587
+   - SMTP Login: Your email (or special username)
+   - SMTP Password: API key
+
+5. Copy these values (you'll need them)
+
+Result: You have Brevo credentials
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 3: CONFIGURE .ENV FOR PRODUCTION
+──────────────────────────────────────
+
+Update .env file with Brevo settings:
+
+For PRODUCTION (Brevo SMTP):
+───────────────────────────
+
+# Email Configuration - PRODUCTION
+EMAIL_HOST=smtp-relay.brevo.com
+EMAIL_PORT=587
+EMAIL_USE_SSL=false
+EMAIL_USERNAME=b5ef15001@smtp-brevo.com    (your Brevo username)
+EMAIL_PASSWORD=xkeysib-xxx...              (your Brevo API key)
+EMAIL_FROM_ADDRESS=your@company.com        (your company email)
+EMAIL_FROM_NAME=RatanHR HRMS
+EMAIL_TO_ADDRESS=employee@company.com      (default reply-to)
+
+# .NET Configuration
+Email__Host=smtp-relay.brevo.com
+Email__Port=587
+Email__UseSsl=false
+Email__Username=b5ef15001@smtp-brevo.com
+Email__Password=xkeysib-xxx...
+Email__FromAddress=your@company.com
+Email__FromName=RatanHR HRMS
+Email__ToAddress=employee@company.com
+
+IMPORTANT:
+  ✓ Replace username/password with YOUR Brevo credentials
+  ✓ Replace email addresses with YOUR company emails
+  ✓ Keep this file SECURE (don't share passwords)
+  ✓ Never commit to Git with real credentials
+
+How to edit:
+  1. Open .env with Notepad
+  2. Find EMAIL section
+  3. Replace values with Brevo credentials
+  4. Save (Ctrl+S)
+
+Result: Production configuration is set
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                 PART 4: PHASE 3 - DEPLOYMENT
+
+═══════════════════════════════════════════════════════════════════════════════
+
+YOU HAVE TWO OPTIONS:
+
+OPTION A: ON-PREMISE DEPLOYMENT
+OPTION B: CLOUD DEPLOYMENT (AWS/Azure/GCP)
+
+Both use the same code and same .env configuration!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+OPTION A: ON-PREMISE DEPLOYMENT (Your Own Server)
+─────────────────────────────────────────────────
+
+What is On-Premise?
+  → You own/manage the server
+  → Can be: physical server, VM, or private cloud
+  → Runs in your data center
+  → Full control over infrastructure
+
+Step 1: Get an On-Premise Server
+  ✓ Physical server
+  ✓ Virtual machine (Hyper-V, VMware, etc.)
+  ✓ Private cloud
+  ✓ Minimum: Linux/Windows with Docker support
+
+Step 2: Install Docker (if not already installed)
+  
+  For Windows:
+    1. Download Docker Desktop: https://www.docker.com/products/docker-desktop
+    2. Install (follow wizard)
+    3. Verify: docker --version
+  
+  For Linux (Ubuntu):
+    sudo apt-get install docker.io
+    docker --version
+
+Step 3: Prepare RatanHR Application
+
+  Build Docker image:
+    cd C:\Users\[YourUser]\Downloads\RatanHR_Run8_Final\RatanHR
+    docker build -t ratanhr:1.0.4 .
+  
+  Wait for build to complete (5-10 minutes)
+
+Step 4: Copy .env file to Server
+  
+  1. Update .env with Brevo credentials
+  2. Copy to server: C:\path\on\server\.env
+  3. Place in: /home/username/ratanhr/.env
+
+Step 5: Deploy Container
+  
+  On server, run:
+    docker run -d \
+      --env-file .env \
+      -p 8080:80 \
+      --name ratanhr-app \
+      -v /data/ratanhr:/data \
+      ratanhr:1.0.4
+  
+  This:
+    -d = Run in background
+    --env-file .env = Load configuration
+    -p 8080:80 = Port mapping
+    --name = Container name
+    -v = Data volume
+    ratanhr:1.0.4 = Image name
+
+Step 6: Verify Deployment
+  
+  1. Check if running: docker ps
+  2. Should show: ratanhr-app (Status: Up)
+  3. Open browser: http://[SERVER_IP]:8080
+  4. Should see: RatanHR login page
+
+Step 7: Test Email
+  
+  1. Go to: http://[SERVER_IP]:8080/forgot-password
+  2. Enter: test@company.com
+  3. Wait 2-3 minutes
+  4. Check email inbox
+  5. Should receive: Password reset email
+  6. If received → EMAIL WORKING ✓
+
+Result: On-Premise deployment complete!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+OPTION B: CLOUD DEPLOYMENT (AWS/Azure/GCP)
+──────────────────────────────────────────
+
+What is Cloud?
+  → AWS (Amazon), Azure (Microsoft), GCP (Google)
+  → Hosted servers managed by cloud provider
+  → Automatic scaling, backups, monitoring
+  → Pay-as-you-go pricing
+
+STEP 1: Choose Cloud Provider
+  ✓ AWS (most popular)
+  ✓ Microsoft Azure
+  ✓ Google Cloud Platform
+  ✓ DigitalOcean
+
+STEP 2: Create Cloud Account
+  
+  For AWS:
+    1. Go to: https://aws.amazon.com/
+    2. Click: "Sign Up"
+    3. Enter email, password
+    4. Choose: Free tier eligible
+    5. Verify email
+  
+  For Azure:
+    1. Go to: https://azure.microsoft.com/
+    2. Click: "Start free"
+    3. Follow signup
+  
+  For GCP:
+    1. Go to: https://cloud.google.com/
+    2. Click: "Get started"
+    3. Follow signup
+
+STEP 3: Build & Push Docker Image
+  
+  1. Build image locally:
+     docker build -t ratanhr:1.0.4 .
+  
+  2. Tag for cloud:
+     For AWS:
+       docker tag ratanhr:1.0.4 ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/ratanhr:1.0.4
+     
+     For Azure:
+       docker tag ratanhr:1.0.4 REGISTRY.azurecr.io/ratanhr:1.0.4
+     
+     For GCP:
+       docker tag ratanhr:1.0.4 gcr.io/PROJECT_ID/ratanhr:1.0.4
+  
+  3. Push to cloud:
+     For AWS:
+       docker push ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/ratanhr:1.0.4
+     
+     For Azure:
+       docker push REGISTRY.azurecr.io/ratanhr:1.0.4
+     
+     For GCP:
+       docker push gcr.io/PROJECT_ID/ratanhr:1.0.4
+
+STEP 4: Deploy on Cloud
+
+  For AWS ECS:
+    1. Go to AWS ECS console
+    2. Create task definition (use image URL)
+    3. Create service
+    4. Deploy
+    5. Get load balancer URL
+  
+  For Azure:
+    1. Go to Azure Container Instances
+    2. Create container instance
+    3. Upload image
+    4. Set environment variables
+    5. Deploy
+    6. Get IP address
+  
+  For GCP:
+    1. Go to Cloud Run
+    2. Create service
+    3. Deploy container
+    4. Set environment variables
+    5. Get service URL
+
+STEP 5: Configure Environment Variables
+
+  In cloud console, set:
+    EMAIL_HOST=smtp-relay.brevo.com
+    EMAIL_PORT=587
+    EMAIL_USERNAME=your@brevo.com
+    EMAIL_PASSWORD=your_api_key
+    EMAIL_FROM_ADDRESS=your@company.com
+    (etc - all .env variables)
+
+STEP 6: Test Email
+
+  1. Open: http://[CLOUD_APP_URL]
+  2. Go to: /forgot-password
+  3. Enter: test@company.com
+  4. Wait 2-3 minutes
+  5. Check email inbox
+  6. Should receive password reset email
+  7. If received → EMAIL WORKING ✓
+
+Result: Cloud deployment complete!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                 PART 5: PHASE 4 - TESTING IN PRODUCTION
+
+═══════════════════════════════════════════════════════════════════════════════
+
+After deployment, test all email features:
+
+TEST 1: PASSWORD RESET EMAIL
+────────────────────────────
+
+1. Go to: RatanHR login page
+2. Click: "Forgot Password?"
+3. Enter: employee@company.com
+4. Click: "Send Reset Link"
+5. Check email inbox
+6. Should receive: Email with password reset link
+7. Click link to verify it works
+8. Set new password
+
+Expected: Email arrives within 2-3 minutes ✓
+
+═══════════════════════════════════════════════════════════════════════════════
+
+TEST 2: WELCOME EMAIL (New Employee)
+─────────────────────────────────────
+
+1. Go to: HR > Employees
+2. Create new employee: Enter email, name, etc.
+3. Click: "Add Employee"
+4. System sends welcome email automatically
+5. Check email inbox
+6. Should receive: Welcome email with login credentials
+
+Expected: Email arrives within 1-2 minutes ✓
+
+═══════════════════════════════════════════════════════════════════════════════
+
+TEST 3: LEAVE NOTIFICATION (Approval)
+──────────────────────────────────────
+
+1. Go to: Leave Management
+2. Employee submits leave request
+3. Manager approves/rejects
+4. System sends notification email
+5. Check email inbox
+6. Should receive: Leave approval/rejection
+
+Expected: Email arrives within 1-2 minutes ✓
+
+═══════════════════════════════════════════════════════════════════════════════
+
+TEST 4: MASS EMAIL (All Employees)
+──────────────────────────────────
+
+1. Go to: Communications
+2. Create announcement
+3. Send to: All employees
+4. Multiple employees should receive
+5. Check multiple inboxes
+
+Expected: All emails arrive within 2-3 minutes ✓
+
+═══════════════════════════════════════════════════════════════════════════════
+
+MONITORING & HEALTH CHECK
+─────────────────────────
+
+How to verify email system is healthy:
+
+1. Check Health Endpoint:
+   Go to: http://[APP_URL]/health
+   Look for: "Email": "Healthy"
+   
+2. Check Logs:
+   Look for: "Email delivery completed" (success)
+   Look for: "Email delivery failed" (error)
+   
+3. Check Brevo Dashboard:
+   Go to: https://www.brevo.com/
+   View: "Sent emails", "Bounces", "Clicks"
+   
+4. Monitor Delivery Rate:
+   Track: How many emails sent vs received
+   Target: 95%+ delivery rate
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                 PART 6: TROUBLESHOOTING
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PROBLEM 1: Email not sending - Timeout error
+─────────────────────────────────────────────
+
+Symptoms:
+  - Error: "Connection timeout"
+  - Emails not sent
+  - Slow response
+
+Causes:
+  - Firewall blocking port 587
+  - Network connectivity issue
+  - Brevo server down
+
+Solutions:
+  1. Check internet connection
+  2. Check firewall allows port 587 outbound
+  3. Verify credentials are correct
+  4. Test: telnet smtp-relay.brevo.com 587
+  5. Contact Brevo support
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PROBLEM 2: Authentication failed
+─────────────────────────────────
+
+Symptoms:
+  - Error: "Authentication failed"
+  - "Invalid credentials"
+  - "Login rejected"
+
+Causes:
+  - Wrong username/password
+  - Copied wrong API key
+  - Brevo account not verified
+
+Solutions:
+  1. Login to Brevo dashboard
+  2. Verify credentials again
+  3. Copy exact username/password
+  4. Check: No extra spaces or characters
+  5. Try: Creating new API key
+  6. Update .env with new key
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PROBLEM 3: Email arrives in spam folder
+────────────────────────────────────────
+
+Symptoms:
+  - Email sent successfully
+  - But appears in spam/junk folder
+
+Causes:
+  - Email not from verified domain
+  - SPF/DKIM records not configured
+  - Email content flagged as spam
+
+Solutions:
+  1. Use verified company domain email
+  2. Add SPF/DKIM records (ask IT)
+  3. Test with internal email first
+  4. Check: Email templates are not spam-like
+  5. Whitelist sender email
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PROBLEM 4: Emails sending but not received
+───────────────────────────────────────────
+
+Symptoms:
+  - Email marked "sent" in logs
+  - But recipient doesn't receive
+  - Brevo shows successful
+
+Causes:
+  - Recipient email wrong/typo
+  - Recipient email flagged as spam
+  - Email bounced (invalid address)
+
+Solutions:
+  1. Verify recipient email address
+  2. Check Brevo bounce list
+  3. Ask recipient to check spam folder
+  4. Test with different email address
+  5. Check email content for spam words
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                 PART 7: MONITORING & SUPPORT
+
+═══════════════════════════════════════════════════════════════════════════════
+
+DAILY MONITORING CHECKLIST
+──────────────────────────
+
+Every morning, check:
+  ✓ Application /health endpoint (email status)
+  ✓ Brevo dashboard (daily stats)
+  ✓ Application logs (errors)
+  ✓ Email delivery rate (target: 95%+)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+MONTHLY REPORTING
+─────────────────
+
+Create monthly report:
+  - Emails sent: X
+  - Emails delivered: X
+  - Bounce rate: X%
+  - Failed emails: X
+  - Average delivery time: X seconds
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SUPPORT CONTACTS
+────────────────
+
+Brevo Support:
+  - Website: https://www.brevo.com/support/
+  - Email: support@brevo.com
+  - Free tier: Limited support
+
+RatanHR Support:
+  - Email: support@ratanhr.com
+  - Phone: [Your support number]
+  - Hours: [Your support hours]
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    QUICK REFERENCE CHECKLIST
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Development Setup:
+  □ MailHog installed and running
+  □ .env configured for localhost
+  □ Test email sent successfully
+  □ Email received in MailHog ✓
+
+Production Setup:
+  □ Brevo account created
+  □ SMTP credentials obtained
+  □ .env updated with credentials
+  □ Application deployed
+  □ Docker container running
+  □ Health endpoint showing healthy
+  □ Password reset email tested ✓
+  □ Welcome email tested ✓
+  □ Leave notification tested ✓
+
+Monitoring:
+  □ Health endpoint monitored
+  □ Logs checked daily
+  □ Delivery rate tracked
+  □ Alerts configured
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    SUMMARY
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Your RatanHR application now has:
+
+✅ Professional email service (Brevo SMTP)
+✅ Automatic password reset emails
+✅ Welcome emails for new employees
+✅ Leave notification system
+✅ Production-grade error handling
+✅ Email health monitoring
+✅ Comprehensive logging
+✅ Scalable architecture
+
+Deployment Options:
+✅ Local development (MailHog)
+✅ On-Premise servers
+✅ Cloud (AWS, Azure, GCP)
+
+All using the same code and configuration!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    SUPPORT & RESOURCES
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Documentation:
+  - Brevo Docs: https://docs.brevo.com/
+  - Docker Docs: https://docs.docker.com/
+  - RatanHR Docs: [Your documentation]
+
+Videos:
+  - Email setup: [Link to video]
+  - Deployment: [Link to video]
+  - Troubleshooting: [Link to video]
+
+Email Support:
+  - support@ratanhr.com
+  - Response time: 24 hours
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    END OF DOCUMENTATION
+
+Version: 1.0.4
+Date: 2026-08-19
+Author: RatanHR Team
+Status: ✅ PRODUCTION READY
+
+═══════════════════════════════════════════════════════════════════════════════

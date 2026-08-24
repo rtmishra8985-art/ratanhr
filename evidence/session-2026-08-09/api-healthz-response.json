@@ -1,0 +1,1 @@
+{"status":"Healthy","checks":[{"name":"liveness","status":"Healthy","description":"Service is alive."},{"name":"email","status":"Healthy","description":"SMTP not configured (non-production)."},{"name":"database","status":"Healthy","description":null},{"name":"redis","status":"Healthy","description":null}]}

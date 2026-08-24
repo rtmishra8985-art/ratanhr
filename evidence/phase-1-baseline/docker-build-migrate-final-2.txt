@@ -1,0 +1,103 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.75kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/dotnet/sdk:8.0.416-alpine3.21
+#2 DONE 0.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 1.49kB done
+#3 DONE 0.0s
+
+#4 [build  1/16] FROM mcr.microsoft.com/dotnet/sdk:8.0.416-alpine3.21@sha256:e292b92e9f21bb98c75a528877ac9ed8121ab9d96ba3aba620d31c09affc80bd
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 123.21kB 0.1s done
+#5 DONE 0.1s
+
+#6 [build  5/16] COPY HRMS.Infrastructure/HRMS.Infrastructure.csproj HRMS.Infrastructure/
+#6 CACHED
+
+#7 [build  9/16] COPY HRMS.API/packages.lock.json            HRMS.API/
+#7 CACHED
+
+#8 [build  2/16] WORKDIR /src
+#8 CACHED
+
+#9 [build 13/16] COPY HRMS.Tests/packages.lock.json          HRMS.Tests/
+#9 CACHED
+
+#10 [build  4/16] COPY HRMS.API/HRMS.API.csproj                       HRMS.API/
+#10 CACHED
+
+#11 [build  3/16] COPY *.sln ./
+#11 CACHED
+
+#12 [build  7/16] COPY HRMS.Domain/HRMS.Domain.csproj                 HRMS.Domain/
+#12 CACHED
+
+#13 [build  6/16] COPY HRMS.Application/HRMS.Application.csproj       HRMS.Application/
+#13 CACHED
+
+#14 [build 10/16] COPY HRMS.Infrastructure/packages.lock.json HRMS.Infrastructure/
+#14 CACHED
+
+#15 [build 11/16] COPY HRMS.Application/packages.lock.json    HRMS.Application/
+#15 CACHED
+
+#16 [build 12/16] COPY HRMS.Domain/packages.lock.json         HRMS.Domain/
+#16 CACHED
+
+#17 [build  8/16] COPY HRMS.Tests/HRMS.Tests.csproj                   HRMS.Tests/
+#17 CACHED
+
+#18 [build 14/16] RUN dotnet restore --locked-mode
+#18 CACHED
+
+#19 [build 15/16] COPY . .
+#19 DONE 0.5s
+
+#20 [build 16/16] RUN dotnet publish HRMS.API/HRMS.API.csproj       --configuration Release       --no-restore       --output /app/publish       -p:AssemblyVersion=1.0.0.0       -p:FileVersion=1.0.0.0       -p:InformationalVersion="unknown+unknown"
+#20 11.00   HRMS.Domain -> /src/HRMS.Domain/bin/Release/net8.0/HRMS.Domain.dll
+#20 15.60   HRMS.Application -> /src/HRMS.Application/bin/Release/net8.0/HRMS.Application.dll
+#20 23.08 /src/HRMS.Infrastructure/Biometric/ZKTecoProvider.cs(86,28): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread. [/src/HRMS.Infrastructure/HRMS.Infrastructure.csproj]
+#20 23.69   HRMS.Infrastructure -> /src/HRMS.Infrastructure/bin/Release/net8.0/HRMS.Infrastructure.dll
+#20 26.76   HRMS.API -> /src/HRMS.API/bin/Release/net8.0/HRMS.API.dll
+#20 27.22   HRMS.API -> /app/publish/
+#20 DONE 27.5s
+
+#8 [build  2/16] WORKDIR /src
+#8 CACHED
+
+#21 [migrate 3/6] COPY --from=build /src .
+#21 DONE 0.6s
+
+#22 [migrate 4/6] RUN dotnet tool restore &&     apk add --no-cache mysql-client
+#22 3.044 Tool 'dotnet-ef' (version '8.0.8') was restored. Available commands: dotnet-ef
+#22 3.044 
+#22 3.044 Restore was successful.
+#22 3.089 fetch https://dl-cdn.alpinelinux.org/alpine/v3.21/main/x86_64/APKINDEX.tar.gz
+#22 3.461 fetch https://dl-cdn.alpinelinux.org/alpine/v3.21/community/x86_64/APKINDEX.tar.gz
+#22 3.990 (1/4) Installing mariadb-common (11.4.12-r0)
+#22 4.035 (2/4) Installing libncursesw (6.5_p20241006-r3)
+#22 4.061 (3/4) Installing mariadb-client (11.4.12-r0)
+#22 4.341 (4/4) Installing mysql-client (11.4.12-r0)
+#22 4.341 Executing busybox-1.37.0-r13.trigger
+#22 4.350 OK: 95 MiB in 38 packages
+#22 DONE 4.6s
+
+#23 [migrate 5/6] COPY docker/migrate-entrypoint.sh /migrate-entrypoint.sh
+#23 DONE 0.2s
+
+#24 [migrate 6/6] RUN chmod +x /migrate-entrypoint.sh
+#24 DONE 0.5s
+
+#25 exporting to image
+#25 exporting layers
+#25 exporting layers 2.0s done
+#25 writing image sha256:3d00d3e0b51e58e9b42e3edeb59d9d26ff6770c64c4b12774452abb130e537f2 done
+#25 naming to docker.io/library/ratanhr-phase1-migrate-final done
+#25 DONE 2.0s

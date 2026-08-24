@@ -1,0 +1,5 @@
+Command: ripgrep secret patterns (no values printed)
+Date (UTC): Mon Aug 10 06:31:41 UTC 2026
+----
+Private-key/AWS/GitHub/Slack/Stripe patterns: all matches are placeholders, test key generation, or scanner docs. No live credential found.
+SslMode=None: 0 matches in any compose/.env/runtime config (only prose warnings + a historical evidence log).

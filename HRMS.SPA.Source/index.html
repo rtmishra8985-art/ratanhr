@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5" />
+
+    <!-- ─── Security: Content Security Policy ────────────────────────────── -->
+    <!--
+      This CSP restricts where scripts, styles, images and connections can
+      come from. Tighten the connect-src directive to list only your API
+      domain(s) in production (remove the wildcard '*').
+
+      NOTE: move these to HTTP response headers set by the ASP.NET backend
+      for the strongest enforcement — meta-tag CSP cannot block navigation.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src  'self' 'unsafe-inline';
+        style-src   'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src    'self' https://fonts.gstatic.com;
+        img-src     'self' data: https:;
+        connect-src 'self' *;
+      "
+    />
+    <!-- Clickjacking and MIME-sniffing protections are response headers set by
+         the ASP.NET host; the browser ignores these directives in meta tags. -->
+    <!-- Only send the origin as referrer, never the full URL -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <!-- ─── Identity ──────────────────────────────────────────────────────── -->
+    <title>RatanHR — HR Management System</title>
+    <meta
+      name="description"
+      content="RatanHR is a modern HRMS covering employee management, payroll, attendance, recruitment, performance, assets, and helpdesk in one unified platform."
+    />
+    <meta name="robots" content="noindex, nofollow" />
+
+    <!-- ─── Open Graph ────────────────────────────────────────────────────── -->
+    <meta property="og:title"       content="RatanHR — HR Management System" />
+    <meta property="og:description" content="Modern HRMS for your organisation." />
+    <meta property="og:type"        content="website" />
+
+    <!-- ─── Favicon ──────────────────────────────────────────────────────── -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- ─── Fonts (preconnect for speed) ─────────────────────────────────── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- SRI note: Google Fonts CSS content is dynamic (UA-dependent); static SRI hash is
+         impractical. crossorigin is still required for CORS compliance on the font fetch.
+         Vite-bundled JS/CSS bundles receive SHA-384 integrity hashes via vite-plugin-subresource-integrity. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <!--
+      #main-content is the target for the SkipToContent accessibility link.
+      The actual <main> element is rendered by Layout.tsx inside the React tree,
+      which sets id="main-content" on the <main> tag.
+    -->
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

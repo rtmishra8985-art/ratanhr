@@ -1,0 +1,177 @@
+$ docker build --target runtime -t ratanhr-api .
+
+--- STDOUT ---
+
+--- STDERR ---
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.82kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/dotnet/sdk:8.0.303-alpine3.20
+#2 DONE 0.1s
+
+#3 [internal] load metadata for docker.io/oven/bun:1.2-alpine
+#3 ...
+
+#4 [internal] load metadata for mcr.microsoft.com/dotnet/aspnet:8.0.8-alpine3.20
+#4 DONE 0.5s
+
+#3 [internal] load metadata for docker.io/oven/bun:1.2-alpine
+#3 DONE 0.8s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 1.49kB done
+#5 DONE 0.0s
+
+#6 [spa-builder 1/6] FROM docker.io/oven/bun:1.2-alpine@sha256:0841c588f6304300baf1d395ae339ce09a6e18c4b6a7cdd4fddcbdb87a2f096a
+#6 DONE 0.0s
+
+#7 [build  1/16] FROM mcr.microsoft.com/dotnet/sdk:8.0.303-alpine3.20@sha256:6e8997576d16a6d7b4e6ba7ac0956d3ae46cb7a376581c40eabd20fbc5c28b8d
+#7 DONE 0.0s
+
+#8 [internal] load build context
+#8 transferring context: 78.54kB 0.0s done
+#8 DONE 0.1s
+
+#9 [build 10/16] COPY HRMS.Infrastructure/packages.lock.json HRMS.Infrastructure/
+#9 CACHED
+
+#10 [build  3/16] COPY *.sln ./
+#10 CACHED
+
+#11 [build  8/16] COPY HRMS.Tests/HRMS.Tests.csproj                   HRMS.Tests/
+#11 CACHED
+
+#12 [build 12/16] COPY HRMS.Domain/packages.lock.json         HRMS.Domain/
+#12 CACHED
+
+#13 [build  9/16] COPY HRMS.API/packages.lock.json            HRMS.API/
+#13 CACHED
+
+#14 [build 11/16] COPY HRMS.Application/packages.lock.json    HRMS.Application/
+#14 CACHED
+
+#15 [build  5/16] COPY HRMS.Infrastructure/HRMS.Infrastructure.csproj HRMS.Infrastructure/
+#15 CACHED
+
+#16 [build  4/16] COPY HRMS.API/HRMS.API.csproj                       HRMS.API/
+#16 CACHED
+
+#17 [build  6/16] COPY HRMS.Application/HRMS.Application.csproj       HRMS.Application/
+#17 CACHED
+
+#18 [build  7/16] COPY HRMS.Domain/HRMS.Domain.csproj                 HRMS.Domain/
+#18 CACHED
+
+#19 [build  2/16] WORKDIR /src
+#19 CACHED
+
+#20 [build 13/16] COPY HRMS.Tests/packages.lock.json          HRMS.Tests/
+#20 CACHED
+
+#21 [build 14/16] RUN dotnet restore --locked-mode
+#21 CACHED
+
+#22 [spa-builder 3/6] COPY HRMS.SPA.Source/package.json HRMS.SPA.Source/bun.lock ./
+#22 CACHED
+
+#23 [spa-builder 4/6] RUN bun install --frozen-lockfile
+#23 CACHED
+
+#24 [spa-builder 5/6] COPY HRMS.SPA.Source/ .
+#24 CACHED
+
+#25 [spa-builder 2/6] WORKDIR /spa
+#25 CACHED
+
+#26 [spa-builder 6/6] RUN bun run build:ci
+#26 CACHED
+
+#27 [runtime 1/6] FROM mcr.microsoft.com/dotnet/aspnet:8.0.8-alpine3.20@sha256:c45e218d64af2d1f223b2ff0fd3ccb59f2c1a91232c4932bd4e70d2aadf5dc7c
+#27 resolve mcr.microsoft.com/dotnet/aspnet:8.0.8-alpine3.20@sha256:c45e218d64af2d1f223b2ff0fd3ccb59f2c1a91232c4932bd4e70d2aadf5dc7c 0.1s done
+#27 sha256:c45e218d64af2d1f223b2ff0fd3ccb59f2c1a91232c4932bd4e70d2aadf5dc7c 1.08kB / 1.08kB done
+#27 sha256:79e991813b0f5240f12928d589ad1eb3bb9c8ea29bf077cf5d8dade0d8f97bc2 1.37kB / 1.37kB done
+#27 sha256:8c61a235e43caf8955e4bdcd214861e8397e783721ed5da87020d9de0764815d 3.45kB / 3.45kB done
+#27 sha256:43c4264eed91be63b206e17d93e75256a6097070ce643c5e8f0379998b44f170 0B / 3.62MB 0.1s
+#27 sha256:b637ed26fc0fb60e68442f404a49dea2936cdd0cb57a7c6487e2b3bcef964ca6 0B / 1.02MB 0.1s
+#27 sha256:c0727c98521da3c59dc020b60a46764922166b0f039245a6e0bde70903baa9b2 0B / 958B 0.1s
+#27 sha256:43c4264eed91be63b206e17d93e75256a6097070ce643c5e8f0379998b44f170 2.10MB / 3.62MB 0.2s
+#27 sha256:43c4264eed91be63b206e17d93e75256a6097070ce643c5e8f0379998b44f170 3.62MB / 3.62MB 0.3s
+#27 sha256:b637ed26fc0fb60e68442f404a49dea2936cdd0cb57a7c6487e2b3bcef964ca6 1.02MB / 1.02MB 0.3s
+#27 sha256:c0727c98521da3c59dc020b60a46764922166b0f039245a6e0bde70903baa9b2 958B / 958B 0.3s
+#27 extracting sha256:43c4264eed91be63b206e17d93e75256a6097070ce643c5e8f0379998b44f170
+#27 sha256:43c4264eed91be63b206e17d93e75256a6097070ce643c5e8f0379998b44f170 3.62MB / 3.62MB 0.3s done
+#27 sha256:b637ed26fc0fb60e68442f404a49dea2936cdd0cb57a7c6487e2b3bcef964ca6 1.02MB / 1.02MB 0.4s done
+#27 sha256:c0727c98521da3c59dc020b60a46764922166b0f039245a6e0bde70903baa9b2 958B / 958B 0.3s done
+#27 ...
+
+#28 [build 15/16] COPY . .
+#28 DONE 0.5s
+
+#27 [runtime 1/6] FROM mcr.microsoft.com/dotnet/aspnet:8.0.8-alpine3.20@sha256:c45e218d64af2d1f223b2ff0fd3ccb59f2c1a91232c4932bd4e70d2aadf5dc7c
+#27 extracting sha256:43c4264eed91be63b206e17d93e75256a6097070ce643c5e8f0379998b44f170 0.2s done
+#27 sha256:67162521808ec93b1e32368cd7454736abe41ffba08d8c664d255594b4a9107f 0B / 11.03MB 0.7s
+#27 extracting sha256:b637ed26fc0fb60e68442f404a49dea2936cdd0cb57a7c6487e2b3bcef964ca6
+#27 sha256:ab214c699105e1e46e277ef2751e309b87afebd0a673186c182f5fb067153025 0B / 32.26MB 0.7s
+#27 sha256:67162521808ec93b1e32368cd7454736abe41ffba08d8c664d255594b4a9107f 11.03MB / 11.03MB 0.8s
+#27 extracting sha256:b637ed26fc0fb60e68442f404a49dea2936cdd0cb57a7c6487e2b3bcef964ca6 0.1s done
+#27 sha256:ab214c699105e1e46e277ef2751e309b87afebd0a673186c182f5fb067153025 8.39MB / 32.26MB 0.9s
+#27 extracting sha256:c0727c98521da3c59dc020b60a46764922166b0f039245a6e0bde70903baa9b2
+#27 sha256:ab214c699105e1e46e277ef2751e309b87afebd0a673186c182f5fb067153025 23.07MB / 32.26MB 1.0s
+#27 extracting sha256:c0727c98521da3c59dc020b60a46764922166b0f039245a6e0bde70903baa9b2 0.2s done
+#27 sha256:67162521808ec93b1e32368cd7454736abe41ffba08d8c664d255594b4a9107f 11.03MB / 11.03MB 1.0s done
+#27 sha256:ab214c699105e1e46e277ef2751e309b87afebd0a673186c182f5fb067153025 26.21MB / 32.26MB 1.2s
+#27 sha256:ab214c699105e1e46e277ef2751e309b87afebd0a673186c182f5fb067153025 30.41MB / 32.26MB 1.3s
+#27 sha256:ab214c699105e1e46e277ef2751e309b87afebd0a673186c182f5fb067153025 32.26MB / 32.26MB 1.4s done
+#27 extracting sha256:ab214c699105e1e46e277ef2751e309b87afebd0a673186c182f5fb067153025
+#27 ...
+
+#29 [build 16/16] RUN dotnet publish HRMS.API/HRMS.API.csproj       --configuration Release       --no-restore       --output /app/publish       -p:AssemblyVersion=1.0.0.0       -p:FileVersion=1.0.0.0       -p:InformationalVersion="unknown+unknown"
+#29 0.739 The command could not be loaded, possibly because:
+#29 0.739   * You intended to execute a .NET application:
+#29 0.739       The application 'publish' does not exist.
+#29 0.739   * You intended to execute a .NET SDK command:
+#29 0.739       A compatible .NET SDK was not found.
+#29 0.739 
+#29 0.739 Requested SDK version: 8.0.416
+#29 0.739 global.json file: /src/global.json
+#29 0.739 
+#29 0.739 Installed SDKs:
+#29 0.739 
+#29 0.739 Install the [8.0.416] .NET SDK or update [/src/global.json] to match an installed SDK.
+#29 0.739 
+#29 0.739 Learn about SDK resolution:
+#29 0.739 https://aka.ms/dotnet/sdk-not-found
+#29 0.740 8.0.303 [/usr/share/dotnet/sdk]
+#29 ERROR: process "/bin/sh -c dotnet publish HRMS.API/HRMS.API.csproj       --configuration Release       --no-restore       --output /app/publish       -p:AssemblyVersion=1.0.0.0       -p:FileVersion=1.0.0.0       -p:InformationalVersion=\"${GIT_SHA}+${BUILD_TIMESTAMP}\"" did not complete successfully: exit code: 145
+------
+ > [build 16/16] RUN dotnet publish HRMS.API/HRMS.API.csproj       --configuration Release       --no-restore       --output /app/publish       -p:AssemblyVersion=1.0.0.0       -p:FileVersion=1.0.0.0       -p:InformationalVersion="unknown+unknown":
+0.739 Requested SDK version: 8.0.416
+0.739 global.json file: /src/global.json
+0.739 
+0.739 Installed SDKs:
+0.739 
+0.739 Install the [8.0.416] .NET SDK or update [/src/global.json] to match an installed SDK.
+0.739 
+0.739 Learn about SDK resolution:
+0.739 https://aka.ms/dotnet/sdk-not-found
+0.740 8.0.303 [/usr/share/dotnet/sdk]
+------
+Dockerfile:48
+--------------------
+  47 |     COPY . .
+  48 | >>> RUN dotnet publish HRMS.API/HRMS.API.csproj \
+  49 | >>>       --configuration Release \
+  50 | >>>       --no-restore \
+  51 | >>>       --output /app/publish \
+  52 | >>>       -p:AssemblyVersion=1.0.0.0 \
+  53 | >>>       -p:FileVersion=1.0.0.0 \
+  54 | >>>       -p:InformationalVersion="${GIT_SHA}+${BUILD_TIMESTAMP}"
+  55 |     
+--------------------
+ERROR: failed to solve: process "/bin/sh -c dotnet publish HRMS.API/HRMS.API.csproj       --configuration Release       --no-restore       --output /app/publish       -p:AssemblyVersion=1.0.0.0       -p:FileVersion=1.0.0.0       -p:InformationalVersion=\"${GIT_SHA}+${BUILD_TIMESTAMP}\"" did not complete successfully: exit code: 145
+
+--- EXIT CODE ---
+1

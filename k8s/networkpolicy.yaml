@@ -1,0 +1,101 @@
+# ── Default-deny all ingress within the hrms namespace ────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+spec:
+  podSelector: {}         # applies to every pod in the namespace
+  policyTypes:
+    - Ingress
+---
+# ── Allow ingress to the API only from the nginx ingress controller ───────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-api
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: api
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+---
+# ── MySQL: only the API pod may connect ───────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mysql-from-api
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: mysql
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: api
+      ports:
+        - protocol: TCP
+          port: 3306
+---
+# ── Redis: only the API pod may connect ──────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-redis-from-api
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: api
+      ports:
+        - protocol: TCP
+          port: 6379
+---
+# ── Prometheus: scrape the API /metrics from the monitoring namespace ─────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: api
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080    # adjust to your actual metrics port

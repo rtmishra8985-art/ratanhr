@@ -1,0 +1,37 @@
+Archive: attached_assets/RatanHR-phase2-remediation_1786180067558.zip
+(delivered to this session as RatanHR-phase2-remediation.zip)
+
+ZIP integrity: `unzip -t` — "No errors detected in compressed data." PASS
+
+Extracted root: RatanHR-merged-release-candidate/  (not assumed — confirmed by listing)
+Extraction target: /home/claude/work/extracted/  (temporary working dir; original ZIP untouched)
+
+Confirmed present:
+  Solution file:        HRMS.sln
+  Backend projects:      HRMS.Domain/HRMS.Domain.csproj
+                         HRMS.Application/HRMS.Application.csproj
+                         HRMS.Infrastructure/HRMS.Infrastructure.csproj
+                         HRMS.API/HRMS.API.csproj
+                         HRMS.Tests/HRMS.Tests.csproj
+  Frontend project:      HRMS.SPA.Source/package.json (bun.lock present -> bun is the
+                         actual package manager)
+  Docker Compose files:  docker-compose.yml
+                         docker-compose.e2e.yml
+                         docker-compose.override.yml
+                         docker-compose.prod.yml
+                         docker-compose.replica.yml
+                         docker-compose.backup.yml
+                         Staging/docker-compose.staging.yml
+                         Staging/docker-compose.staging.override.yml
+                         Staging/docker-compose.staging.replit.yml
+  Dockerfile:            Dockerfile (stages: spa-builder, build, migrate, runtime)
+  Playwright config:     HRMS.SPA.Source/playwright.config.ts
+  global.json:           sdk.version 8.0.416, rollForward latestFeature
+  Existing Phase 1/2
+  reports preserved:     ORIGINAL_PHASE1_AUDIT_REPORT.md, PHASE_1_REMEDIATION_REPORT.md,
+                         RELEASE_GATE_VERIFIED_2026-08-01.md, PHASE8_STAGING_VALIDATION.md,
+                         PRODUCTION_READINESS_FIXES.md, BUGFIX_CHANGELOG_V2/V4/V5_FINAL.md,
+                         DEVELOPMENT_VALIDATION_REPORT.md, and the Documentation/ tree
+                         (36 files) — none modified or deleted by this pass.
+
+Repository size (extracted, no build artifacts): 16M

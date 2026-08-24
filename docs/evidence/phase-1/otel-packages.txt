@@ -1,0 +1,15 @@
+Command: grep OpenTelemetry package references
+Date (UTC): Mon Aug 10 06:31:41 UTC 2026
+----
+HRMS.API/HRMS.API.csproj:64:    <!-- OpenTelemetry: Tracing + Metrics + Logs                                          -->
+HRMS.API/HRMS.API.csproj:69:    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.17.0" />
+HRMS.API/HRMS.API.csproj:70:    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.17.0" />
+HRMS.API/HRMS.API.csproj:71:    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.17.0" />
+HRMS.API/HRMS.API.csproj:72:    <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.17.0-beta.1" />
+HRMS.API/HRMS.API.csproj:73:    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.17.0" />
+HRMS.API/HRMS.API.csproj:74:    <!-- OpenTelemetry.Instrumentation.Process has no stable release and is not used. -->
+HRMS.API/HRMS.API.csproj:75:    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.17.0" />
+HRMS.API/HRMS.API.csproj:76:    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.17.0-beta.1" />
+HRMS.API/HRMS.API.csproj:77:    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.17.0-beta.1" />
+HRMS.Infrastructure/HRMS.Infrastructure.csproj:32:    <!-- OpenTelemetry metrics for payroll/DB instrumentation -->
+HRMS.Infrastructure/HRMS.Infrastructure.csproj:33:    <PackageReference Include="OpenTelemetry" Version="1.17.0" />

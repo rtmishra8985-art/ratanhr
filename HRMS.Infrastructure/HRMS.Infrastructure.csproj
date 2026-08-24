@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Item 7: aligned with CHANGELOG 1.0.4. -->
+    <Version>1.0.4</Version>
+    <AssemblyVersion>1.0.4</AssemblyVersion>
+    <FileVersion>1.0.4</FileVersion>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <!-- Phase 1: Replaced Npgsql.EntityFrameworkCore.PostgreSQL with Pomelo MySQL provider -->
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <!-- ClosedXML retained for non-streaming exports (small datasets < 10k rows) -->
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <!-- DocumentFormat.OpenXml for streaming exports (100k+ rows, minimal RAM) -->
+    <!-- Must be >= 3.1.1 to satisfy ClosedXML 0.105.0 transitive requirement -->
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
+    <PackageReference Include="MailKit" Version="4.17.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.8" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+    <!-- SECURITY: transitive pins — see HRMS.API.csproj for advisory references. -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <!-- OpenTelemetry metrics for payroll/DB instrumentation -->
+    <PackageReference Include="OpenTelemetry" Version="1.17.0" />
+    <!-- Fixed: M3 — TOTP MFA support -->
+    <PackageReference Include="Otp.NET" Version="1.4.0" />
+    <!-- FIX MED-03: Antivirus scanning via ClamAV -->
+    <PackageReference Include="nClam" Version="5.0.0" />
+    <!-- BLOCKER-1 FIX: Infrastructure defines PayslipPdfJob which uses
+         Hangfire attributes (AutomaticRetry, DisableConcurrentExecution,
+         AttemptsExceededAction). Those types live in Hangfire.Core.
+         Hangfire.Core is a transitive dependency from HRMS.API's
+         Hangfire.AspNetCore, but projects must declare their own direct
+         references — transitive package assets are not automatically
+         available across project boundaries in .NET SDK-style projects. -->
+    <PackageReference Include="Hangfire.Core" Version="1.8.14" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Exclude old PostgreSQL/Npgsql migration files; only Migrations/MySql/ is active -->
+    <!-- Two Remove items: one for files directly in Migrations/, one for subdirectories -->
+    <Compile Remove="Migrations/*.cs" />
+    <Compile Remove="Migrations/**/*.cs" />
+    <Compile Include="Migrations/MySql/**/*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HRMS.Application\HRMS.Application.csproj" />
+      <PackageReference Include="QuestPDF" Version="2024.10.2" />
+  </ItemGroup>
+</Project>

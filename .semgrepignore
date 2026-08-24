@@ -1,0 +1,26 @@
+# .semgrepignore — Triaged Semgrep suppressions for HRMS
+# Each entry below has been reviewed and suppressed with documented justification.
+# DO NOT add entries without a comment explaining the rationale.
+# Last reviewed: 2026-07-25
+
+# ── Generated / migration files ──────────────────────────────────────────────
+# EF Core migrations are auto-generated. Raw SQL strings in Up()/Down() are
+# parameterised via EF infrastructure; they are not user-controlled injection risks.
+HRMS.Infrastructure/Migrations/
+
+# ── Test files ────────────────────────────────────────────────────────────────
+# Test files intentionally use hard-coded passwords, dummy secrets, and mock data.
+# Semgrep secret rules produce many false positives here. Tests run in a sandboxed
+# in-memory DB with no real credentials.
+HRMS.Tests/
+
+# ── wwwroot vendor bundles ─────────────────────────────────────────────────────
+# Third-party minified JS/CSS (Bootstrap, etc.) — not our code, already vetted via
+# dependency scanning (Dependabot). Semgrep's JS rules create false positives here.
+HRMS.API/wwwroot/assets/vendor/
+
+# ── appsettings.Development.json ──────────────────────────────────────────────
+# Dev-only config with placeholder values (empty strings, localhost, dev Swagger creds).
+# None of these values are used in production. Production config is supplied via
+# env vars only (enforced by EnvironmentValidator at startup).
+HRMS.API/appsettings.Development.json

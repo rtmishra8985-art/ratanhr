@@ -1,0 +1,83 @@
+# Phase 7: Updated initContainer from PostgreSQL readiness check to MySQL.
+# wait-for-postgres container replaced with wait-for-mysql using mysqladmin ping.
+# One-shot EF Core migration Job.
+# Run this before every API deployment that includes schema changes:
+#   kubectl apply -f k8s/migrate-job.yaml
+#   kubectl wait --for=condition=complete job/hrms-migrate -n hrms --timeout=120s
+#
+# Only ONE instance ever runs migrations — Kubernetes Job guarantees completions=1.
+# The API Deployment's initContainer also waits for the database to be reachable,
+# so there is no race between migrations and the API starting.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hrms-migrate
+  namespace: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+    app.kubernetes.io/component: migrate
+spec:
+  completions: 1
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 600   # Clean up completed job after 10 minutes
+  template:
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        # Wait for MySQL to be ready before running EF Core migrations
+        - name: wait-for-mysql
+          image: mysql:8.4.6
+          command:
+            - sh
+            - -c
+            - |
+              until mysqladmin ping -h mysql-svc -u $MYSQL_USER --password=$MYSQL_PASSWORD --silent; do
+                echo "Waiting for mysql..."; sleep 2;
+              done
+              echo "MySQL is ready."
+          env:
+            - name: MYSQL_USER
+              valueFrom: { secretKeyRef: { name: hrms-secrets, key: MYSQL_USER } }
+            - name: MYSQL_PASSWORD
+              valueFrom: { secretKeyRef: { name: hrms-secrets, key: MYSQL_PASSWORD } }
+      containers:
+        - name: migrate
+          # Replace this immutable release tag with the image built from this
+          # source before applying the overlay. Never deploy a mutable alias.
+          image: hrms-api:0.0.0
+          command: ["dotnet", "HRMS.API.dll", "--migrate-only"]
+          envFrom:
+            - configMapRef:
+                name: hrms-config
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: ConnectionStrings__DefaultConnection
+            # RS256 asymmetric keys — EnvironmentValidator requires both PEM values at startup.
+            - name: Jwt__PrivateKeyPem
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: Jwt__PrivateKeyPem
+            - name: Jwt__PublicKeyPem
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: Jwt__PublicKeyPem
+            - name: Security__EncryptionKey
+              valueFrom:
+                secretKeyRef:
+                  name: hrms-secrets
+                  key: Security__EncryptionKey
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

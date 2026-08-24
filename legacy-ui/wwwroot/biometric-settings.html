@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <title>Biometric Settings – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Biometric</div>
+    <a class="nav-link" href="biometric-dashboard.html"><i class="bi bi-fingerprint"></i> Biometric Dashboard</a>
+    <a class="nav-link" href="biometric-devices.html"><i class="bi bi-hdd-network"></i> Devices</a>
+    <a class="nav-link" href="biometric-logs.html"><i class="bi bi-list-ul"></i> Punch Logs</a>
+    <a class="nav-link" href="biometric-realtime.html"><i class="bi bi-broadcast"></i> Realtime Monitor</a>
+    <a class="nav-link" href="biometric-sync-history.html"><i class="bi bi-arrow-repeat"></i> Sync History</a>
+    <a class="nav-link active" href="biometric-settings.html"><i class="bi bi-gear"></i> Settings</a>
+  </div>
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Biometric Settings</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <div id="alertArea" class="d-none mb-3"></div>
+
+      <form id="settingsForm">
+
+        <!-- Auto Sync -->
+        <div class="card mb-4">
+          <div class="card-header fw-semibold"><i class="bi bi-arrow-repeat me-2"></i>Auto Sync</div>
+          <div class="card-body">
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="autoSyncEnabled">
+              <label class="form-check-label fw-semibold" for="autoSyncEnabled">Enable Automatic Background Sync</label>
+              <div class="text-muted small">When enabled, the background service polls all enabled devices on the interval below.</div>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Sync Interval (minutes)</label>
+                <input type="number" class="form-control" id="syncIntervalMinutes" min="5" max="1440">
+                <div class="form-text">Minimum 5 minutes.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Lookback Window (days)</label>
+                <input type="number" class="form-control" id="syncLookbackDays" min="1" max="30">
+                <div class="form-text">Days of history to fetch per poll cycle (prevents gaps after downtime).</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attendance Rules -->
+        <div class="card mb-4">
+          <div class="card-header fw-semibold"><i class="bi bi-clock me-2"></i>Attendance Rules</div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Grace Time (minutes)</label>
+                <input type="number" class="form-control" id="graceTimeMinutes" min="0" max="120">
+                <div class="form-text">Punches within this window of shift start are not marked Late.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Min Hours for Half-Day</label>
+                <input type="number" class="form-control" id="minHalfDayHours" min="1" max="12">
+                <div class="form-text">Minimum hours between Check-In and Check-Out for a full-day record.</div>
+              </div>
+              <div class="col-12">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="queueUnknownEmployees">
+                  <label class="form-check-label fw-semibold" for="queueUnknownEmployees">Queue Unknown Employee Punches</label>
+                  <div class="text-muted small">Unrecognised device user IDs are flagged in Punch Logs instead of silently discarded.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Duplicate Punch Detection -->
+        <div class="card mb-4">
+          <div class="card-header fw-semibold"><i class="bi bi-shield-check me-2"></i>Duplicate Punch Detection</div>
+          <div class="card-body">
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="enableDuplicatePunchDetection">
+              <label class="form-check-label fw-semibold" for="enableDuplicatePunchDetection">Enable Duplicate Detection</label>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Deduplicate Window (minutes)</label>
+              <input type="number" class="form-control" id="dedupeWindowMinutes" min="1" max="60">
+              <div class="form-text">A second punch from the same user within this window is treated as a duplicate and discarded.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logs & Realtime -->
+        <div class="card mb-4">
+          <div class="card-header fw-semibold"><i class="bi bi-database me-2"></i>Logs &amp; Realtime</div>
+          <div class="card-body">
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="persistRawLogs">
+              <label class="form-check-label fw-semibold" for="persistRawLogs">Persist Raw Punch Logs</label>
+              <div class="text-muted small">Store every raw punch event in the biometric_logs table for auditing.</div>
+            </div>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="realtimeEnabled">
+              <label class="form-check-label fw-semibold" for="realtimeEnabled">Enable Realtime Push</label>
+              <div class="text-muted small">Activate vendor push/webhook listener (requires vendor SDK integration).</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Log Retention (days)</label>
+              <input type="number" class="form-control" id="logRetentionDays" min="0" max="3650">
+              <div class="form-text">0 = keep forever. Logs older than this are auto-deleted by the cleanup service.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" onclick="loadSettings()">Reset</button>
+          <button type="button" class="btn btn-primary px-4" onclick="saveSettings()">
+            <i class="bi bi-check-circle me-1"></i> Save Settings
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script>
+async function loadSettings() {
+  const r = await fetch('/api/biometric/settings', { credentials: 'include' });
+  const d = await r.json();
+  if (!d.success) return;
+  const s = d.data;
+  document.getElementById('autoSyncEnabled').checked           = s.autoSyncEnabled;
+  document.getElementById('syncIntervalMinutes').value         = s.syncIntervalMinutes;
+  document.getElementById('syncLookbackDays').value            = s.syncLookbackDays;
+  document.getElementById('graceTimeMinutes').value            = s.graceTimeMinutes;
+  document.getElementById('minHalfDayHours').value             = s.minHalfDayHours;
+  document.getElementById('enableDuplicatePunchDetection').checked = s.enableDuplicatePunchDetection;
+  document.getElementById('dedupeWindowMinutes').value         = s.dedupeWindowMinutes;
+  document.getElementById('queueUnknownEmployees').checked     = s.queueUnknownEmployees;
+  document.getElementById('realtimeEnabled').checked           = s.realtimeEnabled;
+  document.getElementById('persistRawLogs').checked            = s.persistRawLogs;
+  document.getElementById('logRetentionDays').value            = s.logRetentionDays;
+}
+
+async function saveSettings() {
+  const body = {
+    autoSyncEnabled:               document.getElementById('autoSyncEnabled').checked,
+    syncIntervalMinutes:           parseInt(document.getElementById('syncIntervalMinutes').value),
+    syncLookbackDays:              parseInt(document.getElementById('syncLookbackDays').value),
+    graceTimeMinutes:              parseInt(document.getElementById('graceTimeMinutes').value),
+    minHalfDayHours:               parseInt(document.getElementById('minHalfDayHours').value),
+    enableDuplicatePunchDetection: document.getElementById('enableDuplicatePunchDetection').checked,
+    dedupeWindowMinutes:           parseInt(document.getElementById('dedupeWindowMinutes').value),
+    queueUnknownEmployees:         document.getElementById('queueUnknownEmployees').checked,
+    realtimeEnabled:               document.getElementById('realtimeEnabled').checked,
+    persistRawLogs:                document.getElementById('persistRawLogs').checked,
+    logRetentionDays:              parseInt(document.getElementById('logRetentionDays').value),
+  };
+
+  const r = await fetch('/api/biometric/settings', {
+    method: 'PUT', credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const d = await r.json();
+  const alert = document.getElementById('alertArea');
+  alert.className = `alert alert-${d.success ? 'success' : 'danger'}`;
+  alert.textContent = d.success ? 'Settings saved successfully.' : (d.message || 'Failed to save settings.');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+loadSettings();
+</script>
+</body>
+</html>

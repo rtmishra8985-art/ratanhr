@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goals – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Performance</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapsePerf"><i class="bi bi-trophy"></i> Performance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapsePerf">
+      <a href="performance-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="performance-cycles.html" class="sub-link">Review Cycles</a>
+      <a href="performance-goals.html" class="sub-link" style="color:#f7b731;">Goals</a>
+      <a href="performance-reviews.html" class="sub-link">Reviews</a>
+      <a href="performance-feedback.html" class="sub-link">Feedback</a>
+    </div>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Employee Goals</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-muted" id="navUserName"></span>
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+<div class="main-panel">
+  <div class="card mb-3">
+    <div class="card-body py-2">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3"><select class="form-select form-select-sm" id="filterCycle"><option value="">All Cycles</option></select></div>
+        <div class="col-md-3"><select class="form-select form-select-sm" id="filterGoalStatus"><option value="">All Statuses</option><option>Not Started</option><option>In Progress</option><option>Completed</option><option>On Hold</option></select></div>
+        <div class="col-md-2"><button class="btn btn-sm btn-warning w-100" onclick="loadGoals()">Filter</button></div>
+        <div class="col-md-4 text-end"><button class="btn btn-sm btn-primary" onclick="openModal()"><i class="bi bi-plus-circle me-1"></i>Set Goal</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3" id="goalsGrid">
+    <div class="col-12 text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div>
+  </div>
+</div>
+
+<!-- Goal Modal -->
+<div class="modal fade" id="goalModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title" id="modalTitle">Set Goal</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body row g-3">
+        <input type="hidden" id="goalId">
+        <div class="col-md-6"><label class="form-label">Employee ID *</label><input type="text" class="form-control" id="gEmpId"></div>
+        <div class="col-md-6"><label class="form-label">Cycle</label><select class="form-select" id="gCycleId"><option value="">— None —</option></select></div>
+        <div class="col-12"><label class="form-label">Goal Title *</label><input type="text" class="form-control" id="gTitle"></div>
+        <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" id="gDesc" rows="2"></textarea></div>
+        <div class="col-md-4"><label class="form-label">Goal Type</label>
+          <select class="form-select" id="gType"><option>Individual</option><option>Department</option><option>Company</option></select>
+        </div>
+        <div class="col-md-4"><label class="form-label">Category</label>
+          <select class="form-select" id="gCategory"><option>KPI</option><option>OKR</option><option>Project</option></select>
+        </div>
+        <div class="col-md-4"><label class="form-label">Status</label>
+          <select class="form-select" id="gStatus"><option>Not Started</option><option>In Progress</option><option>Completed</option><option>On Hold</option></select>
+        </div>
+        <div class="col-md-4"><label class="form-label">Target Value *</label><input type="number" class="form-control" id="gTarget" step="any"></div>
+        <div class="col-md-4"><label class="form-label">Unit</label><input type="text" class="form-control" id="gUnit" placeholder="%, units, calls…"></div>
+        <div class="col-md-4"><label class="form-label">Weight (%)</label><input type="number" class="form-control" id="gWeight" value="100" min="1" max="100"></div>
+        <div class="col-md-6"><label class="form-label">Due Date *</label><input type="date" class="form-control" id="gDue"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning" onclick="saveGoal()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Progress Modal -->
+<div class="modal fade" id="progressModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Update Progress</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <input type="hidden" id="pgGoalId">
+        <p class="text-muted small" id="pgInfo"></p>
+        <label class="form-label">Achieved Value *</label>
+        <input type="number" class="form-control" id="pgAchieved" step="any">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" onclick="saveProgress()">Update Progress</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script>
+requireAuth(['admin','superadmin']);
+populateTopnav();
+const STATUS_BADGE = { 'Completed':'success','In Progress':'primary','Not Started':'secondary','On Hold':'warning' };
+let goalModal, progressModal;
+
+async function loadCycleDropdown() {
+  const res = await HrmsApi.listPerformanceCycles();
+  const opts = (res?.data||[]).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('filterCycle').innerHTML = '<option value="">All Cycles</option>' + opts;
+  document.getElementById('gCycleId').innerHTML    = '<option value="">— None —</option>' + opts;
+}
+
+function openModal(g) {
+  document.getElementById('goalId').value    = g ? g.id : '';
+  document.getElementById('gEmpId').value    = g ? g.employeeId : '';
+  document.getElementById('gCycleId').value  = g && g.performanceCycleId ? g.performanceCycleId : '';
+  document.getElementById('gTitle').value    = g ? g.title : '';
+  document.getElementById('gDesc').value     = g ? (g.description||'') : '';
+  document.getElementById('gType').value     = g ? g.goalType : 'Individual';
+  document.getElementById('gCategory').value = g ? g.category : 'KPI';
+  document.getElementById('gStatus').value   = g ? g.status : 'Not Started';
+  document.getElementById('gTarget').value   = g ? g.targetValue : '';
+  document.getElementById('gUnit').value     = g ? g.unit : '';
+  document.getElementById('gWeight').value   = g ? g.weight : 100;
+  document.getElementById('gDue').value      = g ? g.dueDate.substring(0,10) : '';
+  document.getElementById('modalTitle').textContent = g ? 'Edit Goal' : 'Set Goal';
+  goalModal.show();
+}
+
+async function saveGoal() {
+  const id = document.getElementById('goalId').value;
+  const dto = {
+    employeeId:           document.getElementById('gEmpId').value,
+    performanceCycleId:   parseInt(document.getElementById('gCycleId').value)||null,
+    title:                document.getElementById('gTitle').value,
+    description:          document.getElementById('gDesc').value,
+    goalType:             document.getElementById('gType').value,
+    category:             document.getElementById('gCategory').value,
+    status:               document.getElementById('gStatus').value,
+    targetValue:          parseFloat(document.getElementById('gTarget').value)||0,
+    unit:                 document.getElementById('gUnit').value,
+    weight:               parseInt(document.getElementById('gWeight').value)||100,
+    dueDate:              document.getElementById('gDue').value,
+  };
+  const res = id ? await HrmsApi.updateGoal(id, dto) : await HrmsApi.createGoal(dto);
+  if (res && res.success) { goalModal.hide(); loadGoals(); }
+  else alert((res && res.message) || 'Failed.');
+}
+
+function openProgressModal(g) {
+  document.getElementById('pgGoalId').value  = g.id;
+  document.getElementById('pgAchieved').value = g.achievedValue ?? 0;
+  document.getElementById('pgInfo').textContent = `Target: ${g.targetValue} ${g.unit}`;
+  progressModal.show();
+}
+
+async function saveProgress() {
+  const id       = document.getElementById('pgGoalId').value;
+  const achieved = parseFloat(document.getElementById('pgAchieved').value);
+  const res = await HrmsApi.updateGoalProgress(id, achieved);
+  if (res && res.success) { progressModal.hide(); loadGoals(); }
+  else alert((res && res.message) || 'Failed.');
+}
+
+async function deleteGoal(id) {
+  if (!confirm('Delete this goal?')) return;
+  const res = await HrmsApi.deleteGoal(id);
+  if (res && res.success) loadGoals();
+}
+
+async function loadGoals() {
+  const grid = document.getElementById('goalsGrid');
+  grid.innerHTML = '<div class="col-12 text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div>';
+  const params = {};
+  const cycleId = document.getElementById('filterCycle').value;
+  const status  = document.getElementById('filterGoalStatus').value;
+  if (cycleId) params.cycleId = cycleId;
+  if (status)  params.status  = status;
+  const res = await HrmsApi.listGoals(params);
+  if (!res || !res.success || !res.data.length) {
+    grid.innerHTML = '<div class="col-12 text-center py-4 text-muted">No goals found.</div>'; return;
+  }
+  grid.innerHTML = res.data.map(g => {
+    const pct = g.progressPercent ?? (g.targetValue > 0 && g.achievedValue != null ? Math.min(100, Math.round(g.achievedValue/g.targetValue*100)) : 0);
+    return `<div class="col-md-6 col-xl-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <div class="fw-semibold">${g.title}</div>
+              <div class="text-muted small">${g.employeeId} · ${g.cycleName||'No Cycle'}</div>
+            </div>
+            <span class="badge bg-${STATUS_BADGE[g.status]||'secondary'}">${g.status}</span>
+          </div>
+          <div class="d-flex justify-content-between small text-muted mb-1">
+            <span>${g.category} · ${g.goalType}</span>
+            <span>${g.achievedValue??0} / ${g.targetValue} ${g.unit}</span>
+          </div>
+          <div class="progress mb-2" style="height:6px;">
+            <div class="progress-bar bg-success" style="width:${pct}%"></div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="small text-muted">Due: ${g.dueDate.substring(0,10)}</span>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-success py-0 px-1" onclick='openProgressModal(${JSON.stringify(g)})'><i class="bi bi-graph-up"></i></button>
+              <button class="btn btn-outline-warning py-0 px-1" onclick='openModal(${JSON.stringify(g)})'><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-outline-danger py-0 px-1" onclick="deleteGoal(${g.id})"><i class="bi bi-trash"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+goalModal     = new bootstrap.Modal(document.getElementById('goalModal'));
+progressModal = new bootstrap.Modal(document.getElementById('progressModal'));
+loadCycleDropdown().then(() => loadGoals());
+</script>
+</body>
+</html>

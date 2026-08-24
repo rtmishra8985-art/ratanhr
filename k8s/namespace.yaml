@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hrms
+  labels:
+    app.kubernetes.io/name: hrms
+    app.kubernetes.io/managed-by: kubectl

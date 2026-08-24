@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Openings – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Recruitment</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapseRecruit"><i class="bi bi-briefcase"></i> Recruitment <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseRecruit">
+      <a href="recruitment-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="recruitment-requisitions.html" class="sub-link" style="color:#f7b731;">Job Openings</a>
+      <a href="recruitment-candidates.html" class="sub-link">Candidates</a>
+      <a href="recruitment-interviews.html" class="sub-link">Interviews</a>
+      <a href="recruitment-offers.html" class="sub-link">Offer Letters</a>
+    </div>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Job Openings</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-muted" id="navUserName"></span>
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <div class="card card-table">
+    <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center py-3">
+      <span class="fw-semibold">All Job Requisitions</span>
+      <button class="btn btn-sm btn-warning" onclick="openModal()"><i class="bi bi-plus-circle me-1"></i>New Opening</button>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>Title</th><th>Department</th><th>Type</th><th>Openings</th><th>Location</th><th>Closing</th><th>Candidates</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="reqTbody"><tr><td colspan="9" class="text-center py-3 text-muted">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal fade" id="reqModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title" id="modalTitle">New Job Opening</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <form id="reqForm" class="row g-3">
+          <input type="hidden" id="reqId">
+          <div class="col-md-8"><label class="form-label">Job Title *</label><input type="text" class="form-control" id="reqTitle" required></div>
+          <div class="col-md-4"><label class="form-label">Job Type</label>
+            <select class="form-select" id="reqJobType">
+              <option>Full-Time</option><option>Part-Time</option><option>Contract</option><option>Internship</option>
+            </select>
+          </div>
+          <div class="col-md-6"><label class="form-label">Department</label><input type="text" class="form-control" id="reqDept"></div>
+          <div class="col-md-6"><label class="form-label">Location</label><input type="text" class="form-control" id="reqLocation"></div>
+          <div class="col-md-4"><label class="form-label">No. of Openings</label><input type="number" class="form-control" id="reqOpenings" value="1" min="1"></div>
+          <div class="col-md-4"><label class="form-label">Min Salary</label><input type="number" class="form-control" id="reqMinSal"></div>
+          <div class="col-md-4"><label class="form-label">Max Salary</label><input type="number" class="form-control" id="reqMaxSal"></div>
+          <div class="col-md-6"><label class="form-label">Experience Required</label><input type="text" class="form-control" id="reqExp" placeholder="e.g. 2-4 years"></div>
+          <div class="col-md-6"><label class="form-label">Closing Date</label><input type="date" class="form-control" id="reqClosingDate"></div>
+          <div class="col-12"><label class="form-label">Skills Required</label><input type="text" class="form-control" id="reqSkills" placeholder="Comma-separated skills"></div>
+          <div class="col-12"><label class="form-label">Job Description</label><textarea class="form-control" id="reqDesc" rows="4"></textarea></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning" onclick="saveRequisition()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script>
+requireAuth(['admin','superadmin']);
+populateTopnav();
+
+const STATUS_BADGE = { 'Open':'success','In Progress':'warning','Closed':'secondary','On Hold':'danger' };
+let modal;
+
+function openModal(row) {
+  document.getElementById('reqId').value        = row ? row.id : '';
+  document.getElementById('reqTitle').value     = row ? row.title : '';
+  document.getElementById('reqJobType').value   = row ? row.jobType : 'Full-Time';
+  document.getElementById('reqDept').value      = row ? row.departmentName : '';
+  document.getElementById('reqLocation').value  = row ? row.location : '';
+  document.getElementById('reqOpenings').value  = row ? row.openingsCount : 1;
+  document.getElementById('reqMinSal').value    = row ? (row.minSalary||'') : '';
+  document.getElementById('reqMaxSal').value    = row ? (row.maxSalary||'') : '';
+  document.getElementById('reqExp').value       = row ? row.experienceRequired : '';
+  document.getElementById('reqClosingDate').value = row && row.closingDate ? row.closingDate.substring(0,10) : '';
+  document.getElementById('reqSkills').value    = row ? row.skillsRequired : '';
+  document.getElementById('reqDesc').value      = row ? row.description : '';
+  document.getElementById('modalTitle').textContent = row ? 'Edit Job Opening' : 'New Job Opening';
+  modal.show();
+}
+
+async function saveRequisition() {
+  const id  = document.getElementById('reqId').value;
+  const dto = {
+    title: document.getElementById('reqTitle').value,
+    departmentName: document.getElementById('reqDept').value,
+    description: document.getElementById('reqDesc').value,
+    openingsCount: parseInt(document.getElementById('reqOpenings').value)||1,
+    experienceRequired: document.getElementById('reqExp').value,
+    skillsRequired: document.getElementById('reqSkills').value,
+    jobType: document.getElementById('reqJobType').value,
+    minSalary: parseFloat(document.getElementById('reqMinSal').value)||null,
+    maxSalary: parseFloat(document.getElementById('reqMaxSal').value)||null,
+    location: document.getElementById('reqLocation').value,
+    closingDate: document.getElementById('reqClosingDate').value || null,
+  };
+  const res = id ? await HrmsApi.updateRequisition(id, dto) : await HrmsApi.createRequisition(dto);
+  if (res && res.success) { modal.hide(); loadReqs(); }
+  else alert((res && res.message) || 'Failed to save.');
+}
+
+async function updateStatus(id, status) {
+  const res = await HrmsApi.updateRequisitionStatus(id, status);
+  if (res && res.success) loadReqs();
+  else alert((res && res.message) || 'Failed.');
+}
+
+async function deleteReq(id) {
+  if (!confirm('Delete this requisition?')) return;
+  const res = await HrmsApi.deleteRequisition(id);
+  if (res && res.success) loadReqs();
+  else alert((res && res.message) || 'Failed.');
+}
+
+async function loadReqs() {
+  const tbody = document.getElementById('reqTbody');
+  tbody.innerHTML = '<tr><td colspan="9" class="text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</td></tr>';
+  const res = await HrmsApi.listRequisitions();
+  if (!res || !res.success || !res.data.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-3 text-muted">No job openings found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = res.data.map(r => `<tr>
+    <td><strong>${r.title}</strong></td>
+    <td>${r.departmentName||'—'}</td>
+    <td><span class="badge bg-secondary">${r.jobType}</span></td>
+    <td>${r.openingsCount}</td>
+    <td>${r.location||'—'}</td>
+    <td>${r.closingDate?r.closingDate.substring(0,10):'—'}</td>
+    <td><a href="recruitment-candidates.html?requisitionId=${r.id}" class="badge bg-primary text-decoration-none">${r.totalCandidates}</a></td>
+    <td><span class="badge bg-${STATUS_BADGE[r.status]||'secondary'}">${r.status}</span></td>
+    <td class="text-nowrap">
+      <button class="btn btn-xs btn-outline-warning py-0 px-1 me-1" onclick="openModal(${JSON.stringify(r).replace(/"/g,'&quot;')})"><i class="bi bi-pencil"></i></button>
+      <div class="btn-group">
+        <button class="btn btn-xs btn-outline-secondary py-0 px-1 dropdown-toggle" data-bs-toggle="dropdown"></button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" onclick="updateStatus(${r.id},'Open')">Set Open</a></li>
+          <li><a class="dropdown-item" onclick="updateStatus(${r.id},'In Progress')">In Progress</a></li>
+          <li><a class="dropdown-item" onclick="updateStatus(${r.id},'On Hold')">On Hold</a></li>
+          <li><a class="dropdown-item" onclick="updateStatus(${r.id},'Closed')">Close</a></li>
+        </ul>
+      </div>
+      <button class="btn btn-xs btn-outline-danger py-0 px-1 ms-1" onclick="deleteReq(${r.id})"><i class="bi bi-trash"></i></button>
+    </td>
+  </tr>`).join('');
+}
+
+modal = new bootstrap.Modal(document.getElementById('reqModal'));
+loadReqs();
+</script>
+</body>
+</html>

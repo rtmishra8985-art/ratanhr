@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>Attendance Report – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <style>
+    @media print {
+      .sidebar, .topnav, .no-print { display: none !important; }
+      .main-panel { margin-left: 0 !important; padding: 16px !important; }
+    }
+    .summary-chip { background:#f8f9fa; border-radius:8px; padding:14px 18px; text-align:center; }
+    .summary-chip .value { font-size:22px; font-weight:700; }
+    .summary-chip .label { font-size:11px; text-transform:uppercase; color:#888; letter-spacing:.5px; }
+  </style>
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Registration</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r1"><i class="bi bi-person-plus"></i> Registration <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r1"><a href="add-employee.html" class="sub-link">Register</a><a href="view-employees.html" class="sub-link">View All</a></div>
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r3"><i class="bi bi-globe"></i> Web Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r3"><a href="web-attendance-admin.html" class="sub-link">View</a></div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r4"><i class="bi bi-file-earmark-spreadsheet"></i> Excel Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r4"><a href="upload-attendance.html" class="sub-link">Upload</a><a href="view-attendance.html" class="sub-link">View</a></div>
+    <div class="nav-label">Payroll</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapsePayroll"><i class="bi bi-cash-stack"></i> Payroll <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapsePayroll"><a href="payroll.html" class="sub-link">View Payroll</a><a href="add-payroll.html" class="sub-link">Generate Payslip</a></div>
+    <div class="nav-label">Reports</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapseReports"><i class="bi bi-bar-chart-line"></i> Reports <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseReports">
+      <a href="reports-attendance.html" class="sub-link" style="color:#f7b731;">Attendance Report</a>
+      <a href="reports-employee.html" class="sub-link">Employee Report</a>
+    </div>
+    <div class="nav-label">Others</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r5"><i class="bi bi-star"></i> Appreciation <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r5"><a href="appreciation.html" class="sub-link">Appreciate</a></div>
+    <a href="admin-users.html" class="nav-link"><i class="bi bi-people"></i> Admin Users</a>
+    <div class="nav-label">Recruitment</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseRecruit"><i class="bi bi-briefcase"></i> Recruitment <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseRecruit">
+      <a href="recruitment-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="recruitment-requisitions.html" class="sub-link">Job Openings</a>
+      <a href="recruitment-candidates.html" class="sub-link">Candidates</a>
+      <a href="recruitment-interviews.html" class="sub-link">Interviews</a>
+      <a href="recruitment-offers.html" class="sub-link">Offer Letters</a>
+    </div>
+    <div class="nav-label">Performance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapsePerf"><i class="bi bi-trophy"></i> Performance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapsePerf">
+      <a href="performance-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="performance-cycles.html" class="sub-link">Review Cycles</a>
+      <a href="performance-goals.html" class="sub-link">Goals</a>
+      <a href="performance-reviews.html" class="sub-link">Reviews</a>
+      <a href="performance-feedback.html" class="sub-link">Feedback</a>
+    </div>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+
+<nav class="topnav no-print">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Attendance Report</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-muted" id="navUserName"></span>
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <!-- Filter Bar -->
+  <div class="card card-table mb-4 no-print">
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label fw-semibold small">Employee</label>
+          <select class="form-select form-select-sm" id="filterEmployee">
+            <option value="">All Employees</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-semibold small">Start Date</label>
+          <input type="date" class="form-control form-control-sm" id="filterStartDate">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-semibold small">End Date</label>
+          <input type="date" class="form-control form-control-sm" id="filterEndDate">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-semibold small">Status</label>
+          <select class="form-select form-select-sm" id="filterStatus">
+            <option value="">All</option>
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+            <option value="Half Day">Half Day</option>
+            <option value="Late">Late</option>
+            <option value="Early Exit">Early Exit</option>
+          </select>
+        </div>
+        <div class="col-md-1">
+          <button type="button" class="btn btn-sm btn-warning w-100" onclick="loadReport()">Filter</button>
+        </div>
+        <div class="col-md-1">
+          <button type="button" class="btn btn-sm btn-secondary w-100" onclick="resetFilters()">Reset</button>
+        </div>
+        <div class="col-md-1">
+          <button type="button" class="btn btn-sm btn-dark w-100" onclick="window.print()">
+            <i class="bi bi-printer"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Row -->
+  <div class="row g-3 mb-4" id="summaryRow">
+    <div class="col-md-3 col-6">
+      <div class="summary-chip">
+        <div class="value text-success" id="sumPresent">—</div>
+        <div class="label">Present</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="summary-chip">
+        <div class="value text-danger" id="sumAbsent">—</div>
+        <div class="label">Absent</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="summary-chip">
+        <div class="value text-warning" id="sumHalfDay">—</div>
+        <div class="label">Half Day</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="summary-chip">
+        <div class="value" id="sumTotal">—</div>
+        <div class="label">Total Records</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance Table -->
+  <div class="card card-table">
+    <div class="card-header d-flex justify-content-between align-items-center py-3">
+      <span class="fw-semibold">Attendance Report</span>
+      <button id="btnExport" class="btn btn-sm btn-outline-success no-print" onclick="exportReport()">
+        <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+      </button>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Employee ID</th>
+              <th>Employee Name</th>
+              <th>Date</th>
+              <th>Check In</th>
+              <th>Check Out</th>
+              <th>Duration</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="reportTbody">
+            <tr><td colspan="8" class="text-center py-4 text-muted small">Apply filters and click <strong>Filter</strong> to generate the report.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script>
+requireAuth(['admin','superadmin']);
+populateTopnav();
+
+// Set default dates: first day of current month to today
+(function setDefaultDates() {
+  const today = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+  document.getElementById('filterStartDate').value = firstDay.toISOString().substring(0, 10);
+  document.getElementById('filterEndDate').value = today.toISOString().substring(0, 10);
+})();
+
+// Populate employee dropdown
+async function loadEmployeeDropdown() {
+  const res = await HrmsApi.listEmployees();
+  const sel = document.getElementById('filterEmployee');
+  if (res && res.success && Array.isArray(res.data)) {
+    res.data.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.employeeId || e.employee_id || '';
+      opt.textContent = (e.fullName || e.fullname || '') + (opt.value ? ' (' + opt.value + ')' : '');
+      sel.appendChild(opt);
+    });
+  }
+}
+
+function statusBadge(status) {
+  if (!status) return '<span class="badge bg-secondary">—</span>';
+  const map = {
+    'Present':    'bg-success',
+    'Absent':     'bg-danger',
+    'Half Day':   'bg-warning text-dark',
+    'Late':       'bg-orange text-dark',
+    'Early Exit': 'bg-warning text-dark',
+    'Weekend':    'bg-secondary',
+    'Holiday':    'bg-info text-dark',
+  };
+  const cls = map[status] || 'bg-secondary';
+  return `<span class="badge ${cls}">${status}</span>`;
+}
+
+function fmt(val) {
+  if (!val) return '—';
+  // If it's a datetime string, extract only HH:MM
+  if (val.includes('T')) return val.substring(11, 16);
+  return val;
+}
+
+function fmtDate(val) {
+  if (!val) return '—';
+  return val.substring(0, 10);
+}
+
+function getFilters() {
+  return {
+    startDate:  document.getElementById('filterStartDate').value,
+    endDate:    document.getElementById('filterEndDate').value,
+    employeeId: document.getElementById('filterEmployee').value,
+    status:     document.getElementById('filterStatus').value,
+  };
+}
+
+async function loadReport() {
+  const tbody = document.getElementById('reportTbody');
+  tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2"></span>Loading report…</td></tr>';
+
+  // Reset summary
+  ['sumPresent','sumAbsent','sumHalfDay','sumTotal'].forEach(id => document.getElementById(id).textContent = '—');
+
+  const params = getFilters();
+  // Remove empty params
+  Object.keys(params).forEach(k => { if (!params[k]) delete params[k]; });
+
+  const res = await HrmsApi.attendanceReport(params);
+  if (!res || !res.success) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-danger">${(res && res.message) || 'Failed to load report.'}</td></tr>`;
+    return;
+  }
+
+  // Handle both response shapes: { data: { records: [...], summary: {...} } } or { data: [...] }
+  let records = [];
+  let summary = { present: 0, absent: 0, halfDay: 0, total: 0 };
+
+  if (res.data && Array.isArray(res.data)) {
+    records = res.data;
+  } else if (res.data && res.data.records) {
+    records = res.data.records;
+    if (res.data.summary) {
+      summary = {
+        present:  res.data.summary.present   ?? res.data.summary.presentCount   ?? 0,
+        absent:   res.data.summary.absent    ?? res.data.summary.absentCount    ?? 0,
+        halfDay:  res.data.summary.halfDay   ?? res.data.summary.halfDayCount   ?? 0,
+        total:    res.data.summary.total     ?? res.data.summary.totalRecords   ?? 0,
+      };
+    }
+  } else if (Array.isArray(res)) {
+    records = res;
+  }
+
+  // Compute summary from records if not provided
+  if (!res.data?.summary && records.length > 0) {
+    records.forEach(r => {
+      const s = r.status || r.attendanceStatus || '';
+      if (s === 'Present') summary.present++;
+      else if (s === 'Absent') summary.absent++;
+      else if (s === 'Half Day' || s === 'HalfDay') summary.halfDay++;
+    });
+    summary.total = records.length;
+  }
+
+  // Render summary chips
+  document.getElementById('sumPresent').textContent = summary.present;
+  document.getElementById('sumAbsent').textContent  = summary.absent;
+  document.getElementById('sumHalfDay').textContent = summary.halfDay;
+  document.getElementById('sumTotal').textContent   = summary.total || records.length;
+
+  if (!records.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted small">No records found for the selected filters.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = records.map((r, i) => {
+    const empId   = r.employeeId   || r.employee_id   || '—';
+    const empName = r.employeeName || r.employee_name || '—';
+    const date    = fmtDate(r.date || r.attendanceDate || '');
+    const checkIn = fmt(r.checkInTime  || r.checkin_time  || r.checkIn  || '');
+    const checkOut= fmt(r.checkOutTime || r.checkout_time || r.checkOut || '');
+    const dur     = r.duration  || r.workDuration || '—';
+    const status  = r.status    || r.attendanceStatus || '—';
+    return `<tr>
+      <td class="text-muted small">${i + 1}</td>
+      <td><code>${empId}</code></td>
+      <td>${empName}</td>
+      <td>${date}</td>
+      <td>${checkIn}</td>
+      <td>${checkOut}</td>
+      <td>${dur}</td>
+      <td>${statusBadge(status)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function resetFilters() {
+  document.getElementById('filterEmployee').value = '';
+  document.getElementById('filterStatus').value   = '';
+  const today    = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+  document.getElementById('filterStartDate').value = firstDay.toISOString().substring(0, 10);
+  document.getElementById('filterEndDate').value   = today.toISOString().substring(0, 10);
+  document.getElementById('reportTbody').innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted small">Apply filters and click <strong>Filter</strong> to generate the report.</td></tr>';
+  ['sumPresent','sumAbsent','sumHalfDay','sumTotal'].forEach(id => document.getElementById(id).textContent = '—');
+}
+
+function exportReport() {
+  const params = getFilters();
+  const qs = Object.entries(params).filter(([,v]) => v).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+  window.location.href = `/api/reports/attendance/export?${qs}`;
+}
+
+// Load employee dropdown on page load, then auto-load report
+loadEmployeeDropdown().then(() => loadReport());
+</script>
+</body>
+</html>

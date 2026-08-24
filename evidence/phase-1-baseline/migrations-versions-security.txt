@@ -1,0 +1,52 @@
+Migration files:
+./.agents/memory/payroll-migration-safety.md
+./db_indexes_fix.sql
+./db_performance.sql
+./db_softdelete_fix.sql
+./docs/migration-rollback-runbook.md
+./Documentation/DataMigrationValidation.md
+./Documentation/MigrationGuide.md
+./Documentation/MigrationRunbook.md
+./Documentation/MySqlMigrationAudit.md
+./Documentation/MySqlMigrationGuide.md
+./e2e/e2e_seed.sql
+./e2e/verify-seed.sql
+./evidence/ef-migrations-mysql.txt
+./evidence/ef-migrations.txt
+./evidence/migration-update.txt
+./evidence/phase-1-baseline/migrations-versions-security.txt
+./MYSQL_MIGRATION_AUDIT.md
+./scripts/db-init.sql
+./Staging/db-init/staging-init.sql
+Package version files:
+./global.json
+./HRMS.API/HRMS.API.csproj
+./HRMS.API/packages.lock.json
+./HRMS.Application/HRMS.Application.csproj
+./HRMS.Application/packages.lock.json
+./HRMS.Domain/HRMS.Domain.csproj
+./HRMS.Domain/packages.lock.json
+./HRMS.Infrastructure/HRMS.Infrastructure.csproj
+./HRMS.Infrastructure/packages.lock.json
+./HRMS.Tests/HRMS.Tests.csproj
+./HRMS.Tests/packages.lock.json
+SslMode=None occurrences:
+./Documentation/MySqlCutoverPlan.md:123:sed -i 's|DefaultConnection=.*|DefaultConnection=Server=new-db;Port=3306;Database=hrms_db;User ID=hrms;Password=<MYSQL_PASS>;AllowPublicKeyRetrieval=True;SslMode=None|' .env
+./Documentation/MySqlMigrationGuide.md:39:Server=localhost;Port=3306;Database=hrms_db;User ID=hrms;Password=<PASS>;AllowPublicKeyRetrieval=True;SslMode=None
+./Documentation/MySqlMigrationGuide.md:46:- `AllowPublicKeyRetrieval=True;SslMode=None` for local development without TLS
+./HRMS.Infrastructure/Data/DatabaseOptions.cs:16:///     "PrimaryConnection": "Server=primary-db;Port=3306;Database=hrms_db;User ID=hrms;Password=...;AllowPublicKeyRetrieval=True;SslMode=None",
+./HRMS.Infrastructure/Data/DatabaseOptions.cs:17:///     "ReplicaConnection": "Server=replica-db;Port=3306;Database=hrms_db;User ID=hrms;Password=...;AllowPublicKeyRetrieval=True;SslMode=None",
+./HRMS.Tests/Fixtures/TestConfigurationFixture.cs:51:                "User ID=hrms;Password=testpass;AllowPublicKeyRetrieval=True;SslMode=None;"
+./README.md:144:    "DefaultConnection": "Server=localhost;Port=3306;Database=hrms_db;User ID=hrms;Password=CHANGE_ME;AllowPublicKeyRetrieval=True;SslMode=None"
+./docker-compose.e2e.yml:81:        AllowPublicKeyRetrieval=True;SslMode=None
+./docker-compose.yml:23:      ConnectionStrings__DefaultConnection: "${ConnectionStrings__DefaultConnection:-Server=mysql;Port=3306;Database=${MYSQL_DATABASE:-hrms_db};User ID=${MYSQL_USER:-hrms};Password=${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env};AllowPublicKeyRetrieval=True;SslMode=None}"
+./docker-compose.yml:169:      ConnectionStrings__DefaultConnection: "${ConnectionStrings__DefaultConnection:-Server=mysql;Port=3306;Database=${MYSQL_DATABASE:-hrms_db};User ID=${MYSQL_USER:-hrms};Password=${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env};AllowPublicKeyRetrieval=True;SslMode=None}"
+./k8s/README.md:116:echo -n "Server=mysql-svc;Port=3306;Database=hrms_db;User ID=hrms;Password=<PASS>;AllowPublicKeyRetrieval=True;SslMode=None" | base64 -w 0
+./scripts/generate-secrets.sh:77:ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=hrms_db;User ID=hrms;Password=${MYSQL_PASSWORD};AllowPublicKeyRetrieval=True;SslMode=None
+./DEVELOPMENT_SETUP.md:32:  "Server=localhost;Port=3306;Database=hrms_db;User ID=hrms;Password=<local-password>;AllowPublicKeyRetrieval=True;SslMode=None"
+./evidence/docker-compose-config.txt:66:      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=hrms_audit;User ID=audit;Password=[REDACTED-VALUE]-PASSWORD];AllowPublicKeyRetrieval=True;SslMode=None
+./evidence/docker-compose-config.txt:333:      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=hrms_audit;User ID=audit;Password=[REDACTED-VALUE]-PASSWORD];AllowPublicKeyRetrieval=True;SslMode=None
+./evidence/docker-compose-e2e-config.txt:24:      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=hrms_audit; Uid=root;Pwd=[REDACTED-VALUE]-ROOT-PASSWORD]; AllowPublicKeyRetrieval=True;SslMode=None
+./evidence/mysql-verification.txt:64:      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=hrms;User ID=hrms;Password=[REDACTED-VALUE]-PASSWORD];AllowPublicKeyRetrieval=True;SslMode=None
+./evidence/mysql-verification.txt:331:      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=hrms;User ID=hrms;Password=[REDACTED-VALUE]-PASSWORD];AllowPublicKeyRetrieval=True;SslMode=None
+./evidence/phase-1-baseline/migrations-versions-security.txt:33:SslMode=None occurrences:

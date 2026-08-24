@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RatanHR — Local Setup Guide</title>
+<style>
+  :root {
+    --brand:#6366f1; --brand-dark:#4f46e5; --brand-light:#eef2ff;
+    --green:#22c55e; --green-light:#f0fdf4;
+    --blue:#3b82f6;  --blue-light:#eff6ff;
+    --orange:#f97316;--orange-light:#fff7ed;
+    --red:#ef4444;   --red-light:#fef2f2;
+    --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;
+    --gray-400:#9ca3af;--gray-600:#4b5563;--gray-700:#374151;--gray-900:#111827;
+    --radius:12px; --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
+    --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:var(--gray-700);line-height:1.6}
+
+  /* ── Header ─────────────────────────────────────────────────────── */
+  .header{background:linear-gradient(135deg,var(--brand-dark) 0%,var(--brand) 100%);
+          color:#fff;padding:48px 24px;text-align:center}
+  .header h1{font-size:2.2rem;font-weight:700;letter-spacing:-.5px}
+  .header p{margin-top:8px;opacity:.85;font-size:1.05rem}
+  .badge{display:inline-block;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);
+         border-radius:20px;padding:4px 14px;font-size:.8rem;margin-top:12px;letter-spacing:.5px}
+
+  /* ── Layout ─────────────────────────────────────────────────────── */
+  .page{max-width:900px;margin:0 auto;padding:32px 16px 80px}
+
+  /* ── Progress bar ───────────────────────────────────────────────── */
+  .steps-bar{display:flex;gap:0;margin:32px 0 40px;border-radius:var(--radius);overflow:hidden;
+             box-shadow:var(--shadow)}
+  .step-tab{flex:1;background:#fff;border:1px solid var(--gray-200);padding:12px 6px;
+            text-align:center;font-size:.75rem;font-weight:600;color:var(--gray-400);
+            border-right:none;transition:background .2s}
+  .step-tab:last-child{border-right:1px solid var(--gray-200)}
+  .step-tab.done{background:var(--green-light);color:#16a34a}
+  .step-tab .num{display:block;font-size:1.1rem;font-weight:700;color:var(--brand);margin-bottom:2px}
+  .step-tab.done .num{color:#16a34a}
+
+  /* ── Section card ───────────────────────────────────────────────── */
+  .section{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius);
+           margin-bottom:24px;overflow:hidden;box-shadow:var(--shadow)}
+  .section-head{display:flex;align-items:center;gap:14px;padding:18px 24px;
+                border-bottom:1px solid var(--gray-100)}
+  .section-head .icon{width:40px;height:40px;border-radius:10px;display:grid;
+                      place-items:center;font-size:1.25rem;flex-shrink:0}
+  .icon-vs  {background:#5c2d91;color:#fff}
+  .icon-pg  {background:#336791;color:#fff}
+  .icon-node{background:#026e00;color:#fff}
+  .icon-app {background:var(--brand);color:#fff}
+  .icon-db  {background:var(--orange);color:#fff}
+  .section-head h2{font-size:1.1rem;font-weight:700;color:var(--gray-900)}
+  .section-head p{font-size:.82rem;color:var(--gray-400);margin-top:1px}
+  .section-body{padding:20px 24px}
+
+  /* ── Steps inside a section ─────────────────────────────────────── */
+  .step{display:flex;gap:16px;margin-bottom:20px}
+  .step:last-child{margin-bottom:0}
+  .step-num{width:28px;height:28px;border-radius:50%;background:var(--brand-light);
+            color:var(--brand);font-weight:700;font-size:.82rem;display:grid;
+            place-items:center;flex-shrink:0;margin-top:2px}
+  .step-content h3{font-size:.92rem;font-weight:600;color:var(--gray-900);margin-bottom:4px}
+  .step-content p{font-size:.85rem;color:var(--gray-600);margin-bottom:8px}
+
+  /* ── Code blocks ────────────────────────────────────────────────── */
+  pre{background:#1e1e2e;color:#cdd6f4;border-radius:8px;padding:14px 16px;
+      font-size:.82rem;overflow-x:auto;margin:8px 0;position:relative}
+  pre .comment{color:#6c7086}
+  pre .kw{color:#cba6f7}
+  pre .str{color:#a6e3a1}
+  pre .cmd{color:#89dceb}
+  code{background:var(--gray-100);color:var(--brand-dark);padding:2px 6px;border-radius:4px;
+       font-size:.82rem}
+
+  /* ── Download button ────────────────────────────────────────────── */
+  .dl-row{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0 4px}
+  .dl-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;
+          border-radius:8px;font-size:.83rem;font-weight:600;text-decoration:none;
+          transition:opacity .15s}
+  .dl-btn:hover{opacity:.85}
+  .dl-primary{background:var(--brand);color:#fff}
+  .dl-secondary{background:var(--gray-100);color:var(--gray-700);border:1px solid var(--gray-200)}
+  .dl-pg{background:#336791;color:#fff}
+  .dl-node{background:#026e00;color:#fff}
+
+  /* ── Alert boxes ────────────────────────────────────────────────── */
+  .alert{border-radius:8px;padding:12px 16px;font-size:.83rem;margin:10px 0;
+         display:flex;gap:10px;align-items:flex-start}
+  .alert-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+  .alert p{margin:0;line-height:1.5}
+  .alert strong{display:block;margin-bottom:2px}
+  .info{background:var(--blue-light);color:#1e40af;border:1px solid #bfdbfe}
+  .tip{background:var(--green-light);color:#166534;border:1px solid #bbf7d0}
+  .warn{background:var(--orange-light);color:#9a3412;border:1px solid #fed7aa}
+
+  /* ── Connection string box ──────────────────────────────────────── */
+  .conn-box{background:#1e1e2e;border-radius:8px;padding:16px;margin:10px 0}
+  .conn-box .label{font-size:.7rem;color:#6c7086;text-transform:uppercase;letter-spacing:.8px;
+                   margin-bottom:6px}
+  .conn-box .value{color:#a6e3a1;font-family:monospace;font-size:.85rem;word-break:break-all}
+
+  /* ── Checklist ──────────────────────────────────────────────────── */
+  .checklist{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .checklist li{display:flex;align-items:center;gap:10px;font-size:.85rem;
+                background:var(--gray-50);border:1px solid var(--gray-100);
+                border-radius:8px;padding:8px 12px}
+  .checklist li .tick{color:var(--green);font-size:1rem}
+
+  /* ── Two-col grid ───────────────────────────────────────────────── */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:10px 0}
+  @media(max-width:580px){.grid2{grid-template-columns:1fr}}
+  .card{background:var(--gray-50);border:1px solid var(--gray-100);border-radius:10px;padding:14px 16px}
+  .card h4{font-size:.85rem;font-weight:700;color:var(--gray-900);margin-bottom:6px}
+  .card p{font-size:.8rem;color:var(--gray-600)}
+
+  /* ── Divider ────────────────────────────────────────────────────── */
+  hr{border:none;border-top:1px solid var(--gray-100);margin:16px 0}
+
+  /* ── Footer ─────────────────────────────────────────────────────── */
+  .footer{text-align:center;color:var(--gray-400);font-size:.8rem;margin-top:40px;padding-top:20px;
+          border-top:1px solid var(--gray-200)}
+</style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<div class="header">
+  <h1>🏢 RatanHR — Local Setup Guide</h1>
+  <p>Step-by-step installation for Visual Studio 2022 · PostgreSQL · Node.js</p>
+  <span class="badge">LOCALHOST DEVELOPER EDITION</span>
+</div>
+
+<div class="page">
+
+  <!-- ── Progress tabs ───────────────────────────────────────────────── -->
+  <div class="steps-bar">
+    <div class="step-tab"><span class="num">1</span>Prerequisites</div>
+    <div class="step-tab"><span class="num">2</span>PostgreSQL</div>
+    <div class="step-tab"><span class="num">3</span>Visual Studio</div>
+    <div class="step-tab"><span class="num">4</span>Node.js</div>
+    <div class="step-tab"><span class="num">5</span>Database</div>
+    <div class="step-tab"><span class="num">6</span>Run App</div>
+  </div>
+
+  <!-- ═══ SECTION 1: Prerequisites ═════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-head">
+      <div class="icon icon-app">📋</div>
+      <div>
+        <h2>Step 1 — Prerequisites &amp; System Requirements</h2>
+        <p>Verify your machine meets the minimum requirements before installing</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="grid2">
+        <div class="card">
+          <h4>🖥️ Windows</h4>
+          <p>Windows 10 version 1903 or later<br/>Windows 11 (recommended)<br/>64-bit required</p>
+        </div>
+        <div class="card">
+          <h4>💾 Minimum Specs</h4>
+          <p>RAM: 8 GB (16 GB recommended)<br/>Disk: 20 GB free space<br/>CPU: 2 cores / 1.8 GHz+</p>
+        </div>
+      </div>
+      <ul class="checklist" style="margin-top:14px">
+        <li><span class="tick">✅</span> .NET 8 SDK (for ASP.NET Core backend)</li>
+        <li><span class="tick">✅</span> Node.js 20 LTS (for React frontend)</li>
+        <li><span class="tick">✅</span> PostgreSQL 16 (database)</li>
+        <li><span class="tick">✅</span> Visual Studio 2022 Community (free) — for ASP.NET backend</li>
+        <li><span class="tick">✅</span> VS Code (optional, lighter editor for frontend-only work)</li>
+        <li><span class="tick">✅</span> Git for Windows</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 2: PostgreSQL ═════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-head">
+      <div class="icon icon-pg">🐘</div>
+      <div>
+        <h2>Step 2 — Install PostgreSQL 16</h2>
+        <p>The primary database for RatanHR</p>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Download the installer</h3>
+          <p>Download the Windows installer from the official PostgreSQL website.</p>
+          <div class="dl-row">
+            <a class="dl-btn dl-pg" href="https://www.enterprisedb.com/downloads/postgres-postgresql-downloads" target="_blank">
+              🐘 Download PostgreSQL 16 for Windows
+            </a>
+          </div>
+          <p style="margin-top:6px">Choose: <strong>Windows x86-64 → Version 16.x</strong></p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Run the installer</h3>
+          <p>Double-click <code>postgresql-16.x-windows-x64.exe</code> and follow the wizard.</p>
+          <ul style="font-size:.84rem;color:var(--gray-600);padding-left:20px;margin-top:6px;line-height:2">
+            <li>Installation directory: <code>C:\Program Files\PostgreSQL\16</code> (default, keep it)</li>
+            <li>Data directory: <code>C:\Program Files\PostgreSQL\16\data</code> (default, keep it)</li>
+            <li><strong>Password:</strong> Set a strong password for the <code>postgres</code> superuser — <strong>write it down!</strong></li>
+            <li>Port: <code>5432</code> (default — do not change)</li>
+            <li>Locale: <em>Default locale</em></li>
+            <li>Stack Builder: you can uncheck this — not needed</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Verify the installation</h3>
+          <p>Open <strong>Command Prompt</strong> or <strong>PowerShell</strong> and run:</p>
+<pre><span class="cmd">psql --version</span>
+<span class="comment"># Expected output:</span>
+<span class="str">psql (PostgreSQL) 16.x</span></pre>
+          <div class="alert tip">
+            <span class="alert-icon">💡</span>
+            <p>If <code>psql</code> is not found, add <code>C:\Program Files\PostgreSQL\16\bin</code> to your <strong>System PATH</strong>
+            (Search → "Environment Variables" → System variables → Path → Edit → New).</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Install pgAdmin 4 (GUI — already bundled)</h3>
+          <p>pgAdmin was installed alongside PostgreSQL. Find it in the Start menu under <strong>PostgreSQL 16 → pgAdmin 4</strong>.</p>
+          <p style="margin-top:6px">Alternatively, download the latest standalone version:</p>
+          <div class="dl-row">
+            <a class="dl-btn dl-secondary" href="https://www.pgadmin.org/download/pgadmin-4-windows/" target="_blank">
+              📊 pgAdmin 4 (standalone download)
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 3: Visual Studio 2022 ════════════════════════════════ -->
+  <div class="section">
+    <div class="section-head">
+      <div class="icon icon-vs">🔷</div>
+      <div>
+        <h2>Step 3 — Install Visual Studio 2022</h2>
+        <p>Required for the ASP.NET Core backend</p>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Download Visual Studio 2022 Community (free)</h3>
+          <div class="dl-row">
+            <a class="dl-btn dl-primary" href="https://visualstudio.microsoft.com/downloads/" target="_blank">
+              🔷 Download Visual Studio 2022
+            </a>
+            <a class="dl-btn dl-secondary" href="https://visualstudio.microsoft.com/vs/community/" target="_blank">
+              Community Edition (free)
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Select the correct Workloads</h3>
+          <p>When the installer asks "What do you want to install?", tick these:</p>
+          <ul style="font-size:.84rem;color:var(--gray-600);padding-left:20px;margin-top:6px;line-height:2">
+            <li>☑️ <strong>ASP.NET and web development</strong> — required</li>
+            <li>☑️ <strong>.NET desktop development</strong> — optional but useful</li>
+            <li>☑️ <strong>Node.js development</strong> — optional (if you prefer VS for frontend)</li>
+          </ul>
+          <div class="alert info">
+            <span class="alert-icon">ℹ️</span>
+            <p><strong>Individual components to also check:</strong><br/>
+            Under "Individual components" tab → search and tick:
+            <code>.NET 8.0 Runtime</code> and <code>.NET SDK 8.0</code></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Install Npgsql for Entity Framework (NuGet)</h3>
+          <p>After VS is installed, open your backend solution, then via NuGet Package Manager:</p>
+<pre><span class="comment"># Package Manager Console (Tools → NuGet → Package Manager Console)</span>
+<span class="cmd">Install-Package Npgsql.EntityFrameworkCore.PostgreSQL</span>
+<span class="cmd">Install-Package Microsoft.EntityFrameworkCore.Tools</span></pre>
+          <p style="margin-top:8px">Or search in <strong>NuGet GUI</strong>: right-click project → Manage NuGet Packages → Browse → search <code>Npgsql.EntityFrameworkCore.PostgreSQL</code></p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Verify .NET SDK</h3>
+<pre><span class="cmd">dotnet --version</span>
+<span class="comment"># Expected output:</span>
+<span class="str">8.0.xxx</span></pre>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 4: Node.js ════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-head">
+      <div class="icon icon-node">🟢</div>
+      <div>
+        <h2>Step 4 — Install Node.js 20 LTS</h2>
+        <p>Required to run the RatanHR React frontend</p>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Download Node.js 20 LTS</h3>
+          <div class="dl-row">
+            <a class="dl-btn dl-node" href="https://nodejs.org/en/download" target="_blank">
+              🟢 Download Node.js 20 LTS (Windows Installer)
+            </a>
+          </div>
+          <p style="margin-top:8px">Select: <strong>Windows Installer (.msi) 64-bit</strong> → LTS version</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Run the installer</h3>
+          <p>Accept the license, keep all defaults. Tick <strong>"Automatically install the necessary tools"</strong> if prompted.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Verify Node.js &amp; npm</h3>
+<pre><span class="cmd">node --version</span>   <span class="comment"># Expected: v20.x.x</span>
+<span class="cmd">npm --version</span>    <span class="comment"># Expected: 10.x.x</span></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Install pnpm (package manager used by RatanHR)</h3>
+<pre><span class="cmd">npm install -g pnpm</span>
+<span class="cmd">pnpm --version</span>   <span class="comment"># Expected: 9.x.x</span></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h3>Install VS Code (recommended for frontend editing)</h3>
+          <div class="dl-row">
+            <a class="dl-btn dl-secondary" href="https://code.visualstudio.com/" target="_blank">
+              💙 Download VS Code
+            </a>
+          </div>
+          <p style="margin-top:8px">Recommended extensions for VS Code:</p>
+          <ul style="font-size:.83rem;color:var(--gray-600);padding-left:20px;line-height:2;margin-top:4px">
+            <li><strong>ESLint</strong> — dbaeumer.vscode-eslint</li>
+            <li><strong>Prettier</strong> — esbenp.prettier-vscode</li>
+            <li><strong>Tailwind CSS IntelliSense</strong> — bradlc.vscode-tailwindcss</li>
+            <li><strong>TypeScript Vue Plugin</strong> — vue.volar (skip if not using Vue)</li>
+            <li><strong>PostgreSQL</strong> — cweijan.vscode-postgresql-client2</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 5: Database Setup ════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-head">
+      <div class="icon icon-db">🗄️</div>
+      <div>
+        <h2>Step 5 — Create the RatanHR Database</h2>
+        <p>Create the database and run migrations</p>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Open psql and create the database</h3>
+<pre><span class="comment"># Option A — psql command line</span>
+<span class="cmd">psql -U postgres</span>
+
+<span class="comment"># Inside psql:</span>
+<span class="kw">CREATE DATABASE</span> <span class="str">ratanhr</span>;
+<span class="kw">CREATE USER</span>     <span class="str">ratanhr_user</span> <span class="kw">WITH PASSWORD</span> <span class="str">'YourStrongPassword123!'</span>;
+<span class="kw">GRANT ALL PRIVILEGES ON DATABASE</span> <span class="str">ratanhr</span> <span class="kw">TO</span> <span class="str">ratanhr_user</span>;
+<span class="kw">\q</span></pre>
+          <div class="alert tip">
+            <span class="alert-icon">💡</span>
+            <p><strong>Option B — pgAdmin GUI:</strong><br/>
+            Open pgAdmin → right-click "Databases" → Create → Database → Name: <code>ratanhr</code> → Owner: <code>ratanhr_user</code></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Configure the connection string in appsettings.json</h3>
+          <p>Open your ASP.NET Core backend project. Edit <code>appsettings.Development.json</code>:</p>
+<pre>{
+  <span class="str">"ConnectionStrings"</span>: {
+    <span class="str">"DefaultConnection"</span>: <span class="str">"Host=localhost;Port=5432;Database=ratanhr;Username=ratanhr_user;Password=YourStrongPassword123!"</span>
+  },
+  <span class="str">"Jwt"</span>: {
+    <span class="str">"Key"</span>: <span class="str">"YOUR_SUPER_LONG_SECRET_KEY_MIN_32_CHARS_HERE"</span>,
+    <span class="str">"Issuer"</span>: <span class="str">"RatanHR"</span>,
+    <span class="str">"Audience"</span>: <span class="str">"RatanHR"</span>,
+    <span class="str">"ExpiryHours"</span>: 8
+  }
+}</pre>
+          <div class="alert warn">
+            <span class="alert-icon">⚠️</span>
+            <p><strong>Never commit appsettings.Development.json with real passwords.</strong><br/>
+            Add it to <code>.gitignore</code>. Use <strong>User Secrets</strong> for local dev:<br/>
+            <code>dotnet user-secrets set "ConnectionStrings:DefaultConnection" "..."</code></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Run Entity Framework migrations</h3>
+          <p>In the <strong>Package Manager Console</strong> (Visual Studio) or a terminal inside the backend project folder:</p>
+<pre><span class="comment"># Option A — Package Manager Console (Visual Studio)</span>
+<span class="cmd">Update-Database</span>
+
+<span class="comment"># Option B — dotnet CLI (any terminal)</span>
+<span class="cmd">dotnet ef database update</span></pre>
+          <p style="margin-top:8px">If there are no migrations yet, create the initial one first:</p>
+<pre><span class="cmd">dotnet ef migrations add InitialCreate</span>
+<span class="cmd">dotnet ef database update</span></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Verify the database was created</h3>
+<pre><span class="cmd">psql -U ratanhr_user -d ratanhr -c "\dt"</span>
+<span class="comment"># You should see a list of tables (Employees, Users, etc.)</span></pre>
+        </div>
+      </div>
+
+      <hr/>
+
+      <div style="margin-top:16px">
+        <h3 style="font-size:.9rem;font-weight:700;color:var(--gray-900);margin-bottom:10px">📌 Connection String Quick Reference</h3>
+        <div class="conn-box">
+          <div class="label">Development (localhost)</div>
+          <div class="value">Host=localhost;Port=5432;Database=ratanhr;Username=ratanhr_user;Password=YourStrongPassword123!</div>
+        </div>
+        <div class="conn-box">
+          <div class="label">Production (change host/credentials)</div>
+          <div class="value">Host=your-server;Port=5432;Database=ratanhr_prod;Username=ratanhr_prod_user;Password=ProdPass;SSL Mode=Require</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 6: Run the Application ═══════════════════════════════ -->
+  <div class="section">
+    <div class="section-head">
+      <div class="icon icon-app">🚀</div>
+      <div>
+        <h2>Step 6 — Run RatanHR Locally</h2>
+        <p>Start both the backend API and the React frontend</p>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Start the ASP.NET Core backend</h3>
+          <p><strong>Option A — Visual Studio:</strong> Open the <code>.sln</code> file → press <kbd>F5</kbd> or click ▶ Run.<br/>
+          The API will start on <code>https://localhost:7001</code> (or the port in <code>launchSettings.json</code>).</p>
+          <p style="margin-top:8px"><strong>Option B — dotnet CLI:</strong></p>
+<pre><span class="cmd">cd YourProject.API</span>
+<span class="cmd">dotnet run</span>
+<span class="comment"># API available at: https://localhost:7001/swagger</span></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Install frontend dependencies</h3>
+<pre><span class="cmd">cd HRMS.SPA.Source</span>
+<span class="cmd">npm install</span>
+<span class="comment"># Or with pnpm:</span>
+<span class="cmd">pnpm install</span></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Configure the API base URL</h3>
+          <p>Create <code>HRMS.SPA.Source/.env.local</code>:</p>
+<pre><span class="str">VITE_API_BASE_URL</span>=https://localhost:7001/api</pre>
+          <div class="alert info">
+            <span class="alert-icon">ℹ️</span>
+            <p>The <code>.env.local</code> file is gitignored. Never commit it. Each developer sets their own local port.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Start the React dev server</h3>
+<pre><span class="cmd">npm run dev:local</span>
+<span class="comment"># Or:</span>
+<span class="cmd">pnpm dev:local</span>
+
+<span class="comment"># Output:</span>
+<span class="str">  VITE v5.x.x  ready in 800 ms</span>
+<span class="str">  ➜  Local:   http://localhost:3000/</span>
+<span class="str">  ➜  Network: http://192.168.x.x:3000/</span></pre>
+          <p style="margin-top:8px">Open your browser at <strong>http://localhost:3000</strong> 🎉</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h3>Run unit tests (optional)</h3>
+<pre><span class="cmd">npm run test</span>              <span class="comment"># All unit tests</span>
+<span class="cmd">npm run test:coverage</span>     <span class="comment"># With coverage report</span>
+<span class="cmd">npm run typecheck</span>         <span class="comment"># TypeScript check</span>
+<span class="cmd">npm run lint</span>              <span class="comment"># ESLint</span></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <h3>Run E2E tests (Playwright)</h3>
+<pre><span class="cmd">npm run e2e:install</span>       <span class="comment"># First time only — downloads browsers</span>
+<span class="cmd">E2E_BASE_URL=http://localhost:3000 npm run e2e</span>
+<span class="cmd">npm run e2e:report</span>        <span class="comment"># View HTML test report</span></pre>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 7: Quick Reference ═══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-head">
+      <div class="icon icon-app">📌</div>
+      <div>
+        <h2>Quick Reference — All URLs &amp; Ports</h2>
+        <p>Default localhost addresses for every service</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="grid2">
+        <div class="card">
+          <h4>🌐 Frontend (React / Vite)</h4>
+          <p>http://localhost:<strong>3000</strong></p>
+        </div>
+        <div class="card">
+          <h4>⚙️ Backend API (ASP.NET Core)</h4>
+          <p>https://localhost:<strong>7001</strong>/api<br/>
+          https://localhost:<strong>7001</strong>/swagger</p>
+        </div>
+        <div class="card">
+          <h4>🐘 PostgreSQL</h4>
+          <p>localhost:<strong>5432</strong><br/>
+          Database: <code>ratanhr</code></p>
+        </div>
+        <div class="card">
+          <h4>📊 pgAdmin 4</h4>
+          <p>http://localhost:<strong>5050</strong><br/>
+          (if installed as standalone server)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 8: Troubleshooting ═══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-head">
+      <div class="icon icon-app">🔧</div>
+      <div>
+        <h2>Common Issues &amp; Fixes</h2>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <div class="step-num">!</div>
+        <div class="step-content">
+          <h3>"psql is not recognized"</h3>
+          <p>Add PostgreSQL bin to PATH:<br/>
+          <code>C:\Program Files\PostgreSQL\16\bin</code><br/>
+          Search Windows → "Edit the system environment variables" → Environment Variables → System → Path → Edit → New</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">!</div>
+        <div class="step-content">
+          <h3>Port 5432 already in use</h3>
+<pre><span class="cmd">netstat -ano | findstr :5432</span>
+<span class="comment"># Find PID, then:</span>
+<span class="cmd">taskkill /PID &lt;PID&gt; /F</span></pre>
+          <p style="margin-top:6px">Or change PostgreSQL to port <code>5433</code> in <code>postgresql.conf</code> and update the connection string.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">!</div>
+        <div class="step-content">
+          <h3>CORS error in browser console</h3>
+          <p>In the ASP.NET Core backend's <code>Program.cs</code>, add your frontend origin:</p>
+<pre>builder.Services.AddCors(opt => opt.AddPolicy(<span class="str">"Dev"</span>, p =>
+    p.WithOrigins(<span class="str">"http://localhost:3000"</span>)
+     .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">!</div>
+        <div class="step-content">
+          <h3>SSL certificate error (https://localhost)</h3>
+<pre><span class="cmd">dotnet dev-certs https --trust</span>
+<span class="comment"># Restart Visual Studio and the browser</span></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">!</div>
+        <div class="step-content">
+          <h3>node_modules / pnpm lock issues</h3>
+<pre><span class="cmd">rm -rf node_modules</span>
+<span class="cmd">pnpm install</span>
+<span class="comment"># Or with npm:</span>
+<span class="cmd">npm ci</span></pre>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>RatanHR Installation Guide · Generated for Localhost Development · 2026</p>
+    <p style="margin-top:4px">Visual Studio 2022 · PostgreSQL 16 · Node.js 20 LTS · .NET 8 · React 19 + Vite</p>
+  </div>
+
+</div>
+</body>
+</html>

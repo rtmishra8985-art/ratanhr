@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>View Employees – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Registration</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapseReg"><i class="bi bi-person-plus"></i> Registration <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseReg">
+      <a href="add-employee.html" class="sub-link">Register Employees</a>
+      <a href="view-employees.html" class="sub-link active" style="color:#f7b731;">View All Employees</a>
+    </div>
+    <div class="nav-label">Company</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseCompany"><i class="bi bi-building"></i> Company <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseCompany">
+      <a href="add-company.html" class="sub-link">Add Company Details</a>
+      <a href="view-company.html" class="sub-link">View Company Details</a>
+    </div>
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseWebAtt"><i class="bi bi-globe"></i> Web Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseWebAtt"><a href="web-attendance-admin.html" class="sub-link">View Web Attendance</a></div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseExcel"><i class="bi bi-file-earmark-spreadsheet"></i> Excel Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseExcel">
+      <a href="upload-attendance.html" class="sub-link">Upload Excel</a>
+      <a href="view-attendance.html" class="sub-link">View Attendance</a>
+    </div>
+
+    <div class="nav-label">Payroll</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapsePayroll"><i class="bi bi-cash-stack"></i> Payroll <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapsePayroll">
+      <a href="payroll.html" class="sub-link">View Payroll</a>
+      <a href="add-payroll.html" class="sub-link">Generate Payslip</a>
+    </div>
+    <div class="nav-label">Reports</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseReports"><i class="bi bi-bar-chart-line"></i> Reports <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseReports">
+      <a href="reports-attendance.html" class="sub-link">Attendance Report</a>
+      <a href="reports-employee.html" class="sub-link">Employee Report</a>
+    </div>
+    <div class="nav-label">Others</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseOthers"><i class="bi bi-star"></i> Appreciation <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseOthers"><a href="appreciation.html" class="sub-link">Appreciate Employees</a></div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseLogo"><i class="bi bi-image"></i> Logo <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseLogo"><a href="upload-logo.html" class="sub-link">Upload Logo</a></div>
+    <a href="admin-users.html" class="nav-link"><i class="bi bi-people"></i> Admin Users</a>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Employee List</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <div class="card card-table">
+    <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center py-3">
+      <span class="fw-semibold">All Employees</span>
+      <div class="d-flex gap-2 flex-wrap">
+        <form class="d-flex gap-2" method="GET" action="">
+          <input type="text" class="form-control form-control-sm" name="search" placeholder="Search employees..." id="searchInput" value="{{search_query}}">
+          <button class="btn btn-sm btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+        </form>
+        <a href="add-employee.html" class="btn btn-sm btn-warning">+ Register Employee</a>
+        <form id="editForm" method="GET" action="edit-employee.html">
+          <input type="hidden" id="selectedEmployeeId" name="employeeId">
+          <button type="button" class="btn btn-sm btn-primary" onclick="handleEdit()">Edit Selected</button>
+        </form>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0" id="empTable">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
+              <th>Status</th>
+              <th>Emp ID</th>
+              <th>User ID</th>
+              <th>Name</th>
+              <th>Gender</th>
+              <th>DOB</th>
+              <th>Nationality</th>
+              <th>Marital Status</th>
+              <th>DOJ</th>
+              <th>Designation</th>
+              <th>Department</th>
+              <th>Bank Name</th>
+              <th>IFSC Code</th>
+              <th>UAN</th>
+              <th>Qualification</th>
+              <th>Skills</th>
+              <th>Languages</th>
+              <th>Blood Group</th>
+              <th>Emergency Contact</th>
+              <th>Aadhaar</th>
+              <th>PAN</th>
+              <th>Identity Docs</th>
+              <th>Edu Docs</th>
+              <th>Passport Photo</th>
+            </tr>
+          </thead>
+          <tbody id="empTbody"><tr><td colspan="26" class="text-center py-3 text-muted small">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script>
+requireAuth(['admin','superadmin']);
+populateTopnav();
+function toggleAll(cb) {
+  document.querySelectorAll('.empCheck').forEach(c => c.checked = cb.checked);
+}
+function handleEdit() {
+  const checked = document.querySelector('.empCheck:checked');
+  if (!checked) { alert('Please select an employee to edit.'); return; }
+  document.getElementById('selectedEmployeeId').value = checked.value;
+  document.getElementById('editForm').submit();
+}
+async function updateStatus(employeeId, isActive) {
+  if (!confirm((isActive ? 'Activate' : 'Deactivate') + ' this employee?')) return;
+  const res = await HrmsApi.toggleEmployeeStatus(employeeId, isActive);
+  if (res && res.success) loadEmployees();
+  else alert((res && res.message) || 'Failed to update status.');
+}
+async function deleteEmployee(employeeId) {
+  if (!confirm('Permanently delete this employee?')) return;
+  const res = await HrmsApi.deleteEmployee(employeeId);
+  if (res && res.success) loadEmployees();
+  else alert((res && res.message) || 'Failed to delete.');
+}
+document.getElementById('searchInput').addEventListener('keyup', function() {
+  const q = this.value.toUpperCase();
+  document.querySelectorAll('#empTbody tr').forEach(row => {
+    row.style.display = row.innerText.toUpperCase().includes(q) ? '' : 'none';
+  });
+});
+async function loadEmployees() {
+  const tbody = document.getElementById('empTbody');
+  tbody.innerHTML = '<tr><td colspan="26" class="text-center py-3 text-muted small">Loading…</td></tr>';
+  const res = await HrmsApi.listEmployees();
+  if (!res || !res.success || !Array.isArray(res.data) || !res.data.length) {
+    tbody.innerHTML = '<tr><td colspan="26" class="text-center py-3 text-muted small">No employees found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = res.data.map(e => {
+    const id = e.employeeId || e.employee_id || '';
+    const active = e.isActive;
+    return '<tr>' +
+      '<td><input type="checkbox" class="empCheck" value="'+id+'"></td>' +
+      '<td>'+(active ? '<span class="badge bg-success-subtle text-success small">Active</span>' : '<span class="badge bg-danger-subtle text-danger small">Inactive</span>')+'</td>' +
+      '<td><code>'+(id||'&mdash;')+'</code></td>' +
+      '<td>'+(e.userId||'&mdash;')+'</td>' +
+      '<td>'+(e.fullName||e.fullname||'&mdash;')+'</td>' +
+      '<td>'+(e.gender||'&mdash;')+'</td>' +
+      '<td>'+(e.dob?e.dob.substring(0,10):'&mdash;')+'</td>' +
+      '<td>'+(e.nationality||'&mdash;')+'</td>' +
+      '<td>'+(e.maritalStatus||'&mdash;')+'</td>' +
+      '<td>'+(e.doj?e.doj.substring(0,10):'&mdash;')+'</td>' +
+      '<td>'+(e.designation||'&mdash;')+'</td>' +
+      '<td>'+(e.department||'&mdash;')+'</td>' +
+      '<td>'+(e.bankName||'&mdash;')+'</td>' +
+      '<td>'+(e.ifscCode||'&mdash;')+'</td>' +
+      '<td>'+(e.uan||'&mdash;')+'</td>' +
+      '<td>'+(e.qualification||'&mdash;')+'</td>' +
+      '<td>'+(e.skills||'&mdash;')+'</td>' +
+      '<td>'+(e.languages||'&mdash;')+'</td>' +
+      '<td>'+(e.bloodGroup||'&mdash;')+'</td>' +
+      '<td>'+(e.emergencyContactName?e.emergencyContactName+' ('+(e.emergencyContactPhone||'')+')'  :'&mdash;')+'</td>' +
+      '<td>'+(e.aadhaar||'&mdash;')+'</td>' +
+      '<td>'+(e.pan||'&mdash;')+'</td>' +
+      '<td>'+(e.identityDocs?'<a href="/uploads/identity/'+e.identityDocs+'" target="_blank">Download</a>':'&mdash;')+'</td>' +
+      '<td>'+(e.educationalDocs?'<a href="/uploads/edu/'+e.educationalDocs+'" target="_blank">Download</a>':'&mdash;')+'</td>' +
+      '<td>'+(e.passportPhoto?'<img src="/uploads/photo/'+e.passportPhoto+'" style="height:28px;width:28px;border-radius:50%;object-fit:cover;">':'&mdash;')+'</td>' +
+      '<td class="text-nowrap">' +
+        '<a href="edit-employee.html?employeeId='+id+'" class="btn btn-xs btn-outline-warning py-0 px-1 me-1"><i class="bi bi-pencil"></i></a>' +
+        (active
+          ? '<button class="btn btn-xs btn-outline-secondary py-0 px-1 me-1" onclick="updateStatus('' +id+ '',false)"><i class="bi bi-pause-circle"></i></button>'
+          : '<button class="btn btn-xs btn-outline-success py-0 px-1 me-1" onclick="updateStatus('' +id+ '',true)"><i class="bi bi-play-circle"></i></button>') +
+        '<button class="btn btn-xs btn-outline-danger py-0 px-1" onclick="deleteEmployee('' +id+ '')" ><i class="bi bi-trash"></i></button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+}
+loadEmployees();
+</script>
+</body>
+</html>

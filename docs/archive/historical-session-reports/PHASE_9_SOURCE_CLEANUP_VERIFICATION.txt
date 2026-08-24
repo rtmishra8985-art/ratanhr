@@ -1,0 +1,457 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║                   PHASE 9: SOURCE CLEANUP & VERIFICATION                     ║
+║                                                                               ║
+║                    Final Cleanup Before Release Candidate                    ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 1: CLEANUP CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1.1: Identify Files to Remove
+──────────────────────────────────
+
+Files to REMOVE (only if confirmed):
+
+TEMPORARY FILES:
+  ☐ .tmp files
+  ☐ .temp files
+  ☐ *.swp files (vim temporary)
+  ☐ *~  files (backup)
+  ☐ .DS_Store (Mac)
+  ☐ Thumbs.db (Windows)
+
+DEBUG FILES:
+  ☐ Debug output files
+  ☐ Test run logs (except test results)
+  ☐ Performance logs (temporary)
+  ☐ Memory dumps
+  ☐ Crash dumps
+
+LOCAL SECRETS:
+  ☐ Local .env files with credentials
+  ☐ Local API keys
+  ☐ Local passwords
+  ☐ Local connection strings
+  ⚠️  BUT KEEP: .env.example (template without values)
+
+BUILD ARTIFACTS:
+  ☐ /bin directories (Debug)
+  ☐ /obj directories
+  ☐ *.dll files (compiled)
+  ☐ *.pdb files (debug symbols)
+  ⚠️  BUT KEEP: Release build output if packaging
+
+LOGS:
+  ☐ application.log
+  ☐ error.log
+  ☐ test.log
+  ☐ build.log
+  ☐ Temporary log files
+
+DUPLICATE FILES:
+  ☐ Duplicate source code
+  ☐ Duplicate configs
+  ☐ Old versioned files (v1, v2, etc.)
+  ☐ Backup copies
+
+OBSOLETE FILES:
+  ☐ Old database scripts
+  ☐ Old migration files (kept only latest)
+  ☐ Old configuration files
+  ☐ Deprecated modules
+  ☐ Dead code branches
+
+TEST CREDENTIALS:
+  ☐ Test user passwords
+  ☐ Test API keys
+  ☐ Test database URLs with credentials
+  ☐ Test email addresses (use placeholders)
+
+FILES TO KEEP (CRITICAL):
+  ✅ All source code
+  ✅ Dockerfile
+  ✅ docker-compose.yml
+  ✅ .gitignore
+  ✅ README.md
+  ✅ CHANGELOG.md
+  ✅ .env.example (template)
+  ✅ appsettings.json (no secrets)
+  ✅ appsettings.Production.json (no secrets)
+  ✅ All migration files
+  ✅ All configuration files
+  ✅ Documentation
+  ✅ Build scripts
+  ✅ Deployment guides
+
+═══════════════════════════════════════════════════════════════════════════════
+                    STEP 1.2: Execute Cleanup
+─────────────────────────────────────────────
+
+Command to Clean Build Artifacts:
+  dotnet clean --configuration Release
+
+Directories to Check & Clean:
+  ☐ /bin (remove Debug, keep Release if needed)
+  ☐ /obj (can remove, will be rebuilt)
+  ☐ .vs (Visual Studio cache, safe to remove)
+  ☐ node_modules/.bin (can remove, will be rebuilt)
+  ☐ Logs directory (remove old logs)
+
+Commands:
+  # Clean .NET build
+  dotnet clean
+  
+  # Clean npm/yarn
+  npm run clean
+  OR
+  yarn clean
+  
+  # Remove build artifacts
+  rm -r bin obj .vs
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 2: SECRET VERIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 2.1: Scan for Secrets
+──────────────────────────
+
+Search all source files for:
+
+☐ API Keys
+  grep -r "api_key" .
+  grep -r "apiKey" .
+  grep -r "API_KEY" .
+  grep -r "api-key" .
+
+☐ Database Passwords
+  grep -r "password" .
+  grep -r "Password" .
+  grep -r "pwd" .
+
+☐ JWT Secrets
+  grep -r "secret" .
+  grep -r "Secret" .
+  grep -r "jwt" .
+
+☐ AWS Credentials
+  grep -r "AKIA" .
+  grep -r "aws_" .
+
+☐ Email Credentials
+  grep -r "smtp_password" .
+  grep -r "email_password" .
+
+Expected Result:
+  ☐ No real secrets found in source
+  ☐ Only templated values (e.g., [YOUR_KEY_HERE])
+  ☐ .env.example with placeholders
+
+Status: ⏳ PENDING
+
+STEP 2.2: Check Configuration Files
+────────────────────────────────────
+
+Files to Check:
+  ☐ appsettings.json
+  ☐ appsettings.Production.json
+  ☐ docker-compose.yml
+  ☐ .env.example
+  ☐ Dockerfile
+  ☐ deployment.yaml
+
+Expected:
+  ✅ NO actual credentials
+  ✅ NO API keys
+  ✅ NO passwords
+  ✅ Only configuration structure
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 3: FILE VERIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 3.1: Verify No Missing Files
+──────────────────────────────────
+
+Check All Required Files Exist:
+
+Source Code:
+  ☐ HRMS.API (all files)
+  ☐ HRMS.Application (all files)
+  ☐ HRMS.Domain (all files)
+  ☐ HRMS.Infrastructure (all files)
+  ☐ HRMS.Tests (all files)
+  ☐ HRMS.SPA (all files)
+
+Configuration:
+  ☐ appsettings.json
+  ☐ appsettings.*.json (all environments)
+  ☐ Dockerfile
+  ☐ docker-compose.yml
+  ☐ .gitignore
+  ☐ .dockerignore
+
+Documentation:
+  ☐ README.md
+  ☐ CHANGELOG.md
+  ☐ API documentation
+  ☐ Deployment guides
+
+Build Files:
+  ☐ HRMS.sln
+  ☐ *.csproj files (all)
+  ☐ package.json
+  ☐ webpack.config.js (if using webpack)
+
+Migrations:
+  ☐ All migration files
+  ☐ Migration snapshot
+  ☐ Database context
+
+Status: ⏳ PENDING
+
+STEP 3.2: Verify No Broken References
+──────────────────────────────────────
+
+Build Test:
+  dotnet build --configuration Release
+  
+Expected:
+  ☐ No missing assembly errors
+  ☐ No unresolved namespaces
+  ☐ No file not found errors
+  ☐ No broken project references
+
+Status: ⏳ PENDING
+
+STEP 3.3: Verify No Duplicate Implementation
+──────────────────────────────────────────────
+
+Check for:
+  ☐ Duplicate class definitions
+  ☐ Duplicate service implementations
+  ☐ Duplicate controllers
+  ☐ Duplicate repositories
+  ☐ Duplicate migration files
+
+Search Strategy:
+  # Find duplicate class names
+  grep -r "public class" . | grep -o "class [A-Za-z]*" | sort | uniq -d
+  
+  # Find duplicate methods
+  grep -r "public.*{" . | awk '{print $3}' | sort | uniq -d
+
+Expected Result:
+  ☐ No duplicates found (or documented reasons)
+  ☐ Clean architecture
+  ☐ Single responsibility per file
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 4: REQUIRED SOURCE VERIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 4.1: Phase 1-7 Core Files
+───────────────────────────────
+
+PHASE 1 - Foundation:
+  ☐ HRMS.sln (solution file)
+  ☐ Project structure
+  ☐ Initial database schema
+
+PHASE 2 - Build & Dependencies:
+  ☐ *.csproj files
+  ☐ package.json / package-lock.json
+  ☐ NuGet packages configured
+
+PHASE 3 - Database:
+  ☐ DbContext files
+  ☐ Entity models
+  ☐ Migration files
+  ☐ Seed data scripts
+
+PHASE 4 - API:
+  ☐ Controllers (all)
+  ☐ DTOs / Models
+  ☐ Endpoints (all)
+  ☐ Validators
+
+PHASE 5 - Complex Modules:
+  ☐ Payroll service
+  ☐ Attendance logic
+  ☐ Leave management
+  ☐ Recruitment module
+
+PHASE 6 - Security:
+  ☐ Authentication middleware
+  ☐ Authorization policies
+  ☐ Encryption services
+  ☐ JWT implementation
+
+PHASE 7 - Frontend:
+  ☐ React/Vue components
+  ☐ Pages
+  ☐ Services
+  ☐ Styles
+
+PHASE 8 - Email:
+  ☐ EmailService.cs
+  ☐ Email templates
+  ☐ Brevo configuration
+  ☐ Health checks
+
+Status: ⏳ PENDING
+
+STEP 4.2: Verify No Placeholder Code
+─────────────────────────────────────
+
+Search for:
+  ☐ TODO comments (list them)
+  ☐ FIXME comments (list them)
+  ☐ HACK comments (list them)
+  ☐ throw new NotImplementedException()
+  ☐ [Obsolete] attributes
+  ☐ Placeholder strings
+
+Expected:
+  ☐ No critical TODOs
+  ☐ No incomplete implementations
+  ☐ All core features implemented
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 5: FINAL VERIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 5.1: Pre-Release Checklist
+───────────────────────────────
+
+Code Quality:
+  ☑ No critical warnings
+  ☑ No errors in build
+  ☑ Tests passing (> 95%)
+  ☑ Code follows conventions
+  ☑ Documentation complete
+
+Functionality:
+  ☑ All modules working
+  ☑ No known bugs
+  ☑ All workflows tested
+  ☑ Performance acceptable
+  ☑ Security verified
+
+Deployment:
+  ☑ Docker builds successfully
+  ☑ Migrations work
+  ☑ Configuration correct
+  ☑ Secrets management secure
+  ☑ Monitoring ready
+
+Documentation:
+  ☑ README updated
+  ☑ CHANGELOG updated
+  ☑ API docs complete
+  ☑ Deployment guide ready
+  ☑ Training materials ready
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SECTION 6: RELEASE CANDIDATE CREATION
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 6.1: Create Source Archive
+───────────────────────────────
+
+Only create ZIP after verification passes!
+
+Command:
+  # Create ZIP with all source
+  Compress-Archive -Path "C:\Users\karun\Downloads\RatanHR_Run8_Final\RatanHR\*" `
+    -DestinationPath "C:\Users\karun\Downloads\RatanHR-v1.0.4-Release-Candidate.zip" `
+    -Force
+
+OR
+
+  # Using 7-Zip
+  7z a -r RatanHR-v1.0.4-Release-Candidate.zip RatanHR/
+
+OR
+
+  # Using Git (if repo)
+  git archive --format=zip --output=RatanHR-v1.0.4-Release-Candidate.zip HEAD
+
+ZIP Contents Should Include:
+  ✅ All source code
+  ✅ All configuration files
+  ✅ Dockerfile & docker-compose
+  ✅ Documentation
+  ✅ Migration scripts
+  ✅ Deployment guides
+
+ZIP Should EXCLUDE:
+  ❌ /bin directories
+  ❌ /obj directories
+  ❌ node_modules
+  ❌ .git history (unless intended)
+  ❌ Log files
+  ❌ Temporary files
+
+Status: ⏳ PENDING
+
+STEP 6.2: Verify ZIP Contents
+──────────────────────────────
+
+Extract and Verify:
+  ☐ Extract ZIP to test folder
+  ☐ Check all source files present
+  ☐ Check no secrets included
+  ☐ Check no build artifacts
+  ☐ Verify file structure correct
+  ☐ Check total size reasonable (< 100MB)
+
+Status: ⏳ PENDING
+
+═══════════════════════════════════════════════════════════════════════════════
+                    FINAL SIGN-OFF
+═══════════════════════════════════════════════════════════════════════════════
+
+Regression Test Result:
+  Status: ⏳ PENDING (PASS / FAIL / BLOCKED)
+
+Cleanup Completed:
+  Status: ⏳ PENDING (YES / NO)
+
+Verification Passed:
+  Status: ⏳ PENDING (YES / NO)
+
+Release Candidate Ready:
+  Status: ⏳ PENDING (YES / NO)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    RatanHR-v1.0.4-Release-Candidate.zip
+
+  File: RatanHR-v1.0.4-Release-Candidate.zip
+  Location: C:\Users\karun\Downloads\
+  Status: ⏳ PENDING
+  Created: [Timestamp]
+  Size: [Size]
+  Checksum: [MD5]
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    PHASE 9 STATUS: ⏳ PENDING
+
+              (Will be PASS / FAIL / BLOCKED after testing)
+
+═══════════════════════════════════════════════════════════════════════════════

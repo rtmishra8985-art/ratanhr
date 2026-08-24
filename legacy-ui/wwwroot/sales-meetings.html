@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meetings – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Sales</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapseSales"><i class="bi bi-graph-up-arrow"></i> Sales <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseSales">
+      <a href="sales-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="sales-leads.html" class="sub-link">Leads</a>
+      <a href="sales-customers.html" class="sub-link">Customers</a>
+      <a href="sales-followups.html" class="sub-link">Follow Ups</a>
+      <a href="sales-meetings.html" class="sub-link" style="color:#f7b731;">Meetings</a>
+      <a href="sales-visits.html" class="sub-link">Field Visits</a>
+      <a href="sales-quotations.html" class="sub-link">Quotations</a>
+      <a href="sales-tasks.html" class="sub-link">Tasks</a>
+      <a href="sales-reports.html" class="sub-link">Reports</a>
+    </div>
+  </div>
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Meetings</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-muted" id="navUserName"></span>
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <div class="card mb-3">
+    <div class="card-body py-2 d-flex justify-content-end">
+      <button class="btn btn-sm btn-warning" onclick="openModal()"><i class="bi bi-plus-circle me-1"></i>Schedule Meeting</button>
+    </div>
+  </div>
+
+  <div class="card card-table">
+    <div class="card-header fw-semibold py-3">All Meetings</div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Title</th><th>Lead / Customer</th><th>Date</th><th>Time</th><th>Type</th><th>Location</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="meetTbody"><tr><td colspan="8" class="text-center py-3 text-muted">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="meetModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title" id="modalTitle">Schedule Meeting</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <form id="meetForm" class="row g-3">
+          <input type="hidden" id="meetId">
+          <div class="col-12"><label class="form-label">Title *</label><input type="text" class="form-control" id="fTitle" required></div>
+          <div class="col-md-6"><label class="form-label">Lead</label><select class="form-select" id="fLeadId"><option value="">None</option></select></div>
+          <div class="col-md-6"><label class="form-label">Customer</label><select class="form-select" id="fCustomerId"><option value="">None</option></select></div>
+          <div class="col-md-4"><label class="form-label">Date *</label><input type="date" class="form-control" id="fDate" required></div>
+          <div class="col-md-4"><label class="form-label">Time *</label><input type="time" class="form-control" id="fTime" required value="09:00"></div>
+          <div class="col-md-4"><label class="form-label">Type</label>
+            <select class="form-select" id="fType">
+              <option>Offline</option><option>Online</option>
+            </select>
+          </div>
+          <div class="col-md-8"><label class="form-label">Location</label><input type="text" class="form-control" id="fLocation"></div>
+          <div class="col-md-4"><label class="form-label">Status</label>
+            <select class="form-select" id="fStatus">
+              <option>Scheduled</option><option>Completed</option><option>Cancelled</option>
+            </select>
+          </div>
+          <div class="col-12"><label class="form-label">Google Map URL</label><input type="url" class="form-control" id="fMapUrl" placeholder="https://maps.google.com/…"></div>
+          <div class="col-12"><label class="form-label">Outcome / Notes</label><textarea class="form-control" id="fNotes" rows="3"></textarea></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning" onclick="saveMeeting()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script>
+const role = sessionStorage.getItem('hrms_role') || localStorage.getItem('hrms_role');
+const name = sessionStorage.getItem('hrms_name') || localStorage.getItem('hrms_name') || 'User';
+if (!role) window.location.replace('/login.html');
+document.getElementById('navUserName').textContent = name;
+document.getElementById('navAvatar').textContent   = name.charAt(0).toUpperCase();
+
+const urlP       = new URLSearchParams(window.location.search);
+const preLeadId  = urlP.get('leadId');
+const preCustId  = urlP.get('customerId');
+
+let modal;
+const STATUS_BADGE = { Scheduled:'warning', Completed:'success', Cancelled:'secondary' };
+
+async function populateRefs() {
+  const [lr, cr] = await Promise.all([HrmsApi.listLeads(1,200), HrmsApi.listCustomers(1,200)]);
+  const lSel = document.getElementById('fLeadId');
+  const cSel = document.getElementById('fCustomerId');
+  if (lr?.success) lr.data.forEach(l => { const o = new Option(`${l.leadNo} – ${l.companyName}`, l.id, false, String(l.id)===preLeadId); lSel.add(o); });
+  if (cr?.success) cr.data.forEach(c => { const o = new Option(c.companyName, c.id, false, String(c.id)===preCustId); cSel.add(o); });
+}
+
+function openModal(m) {
+  document.getElementById('modalTitle').textContent = m ? 'Edit Meeting' : 'Schedule Meeting';
+  document.getElementById('meetId').value     = m ? m.id : '';
+  document.getElementById('fTitle').value     = m?.title ?? '';
+  document.getElementById('fLeadId').value    = m?.salesLeadId ?? (preLeadId || '');
+  document.getElementById('fCustomerId').value= m?.salesCustomerId ?? (preCustId || '');
+  document.getElementById('fDate').value      = m ? m.meetingDate.substring(0,10) : '';
+  document.getElementById('fTime').value      = m?.meetingTime ?? '09:00';
+  document.getElementById('fType').value      = m?.meetingType ?? 'Offline';
+  document.getElementById('fLocation').value  = m?.location ?? '';
+  document.getElementById('fStatus').value    = m?.status ?? 'Scheduled';
+  document.getElementById('fMapUrl').value    = m?.googleMapUrl ?? '';
+  document.getElementById('fNotes').value     = m?.notes ?? '';
+  modal.show();
+}
+
+async function saveMeeting() {
+  const form = document.getElementById('meetForm');
+  if (!form.checkValidity()) { form.reportValidity(); return; }
+  const id  = document.getElementById('meetId').value;
+  const dto = {
+    title: document.getElementById('fTitle').value.trim(),
+    salesLeadId: document.getElementById('fLeadId').value ? parseInt(document.getElementById('fLeadId').value) : null,
+    salesCustomerId: document.getElementById('fCustomerId').value ? parseInt(document.getElementById('fCustomerId').value) : null,
+    meetingDate: document.getElementById('fDate').value,
+    meetingTime: document.getElementById('fTime').value,
+    meetingType: document.getElementById('fType').value,
+    location: document.getElementById('fLocation').value.trim(),
+    status: document.getElementById('fStatus').value,
+    googleMapUrl: document.getElementById('fMapUrl').value.trim() || null,
+    notes: document.getElementById('fNotes').value.trim(),
+    outcome: document.getElementById('fNotes').value.trim(),
+  };
+  const res = id ? await HrmsApi.updateMeeting(id, dto) : await HrmsApi.createMeeting(dto);
+  if (res && res.success) { modal.hide(); loadMeetings(); }
+  else alert((res && res.message) || 'Save failed.');
+}
+
+async function deleteMeeting(id) {
+  if (!confirm('Delete meeting?')) return;
+  const res = await HrmsApi.deleteMeeting(id);
+  if (res && res.success) loadMeetings();
+}
+
+async function loadMeetings() {
+  const tbody = document.getElementById('meetTbody');
+  tbody.innerHTML = '<tr><td colspan="8" class="text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</td></tr>';
+  const res = await HrmsApi.listMeetings(preLeadId || null, preCustId || null);
+  if (!res || !res.success) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-3">Failed.</td></tr>'; return; }
+  if (!res.data.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center py-3 text-muted">No meetings found.</td></tr>'; return; }
+  tbody.innerHTML = res.data.map(m => `<tr>
+    <td><strong>${m.title}</strong></td>
+    <td>${m.leadCompanyName || m.customerCompanyName || '—'}</td>
+    <td>${m.meetingDate.substring(0,10)}</td>
+    <td>${m.meetingTime||'—'}</td>
+    <td><span class="badge ${m.meetingType==='Online'?'bg-info':'bg-secondary'}">${m.meetingType}</span></td>
+    <td class="text-truncate" style="max-width:150px">${m.location||'—'}</td>
+    <td><span class="badge bg-${STATUS_BADGE[m.status]||'secondary'} text-dark">${m.status}</span></td>
+    <td class="text-nowrap">
+      <button class="btn btn-xs btn-outline-warning py-0 px-1 me-1" onclick='openModal(${JSON.stringify(m).replace(/"/g,"&quot;")})'><i class="bi bi-pencil"></i></button>
+      <button class="btn btn-xs btn-outline-danger py-0 px-1" onclick="deleteMeeting(${m.id})"><i class="bi bi-trash"></i></button>
+    </td>
+  </tr>`).join('');
+}
+
+modal = new bootstrap.Modal(document.getElementById('meetModal'));
+populateRefs().then(loadMeetings);
+</script>
+</body>
+</html>

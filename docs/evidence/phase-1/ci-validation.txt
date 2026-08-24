@@ -1,0 +1,5 @@
+Command: YAML/command review of .github/workflows/ci.yml
+Date (UTC): Mon Aug 10 06:31:41 UTC 2026
+----
+Remote GitHub Actions execution NOT VERIFIED (no runner).
+continue-on-error: true present on 'EF model-drift check (advisory)' and the e2e job.

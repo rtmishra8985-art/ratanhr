@@ -1,0 +1,9 @@
+Command: dotnet HRMS.API/bin/Debug/net8.0/HRMS.API.dll (ASPNETCORE_ENVIRONMENT=Development, live MySQL 8.0.45 + Redis 8.2.3, ephemeral RSA keys)
+Date (UTC): Mon Aug 10 06:31:41 UTC 2026
+----
+Result: process started, no DI/ValidateOnBuild/ValidateScopes errors, no startup exception.
+Program.cs: ValidateOnBuild/ValidateScopes = !IsProduction()
+
+First startup attempts (recorded failures):
+ 1) no Redis -> RedisConnectionException at ServiceExtensions.cs:205 (fail-fast, expected without Redis)
+ 2) no JWT keys -> EnvironmentValidator startup validation (2 errors), expected

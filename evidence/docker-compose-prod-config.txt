@@ -1,0 +1,317 @@
+$ docker compose -f docker-compose.prod.yml config
+
+--- STDOUT ---
+name: ratanhr-work-fixed-updated
+services:
+  api:
+    build:
+      context: /home/runner/workspace/RatanHR-work-fixed-updated
+      dockerfile: Dockerfile
+      args:
+        BUILD_TIMESTAMP: unknown
+        GIT_SHA: unknown
+      target: runtime
+    depends_on:
+      clamav:
+        condition: service_healthy
+        required: true
+      migrate:
+        condition: service_completed_successfully
+        required: true
+      redis:
+        condition: service_healthy
+        required: true
+    environment:
+      ALLOWED_HOSTS: api.audit.local
+      APP_BASE_URL: https://audit.local
+      ASPNETCORE_ENVIRONMENT: Production
+      ClamAv__Host: clamav
+      ClamAv__Port: "3310"
+      ClamAv__TimeoutSeconds: "30"
+      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=hrms_audit;Uid=audit;Pwd=[REDACTED-VALUE]-PASSWORD];AllowPublicKeyRetrieval=true;SslMode=Required;
+      DOMAIN_NAME: audit.local
+      Database__AutoMigrate: "false"
+      ENCRYPTION_KEY: [REDACTED-VALUE]-ENCRYPTION-KEY]
+      Features__BiometricRealtime: "false"
+      Hangfire__RedisConnectionString: redis:6379,password=[REDACTED-VALUE]-REDIS-PASSWORD],ssl=False,abortConnect=False
+      Hangfire__UseRedis: "true"
+      JWT_PRIVATE_KEY_PEM: [REDACTED-VALUE]-PRIVATE-KEY]
+      JWT_PUBLIC_KEY_PEM: [REDACTED-VALUE]-PUBLIC-KEY]
+      MYSQL_DATABASE: hrms_audit
+      MYSQL_HOST: mysql
+      MYSQL_PASSWORD: [REDACTED-VALUE]-PASSWORD]
+      MYSQL_PORT: "3306"
+      MYSQL_USER: audit
+      REDIS_CONNECTION_STRING: redis:6379,password=[REDACTED-VALUE]-REDIS-PASSWORD],ssl=False,abortConnect=False
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - -qO-
+        - http://127.0.0.1:8080/api/health
+      timeout: 5s
+      interval: 15s
+      retries: 5
+      start_period: 30s
+    image: hrms-api:0.0.0
+    networks:
+      hrms_internal: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_uploads
+        target: /app/Uploads
+        volume: {}
+      - type: volume
+        source: hrms_logs
+        target: /app/Logs
+        volume: {}
+  backup:
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: true
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |-
+        trap exit TERM; while :;
+          do /mysql-backup.sh;
+          sleep 86400 & wait $${!}; done
+    environment:
+      MYSQL_DATABASE: hrms_audit
+      MYSQL_HOST: mysql
+      MYSQL_PASSWORD: [REDACTED-VALUE]-PASSWORD]
+      MYSQL_USER: audit
+    image: mysql:8.4
+    networks:
+      hrms_internal: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_backups
+        target: /backups
+        volume: {}
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/scripts/mysql-backup.sh
+        target: /mysql-backup.sh
+        read_only: true
+        bind:
+          create_host_path: true
+  certbot:
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |-
+        trap exit TERM; while :;
+          do certbot renew --webroot -w /var/www/certbot --quiet;
+          sleep 12h & wait $${!}; done
+    image: certbot/certbot:v2.11.0
+    networks:
+      hrms_internal: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_certbot_conf
+        target: /etc/letsencrypt
+        volume: {}
+      - type: volume
+        source: hrms_certbot_www
+        target: /var/www/certbot
+        volume: {}
+  clamav:
+    environment:
+      CLAMAV_NO_FRESHCLAMD: "false"
+    healthcheck:
+      test:
+        - CMD
+        - clamdscan
+        - --ping
+        - "1"
+      timeout: 10s
+      interval: 30s
+      retries: 5
+      start_period: 2m0s
+    image: clamav/clamav:1.3
+    networks:
+      hrms_internal: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_clamav_db
+        target: /var/lib/clamav
+        volume: {}
+  migrate:
+    build:
+      context: /home/runner/workspace/RatanHR-work-fixed-updated
+      dockerfile: Dockerfile
+      args:
+        BUILD_TIMESTAMP: unknown
+        GIT_SHA: unknown
+      target: migrate
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: true
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=hrms_audit;Uid=audit;Pwd=[REDACTED-VALUE]-PASSWORD];AllowPublicKeyRetrieval=true;SslMode=Required;
+      MYSQL_DATABASE: hrms_audit
+      MYSQL_HOST: mysql
+      MYSQL_PASSWORD: [REDACTED-VALUE]-PASSWORD]
+      MYSQL_PORT: "3306"
+      MYSQL_USER: audit
+      REDIS_CONNECTION_STRING: redis:6379,password=[REDACTED-VALUE]-REDIS-PASSWORD],ssl=False,abortConnect=False
+    image: hrms-api-migrate:0.0.0
+    networks:
+      hrms_internal: null
+    restart: "no"
+    volumes:
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/db_performance.sql
+        target: /sql-supplements/db_performance.sql
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/db_indexes_fix.sql
+        target: /sql-supplements/db_indexes_fix.sql
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/db_softdelete_fix.sql
+        target: /sql-supplements/db_softdelete_fix.sql
+        read_only: true
+        bind:
+          create_host_path: true
+  mysql:
+    environment:
+      MYSQL_DATABASE: hrms_audit
+      MYSQL_PASSWORD: [REDACTED-VALUE]-PASSWORD]
+      MYSQL_ROOT_PASSWORD: [REDACTED-VALUE]-ROOT-PASSWORD]
+      MYSQL_USER: audit
+    healthcheck:
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - -h
+        - 127.0.0.1
+        - -u
+        - audit
+        - -p[REDACTED-VALUE]-PASSWORD]
+      timeout: 5s
+      interval: 10s
+      retries: 10
+      start_period: 30s
+    image: mysql:8.4
+    networks:
+      hrms_internal: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_mysqldata
+        target: /var/lib/mysql
+        volume: {}
+  nginx:
+    depends_on:
+      api:
+        condition: service_healthy
+        required: true
+    environment:
+      DOMAIN_NAME: audit.local
+    image: nginx:1.27.0-alpine
+    networks:
+      hrms_internal: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "80"
+        protocol: tcp
+      - mode: ingress
+        target: 443
+        published: "443"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/runner/workspace/RatanHR-work-fixed-updated/nginx/nginx.conf.template
+        target: /etc/nginx/templates/nginx.conf.template
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: volume
+        source: hrms_certbot_conf
+        target: /etc/letsencrypt
+        read_only: true
+        volume: {}
+      - type: volume
+        source: hrms_certbot_www
+        target: /var/www/certbot
+        read_only: true
+        volume: {}
+  redis:
+    command:
+      - redis-server
+      - --requirepass
+      - [REDACTED-VALUE]-REDIS-PASSWORD]
+      - --appendonly
+      - "yes"
+      - --appendfsync
+      - everysec
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - -a
+        - [REDACTED-VALUE]-REDIS-PASSWORD]
+        - ping
+      timeout: 5s
+      interval: 10s
+      retries: 10
+      start_period: 10s
+    image: redis:7.4-alpine
+    networks:
+      hrms_internal: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: hrms_redis
+        target: /data
+        volume: {}
+networks:
+  hrms_internal:
+    name: ratanhr-work-fixed-updated_hrms_internal
+    driver: bridge
+volumes:
+  hrms_backups:
+    name: ratanhr-work-fixed-updated_hrms_backups
+  hrms_certbot_conf:
+    name: ratanhr-work-fixed-updated_hrms_certbot_conf
+  hrms_certbot_www:
+    name: ratanhr-work-fixed-updated_hrms_certbot_www
+  hrms_clamav_db:
+    name: ratanhr-work-fixed-updated_hrms_clamav_db
+  hrms_logs:
+    name: ratanhr-work-fixed-updated_hrms_logs
+  hrms_mysqldata:
+    name: ratanhr-work-fixed-updated_hrms_mysqldata
+  hrms_redis:
+    name: ratanhr-work-fixed-updated_hrms_redis
+  hrms_uploads:
+    name: ratanhr-work-fixed-updated_hrms_uploads
+x-common-env:
+  ASPNETCORE_ENVIRONMENT: Production
+  ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=hrms_audit;Uid=audit;Pwd=[REDACTED-VALUE]-PASSWORD];AllowPublicKeyRetrieval=true;SslMode=Required;
+  MYSQL_DATABASE: hrms_audit
+  MYSQL_HOST: mysql
+  MYSQL_PASSWORD: [REDACTED-VALUE]-PASSWORD]
+  MYSQL_PORT: "3306"
+  MYSQL_USER: audit
+  REDIS_CONNECTION_STRING: redis:6379,password=[REDACTED-VALUE]-REDIS-PASSWORD],ssl=False,abortConnect=False
+
+--- STDERR ---
+
+--- EXIT CODE ---
+0

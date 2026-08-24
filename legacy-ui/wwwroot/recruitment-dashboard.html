@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recruitment Dashboard – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Recruitment</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapseRecruit"><i class="bi bi-briefcase"></i> Recruitment <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseRecruit">
+      <a href="recruitment-dashboard.html" class="sub-link" style="color:#f7b731;">Dashboard</a>
+      <a href="recruitment-requisitions.html" class="sub-link">Job Openings</a>
+      <a href="recruitment-candidates.html" class="sub-link">Candidates</a>
+      <a href="recruitment-interviews.html" class="sub-link">Interviews</a>
+      <a href="recruitment-offers.html" class="sub-link">Offer Letters</a>
+    </div>
+    <div class="nav-label">Performance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapsePerf"><i class="bi bi-trophy"></i> Performance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapsePerf">
+      <a href="performance-dashboard.html" class="sub-link">Dashboard</a>
+      <a href="performance-cycles.html" class="sub-link">Review Cycles</a>
+      <a href="performance-goals.html" class="sub-link">Goals</a>
+      <a href="performance-reviews.html" class="sub-link">Reviews</a>
+      <a href="performance-feedback.html" class="sub-link">Feedback</a>
+    </div>
+    <div class="nav-label">Others</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-arrow-left"></i> Back to Main</a>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Recruitment Dashboard</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-muted" id="navUserName"></span>
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4" id="kpiRow">
+    <div class="col-6 col-md-3"><div class="card text-center py-3"><div class="fw-bold fs-2 text-warning" id="kpiOpenReqs">—</div><div class="small text-muted">Open Requisitions</div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center py-3"><div class="fw-bold fs-2 text-primary" id="kpiTotalCands">—</div><div class="small text-muted">Total Candidates</div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center py-3"><div class="fw-bold fs-2 text-success" id="kpiHired">—</div><div class="small text-muted">Hired</div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center py-3"><div class="fw-bold fs-2 text-info" id="kpiPendingOffers">—</div><div class="small text-muted">Pending Offers</div></div></div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Candidate Pipeline -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header fw-semibold py-3">Candidate Pipeline</div>
+        <div class="card-body" id="pipelineBody">
+          <div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div>
+        </div>
+      </div>
+    </div>
+    <!-- Upcoming Interviews -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center py-3">
+          <span class="fw-semibold">Upcoming Interviews</span>
+          <a href="recruitment-interviews.html" class="btn btn-sm btn-outline-warning">View All</a>
+        </div>
+        <div class="card-body p-0" id="upcomingInterviews">
+          <div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row g-3 mt-2">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body d-flex flex-wrap gap-2">
+          <a href="recruitment-requisitions.html" class="btn btn-warning"><i class="bi bi-plus-circle me-1"></i>New Job Opening</a>
+          <a href="recruitment-candidates.html" class="btn btn-outline-primary"><i class="bi bi-person-plus me-1"></i>Add Candidate</a>
+          <a href="recruitment-interviews.html" class="btn btn-outline-info"><i class="bi bi-calendar-plus me-1"></i>Schedule Interview</a>
+          <a href="recruitment-offers.html" class="btn btn-outline-success"><i class="bi bi-envelope me-1"></i>Create Offer</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script>
+requireAuth(['admin','superadmin']);
+populateTopnav();
+
+const STATUS_COLORS = {
+  'New': 'primary', 'Shortlisted': 'info', 'Interviewed': 'warning',
+  'Selected': 'success', 'Rejected': 'danger', 'Hired': 'success',
+  'Offer Extended': 'info', 'On Hold': 'secondary', 'Withdrawn': 'secondary'
+};
+
+async function loadDashboard() {
+  const res = await HrmsApi.recruitmentDashboard();
+  if (!res || !res.success) return;
+  const d = res.data;
+
+  document.getElementById('kpiOpenReqs').textContent     = d.openRequisitions  ?? 0;
+  document.getElementById('kpiTotalCands').textContent   = d.totalCandidates   ?? 0;
+  document.getElementById('kpiHired').textContent        = d.hired             ?? 0;
+  document.getElementById('kpiPendingOffers').textContent= d.pendingOffers     ?? 0;
+
+  // Pipeline bars
+  const pipe = document.getElementById('pipelineBody');
+  if (d.candidatesByStatus && d.candidatesByStatus.length) {
+    const total = d.candidatesByStatus.reduce((s, x) => s + x.count, 0) || 1;
+    pipe.innerHTML = d.candidatesByStatus.map(s => `
+      <div class="mb-2">
+        <div class="d-flex justify-content-between small mb-1">
+          <span>${s.status}</span><span class="text-muted">${s.count}</span>
+        </div>
+        <div class="progress" style="height:8px;">
+          <div class="progress-bar bg-${STATUS_COLORS[s.status] || 'secondary'}" style="width:${Math.round(s.count/total*100)}%"></div>
+        </div>
+      </div>`).join('');
+  } else {
+    pipe.innerHTML = '<p class="text-muted small text-center mb-0">No candidates yet.</p>';
+  }
+
+  // Upcoming interviews
+  const upcoming = document.getElementById('upcomingInterviews');
+  if (d.recentInterviews && d.recentInterviews.length) {
+    upcoming.innerHTML = '<ul class="list-group list-group-flush">' +
+      d.recentInterviews.map(i => `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <div class="small fw-semibold">${i.interviewType || ''} Interview</div>
+            <div class="text-muted" style="font-size:11px;">${new Date(i.scheduledAt).toLocaleString()}</div>
+          </div>
+          <span class="badge bg-${i.status === 'Scheduled' ? 'warning text-dark' : 'secondary'}">${i.status}</span>
+        </li>`).join('') + '</ul>';
+  } else {
+    upcoming.innerHTML = '<p class="text-muted small text-center py-3 mb-0">No recent interviews.</p>';
+  }
+}
+
+loadDashboard();
+</script>
+</body>
+</html>

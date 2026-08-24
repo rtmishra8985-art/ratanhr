@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>Payroll – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Registration</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r1"><i class="bi bi-person-plus"></i> Registration <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r1"><a href="add-employee.html" class="sub-link">Register</a><a href="view-employees.html" class="sub-link">View All</a></div>
+    <div class="nav-label">Company</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r2"><i class="bi bi-building"></i> Company <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r2"><a href="add-company.html" class="sub-link">Add</a><a href="view-company.html" class="sub-link">View</a></div>
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r3"><i class="bi bi-globe"></i> Web Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r3"><a href="web-attendance-admin.html" class="sub-link">View</a></div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r4"><i class="bi bi-file-earmark-spreadsheet"></i> Excel Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r4"><a href="upload-attendance.html" class="sub-link">Upload</a><a href="view-attendance.html" class="sub-link">View</a></div>
+    <div class="nav-label">Payroll</div>
+    <a class="nav-link active" data-bs-toggle="collapse" href="#collapsePayroll"><i class="bi bi-cash-stack"></i> Payroll <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapsePayroll">
+      <a href="payroll.html" class="sub-link" style="color:#f7b731;">View Payroll</a>
+      <a href="add-payroll.html" class="sub-link">Generate Payslip</a>
+    </div>
+    <div class="nav-label">Reports</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseReports"><i class="bi bi-bar-chart-line"></i> Reports <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseReports">
+      <a href="reports-attendance.html" class="sub-link">Attendance Report</a>
+      <a href="reports-employee.html" class="sub-link">Employee Report</a>
+    </div>
+    <div class="nav-label">Others</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r5"><i class="bi bi-star"></i> Appreciation <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r5"><a href="appreciation.html" class="sub-link">Appreciate</a></div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#r6"><i class="bi bi-image"></i> Logo <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="r6"><a href="upload-logo.html" class="sub-link">Upload Logo</a></div>
+    <a href="admin-users.html" class="nav-link"><i class="bi bi-people"></i> Admin Users</a>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Payroll List</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+
+  <!-- Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="stat-card position-relative">
+        <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+        <div class="stat-label">Total Employees</div>
+        <div class="stat-value">{{total_employees}}</div>
+        <div class="text-muted small mt-1">On payroll</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card position-relative">
+        <div class="stat-icon text-success"><i class="bi bi-cash-coin"></i></div>
+        <div class="stat-label">Total Gross Pay</div>
+        <div class="stat-value text-success" style="font-size:22px;">₹{{total_gross}}</div>
+        <div class="text-muted small mt-1">This month</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card position-relative">
+        <div class="stat-icon text-danger"><i class="bi bi-arrow-down-circle"></i></div>
+        <div class="stat-label">Total Deductions</div>
+        <div class="stat-value text-danger" style="font-size:22px;">₹{{total_deductions}}</div>
+        <div class="text-muted small mt-1">PF + Tax + Others</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card position-relative">
+        <div class="stat-icon text-warning"><i class="bi bi-wallet2"></i></div>
+        <div class="stat-label">Total Net Pay</div>
+        <div class="stat-value text-warning" style="font-size:22px;">₹{{total_net}}</div>
+        <div class="text-muted small mt-1">To be disbursed</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter + Table -->
+  <div class="card card-table">
+    <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center py-3">
+      <span class="fw-semibold">Payroll Records</span>
+      <div class="d-flex gap-2 flex-wrap align-items-center">
+        <form class="d-flex gap-2" method="GET" action="">
+          <select class="form-select form-select-sm" name="month" style="width:120px;">
+            <option value="1">January</option><option value="2">February</option>
+            <option value="3">March</option><option value="4">April</option>
+            <option value="5">May</option><option value="6">June</option>
+            <option value="7">July</option><option value="8">August</option>
+            <option value="9">September</option><option value="10">October</option>
+            <option value="11">November</option><option value="12">December</option>
+          </select>
+          <input type="number" class="form-control form-control-sm" name="year" placeholder="Year" style="width:90px;" value="{{filter.year}}">
+          <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+        </form>
+        <a href="add-payroll.html" class="btn btn-sm btn-warning">+ Generate Payslip</a>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Emp ID</th>
+              <th>Employee Name</th>
+              <th>Month/Year</th>
+              <th>Basic Pay</th>
+              <th>HRA</th>
+              <th>Other Allowances</th>
+              <th>Gross Pay</th>
+              <th>PF</th>
+              <th>Tax</th>
+              <th>Other Deductions</th>
+              <th>Net Pay</th>
+              <th>Status</th>
+              <th>Payslip</th>
+            </tr>
+          </thead>
+          <tbody id="payTbody"><tr><td colspan="13" class="text-center py-3 text-muted small">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+requireAuth(['admin','superadmin']);
+populateTopnav();
+const MONTHS = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+function fmt(v) { return v != null ? '₹' + Number(v).toLocaleString('en-IN') : '&mdash;'; }
+async function loadPayroll() {
+  const tbody = document.getElementById('payTbody');
+  tbody.innerHTML = '<tr><td colspan="13" class="text-center py-3 text-muted small">Loading…</td></tr>';
+  const res = await HrmsApi.listPayslips();
+  if (!res || !res.success || !Array.isArray(res.data) || !res.data.length) {
+    tbody.innerHTML = '<tr><td colspan="13" class="text-center py-3 text-muted small">No payslip records found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = res.data.map(r => {
+    const ini = (r.employeeName||'').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    return '<tr>' +
+      '<td><code>'+(r.employeeId||'&mdash;')+'</code></td>' +
+      '<td><div class="d-flex align-items-center gap-2"><div class="avatar-circle" style="width:28px;height:28px;font-size:10px;">'+ini+'</div>'+(r.employeeName||'&mdash;')+'</div></td>' +
+      '<td>'+(MONTHS[r.month]||r.month)+' '+r.year+'</td>' +
+      '<td>'+fmt(r.basicPay)+'</td>' +
+      '<td>'+fmt(r.hra)+'</td>' +
+      '<td>'+fmt(r.otherAllowances)+'</td>' +
+      '<td><strong>'+fmt(r.grossPay)+'</strong></td>' +
+      '<td class="text-danger">'+fmt(r.pfEmployee)+'</td>' +
+      '<td class="text-danger">'+fmt(r.incomeTax)+'</td>' +
+      '<td class="text-danger">'+fmt(r.otherDeductions)+'</td>' +
+      '<td><strong class="text-success">'+fmt(r.netPay)+'</strong></td>' +
+      '<td><span class="badge bg-success-subtle text-success small">'+(r.status||'Generated')+'</span></td>' +
+      '<td class="text-nowrap">' +
+        '<a href="add-payroll.html?payrollId='+r.id+'" class="btn btn-sm btn-outline-warning py-0"><i class="bi bi-receipt me-1"></i>View</a> ' +
+        '<button class="btn btn-sm btn-outline-danger py-0" onclick="deletePayslip('+r.id+')"><i class="bi bi-trash"></i></button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+}
+async function deletePayslip(id) {
+  if (!confirm('Delete this payslip?')) return;
+  const res = await HrmsApi.deletePayslip(id);
+  if (res && res.success) loadPayroll();
+  else alert((res && res.message) || 'Failed to delete payslip.');
+}
+loadPayroll();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Patch instruction for sidebar-admin.html
+# Phase 2 fix P2-BIO-REALTIME: hide the realtime biometric link until the feature is ready.
+#
+# In HRMS.API/wwwroot/includes/sidebar-admin.html, find the realtime menu entry and
+# wrap it in a comment so it does not appear in the navigation:
+#
+# BEFORE:
+#   <li><a href="/biometric-realtime.html">Realtime Monitor</a></li>
+#
+# AFTER:
+#   <!-- DEFERRED: Realtime biometric monitoring is not available in this release.
+#        See Biometric/BIOMETRIC_RELEASE_DECISION.md before uncommenting. -->
+#   <!-- <li><a href="/biometric-realtime.html">Realtime Monitor</a></li> -->
+#
+# Apply this change directly to the file (it is an HTML snippet, no build step needed).

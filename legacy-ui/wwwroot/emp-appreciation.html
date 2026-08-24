@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>My Appreciation – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="emp-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">My Profile</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#e1"><i class="bi bi-person-vcard"></i> Employees <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="e1"><a href="add-emp-details.html" class="sub-link">Add Details</a><a href="view-emp-details.html" class="sub-link">View Details</a></div>
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#att"><i class="bi bi-clock"></i> Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="att"><a href="emp-web-attendance.html" class="sub-link">Web Attendance</a></div>
+    <div class="nav-label">Documents</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#docs"><i class="bi bi-folder"></i> Company Docs <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="docs"><a href="company-docs.html" class="sub-link">View</a></div>
+    <div class="nav-label">Rewards</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseApprec"><i class="bi bi-trophy"></i> Appreciation <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseApprec">
+      <a href="emp-appreciation.html" class="sub-link" style="color:#f7b731;">My Appreciation</a>
+    </div>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">My Appreciation Documents</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="avatar-circle">E</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+<div class="main-panel">
+  <!-- BACKEND: Fetch appreciation docs for logged-in employee -->
+  <div class="card card-table">
+    <div class="card-header py-3"><i class="bi bi-trophy text-warning me-2"></i>My Appreciation Records</div>
+    <div class="card-body">
+      <!-- BACKEND: {% for emp in employees %} -->
+      <!-- {% for doc in emp.appreciation_docs.split(',') if emp.appreciation_docs %} -->
+      <div class="row g-3">
+        <div class="col-md-3 col-6">
+          <a href="/files/appreciation/{{doc}}" class="text-decoration-none" download>
+            <div class="border border-warning rounded p-3 text-center h-100">
+              <i class="bi bi-file-earmark-pdf text-danger" style="font-size:36px;"></i>
+              <p class="fw-semibold small mt-2 mb-0">{{doc}}</p>
+              <span class="badge bg-warning text-dark mt-1 small">Download</span>
+            </div>
+          </a>
+        </div>
+      </div>
+      <!-- {% else %} -->
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-trophy" style="font-size:48px;opacity:.2;"></i>
+        <p class="mt-3">No appreciation documents yet.</p>
+        <p class="small">Your recognition awards and appreciation letters will appear here.</p>
+      </div>
+      <!-- {% endfor %} -->
+      <!-- {% endfor %} -->
+    </div>
+  </div>
+</div>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <title>Biometric Realtime Monitor – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+  <style>
+    .pulse-dot { width:10px; height:10px; border-radius:50%; display:inline-block; animation:pulse 1.5s infinite; }
+    .pulse-green { background:#198754; box-shadow:0 0 0 0 rgba(25,135,84,.4); }
+    .pulse-red   { background:#dc3545; box-shadow:0 0 0 0 rgba(220,53,69,.4); }
+    @keyframes pulse {
+      0%   { box-shadow:0 0 0 0 rgba(25,135,84,.4); }
+      70%  { box-shadow:0 0 0 6px rgba(25,135,84,0); }
+      100% { box-shadow:0 0 0 0 rgba(25,135,84,0); }
+    }
+    #countdownBar { height:4px; background:#2e86c1; transition:width 30s linear; }
+  </style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Biometric</div>
+    <a class="nav-link" href="biometric-dashboard.html"><i class="bi bi-fingerprint"></i> Biometric Dashboard</a>
+    <a class="nav-link" href="biometric-devices.html"><i class="bi bi-hdd-network"></i> Devices</a>
+    <a class="nav-link" href="biometric-logs.html"><i class="bi bi-list-ul"></i> Punch Logs</a>
+    <a class="nav-link active" href="biometric-realtime.html"><i class="bi bi-broadcast"></i> Realtime Monitor</a>
+    <a class="nav-link" href="biometric-sync-history.html"><i class="bi bi-arrow-repeat"></i> Sync History</a>
+    <a class="nav-link" href="biometric-settings.html"><i class="bi bi-gear"></i> Settings</a>
+  </div>
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">
+      <span class="pulse-dot pulse-green me-2"></span>Realtime Monitor
+    </h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <small class="text-muted" id="lastUpdated">Updating…</small>
+    <button class="btn btn-sm btn-outline-primary" onclick="refresh()"><i class="bi bi-arrow-clockwise"></i></button>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<!-- Auto-refresh countdown bar -->
+<div style="background:#e9ecef;width:100%;position:sticky;top:56px;z-index:900;">
+  <div id="countdownBar" style="width:100%;"></div>
+</div>
+
+<div class="main-panel">
+
+  <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
+    <i class="bi bi-info-circle-fill"></i>
+    <div>This monitor polls device status every <strong>30 seconds</strong> via <code>GET /api/biometric/realtime</code>.
+    Full realtime push requires vendor SDK integration (configure in <a href="biometric-settings.html">Settings</a>).</div>
+  </div>
+
+  <!-- Device Cards -->
+  <div class="row g-3" id="deviceCards">
+    <div class="col-12 text-center text-muted py-5">
+      <span class="spinner-border spinner-border-sm me-2"></span> Loading device status…
+    </div>
+  </div>
+
+  <!-- Recent Punches (from logs API) -->
+  <div class="card mt-4">
+    <div class="card-header fw-semibold"><i class="bi bi-clock-history me-2"></i>Recent Punch Events (last 20)</div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+          <thead class="table-light">
+            <tr><th>Time</th><th>Device</th><th>Employee ID</th><th>Direction</th><th>Status</th></tr>
+          </thead>
+          <tbody id="recentPunches">
+            <tr><td colspan="5" class="text-center text-muted py-3">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script>
+async function refresh() {
+  await Promise.all([loadDeviceStatus(), loadRecentPunches()]);
+  document.getElementById('lastUpdated').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+  resetCountdown();
+}
+
+async function loadDeviceStatus() {
+  const r = await fetch('/api/biometric/realtime', { credentials: 'include' });
+  const d = await r.json();
+  const container = document.getElementById('deviceCards');
+  if (!d.success || !d.data?.length) {
+    container.innerHTML = '<div class="col-12 text-center text-muted py-5">No devices registered. <a href="biometric-devices.html">Add devices</a> first.</div>';
+    return;
+  }
+  container.innerHTML = d.data.map(s => `
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-${s.isOnline ? 'success' : 'danger'} h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0 fw-semibold">${s.deviceName}</h6>
+            <span class="pulse-dot ${s.isOnline ? 'pulse-green' : 'pulse-red'}"></span>
+          </div>
+          <div class="text-muted small mb-1"><i class="bi bi-cpu me-1"></i>${s.vendorName}</div>
+          <div class="mt-2">
+            <span class="badge ${s.isOnline ? 'bg-success' : 'bg-danger'} fs-6">
+              ${s.isOnline ? 'ONLINE' : 'OFFLINE'}
+            </span>
+          </div>
+          ${s.firmwareVersion ? `<div class="text-muted small mt-2">FW: ${s.firmwareVersion}</div>` : ''}
+          ${s.enrolledUserCount != null ? `<div class="text-muted small">Enrolled: ${s.enrolledUserCount}</div>` : ''}
+          ${s.lastError ? `<div class="text-danger small mt-1 text-truncate" title="${s.lastError}"><i class="bi bi-exclamation-triangle me-1"></i>${s.lastError}</div>` : ''}
+          <div class="text-muted" style="font-size:10px;margin-top:6px;">Checked: ${new Date(s.checkedAt).toLocaleTimeString()}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function loadRecentPunches() {
+  const today = new Date().toISOString().split('T')[0];
+  const r = await fetch(`/api/biometric/logs?from=${today}T00:00:00&pageSize=20&page=1`, { credentials: 'include' });
+  const d = await r.json();
+  const tbody = document.getElementById('recentPunches');
+  if (!d.success || !d.data?.items?.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">No punches today.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = d.data.items.map(l => `
+    <tr>
+      <td class="small">${new Date(l.punchedAt).toLocaleTimeString()}</td>
+      <td>${l.deviceName}</td>
+      <td><code>${l.userId}</code></td>
+      <td>${l.direction === 'CheckIn'
+        ? '<span class="badge bg-success">In</span>'
+        : l.direction === 'CheckOut'
+          ? '<span class="badge bg-primary">Out</span>'
+          : '<span class="badge bg-secondary">?</span>'}</td>
+      <td>${l.isProcessed ? '<span class="text-success small">✓</span>' : '<span class="text-warning small">⏳</span>'}</td>
+    </tr>`).join('');
+}
+
+let countdownTimer;
+function resetCountdown() {
+  const bar = document.getElementById('countdownBar');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  setTimeout(() => { bar.style.transition = 'width 30s linear'; bar.style.width = '0%'; }, 50);
+}
+
+
+refresh();
+const intervalId = setInterval(refresh, 30000);
+window.addEventListener('beforeunload', () => clearInterval(intervalId));
+</script>
+</body>
+</html>

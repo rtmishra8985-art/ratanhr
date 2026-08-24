@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>Register Employee – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><img src="assets/img/ratanhr-logo.png" alt="RatanHR" class="brand-logo"> RatanHR</div>
+  <div class="mt-2">
+    <div class="nav-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <div class="nav-label">Registration</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseReg"><i class="bi bi-person-plus"></i> Registration <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse show" id="collapseReg">
+      <a href="add-employee.html" class="sub-link" style="color:#f7b731;">Register Employees</a>
+      <a href="view-employees.html" class="sub-link">View All Employees</a>
+    </div>
+    <div class="nav-label">Company</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#c2"><i class="bi bi-building"></i> Company <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="c2"><a href="add-company.html" class="sub-link">Add Details</a><a href="view-company.html" class="sub-link">View Details</a></div>
+    <div class="nav-label">Attendance</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#c3"><i class="bi bi-globe"></i> Web Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="c3"><a href="web-attendance-admin.html" class="sub-link">View</a></div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#c4"><i class="bi bi-file-earmark-spreadsheet"></i> Excel Attendance <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="c4"><a href="upload-attendance.html" class="sub-link">Upload</a><a href="view-attendance.html" class="sub-link">View</a></div>
+
+    <div class="nav-label">Payroll</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapsePayroll"><i class="bi bi-cash-stack"></i> Payroll <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapsePayroll">
+      <a href="payroll.html" class="sub-link">View Payroll</a>
+      <a href="add-payroll.html" class="sub-link">Generate Payslip</a>
+    </div>
+    <div class="nav-label">Reports</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#collapseReports"><i class="bi bi-bar-chart-line"></i> Reports <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="collapseReports">
+      <a href="reports-attendance.html" class="sub-link">Attendance Report</a>
+      <a href="reports-employee.html" class="sub-link">Employee Report</a>
+    </div>
+    <div class="nav-label">Others</div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#c5"><i class="bi bi-star"></i> Appreciation <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="c5"><a href="appreciation.html" class="sub-link">Appreciate</a></div>
+    <a class="nav-link" data-bs-toggle="collapse" href="#c6"><i class="bi bi-image"></i> Logo <i class="bi bi-chevron-down ms-auto small"></i></a>
+    <div class="collapse" id="c6"><a href="upload-logo.html" class="sub-link">Upload Logo</a></div>
+    <a href="admin-users.html" class="nav-link"><i class="bi bi-people"></i> Admin Users</a>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">Register Employee</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="avatar-circle" id="navAvatar">?</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main-panel">
+  <!-- BACKEND: POST to /add-employee, enctype multipart for file uploads -->
+  <!-- BACKEND: Show success/error alert here -->
+  <!-- <div class="alert alert-success alert-dismissible">Employee registered! ID: {{new_emp_id}}</div> -->
+
+  <form id="empForm" enctype="multipart/form-data">
+
+    <!-- Personal Info -->
+    <div class="card card-table mb-4">
+      <div class="card-header py-3"><p class="section-title mb-0">Personal Information</p></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+            <input class="form-control" name="fullname" placeholder="Enter full name" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Gender <span class="text-danger">*</span></label>
+            <select class="form-select" name="gender" required>
+              <option value="">Select gender</option>
+              <option>Male</option><option>Female</option><option>Other</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Date of Birth <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" name="dob" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Nationality</label>
+            <input class="form-control" name="nationality" placeholder="e.g. Indian">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Marital Status</label>
+            <select class="form-select" name="marital_status">
+              <option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Blood Group</label>
+            <select class="form-select" name="blood_group">
+              <option value="">Select</option>
+              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+              <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small">Permanent Address</label>
+            <textarea class="form-control" name="permanent_address" rows="2" placeholder="Full permanent address"></textarea>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small">Current Address</label>
+            <textarea class="form-control" name="current_address" rows="2" placeholder="Current residential address"></textarea>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Aadhaar Number</label>
+            <input class="form-control" name="aadhaar" placeholder="12-digit Aadhaar" maxlength="12">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">PAN Number</label>
+            <input class="form-control" name="pan" placeholder="e.g. ABCDE1234F" maxlength="10">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Identity Documents</label>
+            <input type="file" class="form-control" name="identity_docs">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Medical Conditions</label>
+            <input class="form-control" name="medical_conditions" placeholder="Any known conditions">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Hobbies</label>
+            <input class="form-control" name="hobbies" placeholder="e.g. Reading, Sports">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Languages Known</label>
+            <input class="form-control" name="languages" placeholder="e.g. English, Hindi">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employment Info -->
+    <div class="card card-table mb-4">
+      <div class="card-header py-3"><p class="section-title mb-0">Employment Information</p></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Date of Joining <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" name="doj" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Designation <span class="text-danger">*</span></label>
+            <input class="form-control" name="designation" placeholder="e.g. Software Engineer" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Department <span class="text-danger">*</span></label>
+            <input class="form-control" name="department" placeholder="e.g. Development" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small">Skills</label>
+            <input class="form-control" name="skills" placeholder="e.g. Java, Spring Boot, MySQL">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small">Responsibilities</label>
+            <textarea class="form-control" name="responsibilities" rows="2" placeholder="Key responsibilities"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bank Details -->
+    <div class="card card-table mb-4">
+      <div class="card-header py-3"><p class="section-title mb-0">Bank Details</p></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Account Holder Name</label>
+            <input class="form-control" name="bankAccountHolder" placeholder="Name as per bank">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Bank Name</label>
+            <input class="form-control" name="bankName" placeholder="e.g. State Bank of India">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Branch Name</label>
+            <input class="form-control" name="branchName" placeholder="Branch location">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Account Number</label>
+            <input class="form-control" name="accountNumber" type="number" placeholder="Bank account number">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">IFSC Code</label>
+            <input class="form-control" name="ifsc_code" placeholder="e.g. SBIN0001234">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">UAN</label>
+            <input class="form-control" name="uan" placeholder="Universal Account Number">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Educational Info -->
+    <div class="card card-table mb-4">
+      <div class="card-header py-3"><p class="section-title mb-0">Educational Information</p></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Qualification</label>
+            <input class="form-control" name="qualification" placeholder="e.g. B.Tech, MBA">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Institution</label>
+            <input class="form-control" name="institution" placeholder="College / University name">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Year of Passing</label>
+            <input class="form-control" name="year_of_passing" type="number" placeholder="e.g. 2018" min="1980" max="2099">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Specialization</label>
+            <input class="form-control" name="specialization" placeholder="e.g. Computer Science">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Educational Documents</label>
+            <input type="file" class="form-control" name="educational_docs">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Passport Photo</label>
+            <input type="file" class="form-control" name="passport_photo" accept="image/*">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Experience Info -->
+    <div class="card card-table mb-4">
+      <div class="card-header py-3"><p class="section-title mb-0">Work Experience</p></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Previous Employer</label>
+            <input class="form-control" name="previous_employer" placeholder="Company name">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Job Title</label>
+            <input class="form-control" name="job_title" placeholder="Previous role title">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Duration</label>
+            <input class="form-control" name="duration" placeholder="e.g. Jan 2020 – Dec 2022">
+          </div>
+          <div class="col-md-8">
+            <label class="form-label fw-semibold small">Responsibilities</label>
+            <textarea class="form-control" name="responsibilities" rows="2" placeholder="Previous job responsibilities"></textarea>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Experience Documents</label>
+            <input type="file" class="form-control" name="experience_docs">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Emergency Contact -->
+    <div class="card card-table mb-4">
+      <div class="card-header py-3"><p class="section-title mb-0">Emergency Contact</p></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label fw-semibold small">Contact Name</label>
+            <input class="form-control" name="emergency_contact_name" placeholder="Full name">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold small">Relationship</label>
+            <input class="form-control" name="emergency_contact_relationship" placeholder="e.g. Father, Spouse">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold small">Phone Number</label>
+            <input class="form-control" name="emergency_contact_phone" placeholder="+91 XXXXXXXXXX">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold small">Address</label>
+            <input class="form-control" name="emergency_contact_address" placeholder="Contact address">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center pb-4">
+      <button type="submit" class="btn btn-warning fw-bold px-5 py-2">
+        <i class="bi bi-person-check me-2"></i>Submit Employee Details
+      </button>
+      <a href="view-employees.html" class="btn btn-outline-secondary ms-3 px-4 py-2">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<script src="js/api.js"></script>
+<script>
+requireAuth(['admin','superadmin']);
+populateTopnav();
+document.getElementById('empForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.querySelector('#empForm [type="submit"]');
+  btn.disabled = true;
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting…';
+  const res = await HrmsApi.createEmployee(new FormData(e.target));
+  if (res && res.success) {
+    alert('✅ ' + (res.message || 'Employee registered successfully!'));
+    window.location.href = 'view-employees.html';
+  } else {
+    alert('❌ ' + ((res && res.message) || 'Failed to register employee.'));
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+});
+</script>
+</body>
+</html>

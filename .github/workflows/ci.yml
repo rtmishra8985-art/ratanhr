@@ -1,0 +1,354 @@
+name: CI
+
+# Phase 12 CI workflow. Mirrors the local verification commands documented in
+# docs/phase-2-readiness.md so a green run here means the same commands a
+# developer runs locally also pass. This workflow could not be executed from
+# the sandbox that authored it (no GitHub Actions runner access) — its syntax
+# was validated locally with `actionlint`/YAML parsing only. See
+# docs/phase-2-readiness.md, "CI workflow status", for that limitation.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_VERSION: "8.0.416"
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
+jobs:
+  secret-scan:
+    name: Secret scanning (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks (full history + working tree)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
+
+  backend:
+    name: Backend (build, DI validation, tests)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root_test_password
+          MYSQL_DATABASE: hrms_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot_test_password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+      redis:
+        image: redis:7.4-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          # Read from global.json so this can never drift from the SDK the
+          # repo declares as required (see PHASE 4 in the remediation spec).
+          global-json-file: global.json
+
+      - name: Verify SDK version matches global.json
+        run: |
+          INSTALLED=$(dotnet --version)
+          EXPECTED=$(node -e "console.log(require('./global.json').sdk.version)")
+          echo "Installed: $INSTALLED / Expected: $EXPECTED"
+          if [ "$INSTALLED" != "$EXPECTED" ]; then
+            echo "::error::.NET SDK version mismatch: installed $INSTALLED, global.json requires $EXPECTED"
+            exit 1
+          fi
+
+      - name: Restore
+        run: dotnet restore HRMS.sln --locked-mode
+
+      - name: Build (Release)
+        run: dotnet build HRMS.sln -c Release --no-restore
+
+      - name: Apply EF Core migrations to CI MySQL
+        working-directory: HRMS.Infrastructure
+        env:
+          ConnectionStrings__DefaultConnection: "Server=127.0.0.1;Port=3306;Database=hrms_test;User ID=root;Password=root_test_password;AllowPublicKeyRetrieval=True;SslMode=Required"
+        run: |
+          dotnet tool install --global dotnet-ef --version 8.*
+          dotnet ef database update \
+            --project HRMS.Infrastructure.csproj \
+            --startup-project ../HRMS.API/HRMS.API.csproj \
+            --context ApplicationDbContext
+
+      # ─────────────────────────────────────────────────────────────────────
+      # EF model-drift check — ADVISORY, NOT A RELEASE GATE.
+      # See docs/adr/0001-ef-snapshot-drift.md for the accepted decision.
+      #
+      # The legacy ModelSnapshot predates the hand-authored SQL migrations that
+      # are now the source of truth for schema. `has-pending-model-changes`
+      # therefore always reports drift, and auto-generating a migration to
+      # "fix" it produced a 14,134-line script containing destructive drops and
+      # renames. The blocking gate below is "migrations apply cleanly to a
+      # fresh database", which is what actually protects production.
+      # ─────────────────────────────────────────────────────────────────────
+      - name: EF model-drift check (advisory)
+        id: ef_drift
+        continue-on-error: true
+        working-directory: HRMS.Infrastructure
+        run: |
+          set +e
+          dotnet ef migrations has-pending-model-changes \
+            --project HRMS.Infrastructure.csproj \
+            --startup-project ../HRMS.API/HRMS.API.csproj \
+            --context ApplicationDbContext
+          CODE=$?
+          if [ "$CODE" -ne 0 ]; then
+            echo "::warning title=EF model drift::Snapshot differs from the model. Known and accepted — see docs/adr/0001-ef-snapshot-drift.md. Not a release gate."
+          fi
+          exit 0
+
+      # BLOCKING replacement gate: the migration chain must build a usable
+      # schema from empty, and the API must be able to read it back.
+      - name: Verify migrations apply cleanly to a fresh database (blocking)
+        working-directory: HRMS.Infrastructure
+        env:
+          ConnectionStrings__DefaultConnection: "Server=127.0.0.1;Port=3306;Database=hrms_migration_check;User ID=root;Password=root_test_password;AllowPublicKeyRetrieval=True;SslMode=Required"
+        run: |
+          set -euo pipefail
+          mysql -h 127.0.0.1 -uroot -proot_test_password \
+            -e "DROP DATABASE IF EXISTS hrms_migration_check; CREATE DATABASE hrms_migration_check;"
+          dotnet ef database update \
+            --project HRMS.Infrastructure.csproj \
+            --startup-project ../HRMS.API/HRMS.API.csproj \
+            --context ApplicationDbContext
+          APPLIED=$(mysql -N -B -h 127.0.0.1 -uroot -proot_test_password \
+            -e "SELECT COUNT(*) FROM hrms_migration_check.__EFMigrationsHistory;")
+          TABLES=$(mysql -N -B -h 127.0.0.1 -uroot -proot_test_password \
+            -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='hrms_migration_check';")
+          echo "Applied migrations: $APPLIED / tables created: $TABLES"
+          if [ "$APPLIED" -lt 1 ] || [ "$TABLES" -lt 10 ]; then
+            echo "::error::Migration chain did not produce a usable schema"
+            exit 1
+          fi
+
+      - name: Run backend test suite
+        env:
+          ConnectionStrings__DefaultConnection: "Server=127.0.0.1;Port=3306;Database=hrms_test;User ID=root;Password=root_test_password;AllowPublicKeyRetrieval=True;SslMode=Required"
+          Redis__ConnectionString: "127.0.0.1:6379"
+          ASPNETCORE_ENVIRONMENT: "Test"
+        run: >
+          dotnet test HRMS.sln -c Release --no-build
+          --logger "trx;LogFileName=backend-tests.trx"
+          --results-directory ./TestResults
+
+      - name: Publish test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: TestResults/**/*.trx
+
+      - name: Start API and validate DI container + health endpoint
+        env:
+          ConnectionStrings__DefaultConnection: "Server=127.0.0.1;Port=3306;Database=hrms_test;User ID=root;Password=root_test_password;AllowPublicKeyRetrieval=True;SslMode=Required"
+          Redis__ConnectionString: "127.0.0.1:6379"
+          ASPNETCORE_ENVIRONMENT: "Test"
+        run: |
+          dotnet HRMS.API/bin/Release/net8.0/HRMS.API.dll --urls "http://127.0.0.1:8080" &
+          API_PID=$!
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8080/health > /dev/null; then
+              echo "Health check passed"
+              break
+            fi
+            if ! kill -0 $API_PID 2>/dev/null; then
+              echo "::error::API process exited before becoming healthy (likely DI ValidateOnBuild failure)"
+              exit 1
+            fi
+            sleep 2
+          done
+          curl -sf http://127.0.0.1:8080/health || (echo "::error::Health endpoint never became healthy" && exit 1)
+          kill $API_PID
+
+  frontend:
+    name: Frontend (typecheck, lint, unit tests, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: HRMS.SPA.Source
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.2.0"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Unit tests
+        run: bun run test
+
+      - name: Production build
+        run: bun run build:ci
+
+  e2e:
+    name: Frontend E2E (Playwright)
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    # Only runs when the CI environment can supply a live backend + browsers.
+    # See PHASE 10 in the remediation spec — this job is intentionally not
+    # gating merges until a real run has been observed at least once.
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: HRMS.SPA.Source
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root_test_password
+          MYSQL_DATABASE: hrms_e2e
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot_test_password"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+      redis:
+        image: redis:7.4-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.2.0"
+
+      - name: Install frontend dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium firefox
+
+      - name: Build and start API for E2E
+        working-directory: .
+        env:
+          ConnectionStrings__DefaultConnection: "Server=127.0.0.1;Port=3306;Database=hrms_e2e;User ID=root;Password=root_test_password;AllowPublicKeyRetrieval=True;SslMode=Required"
+          Redis__ConnectionString: "127.0.0.1:6379"
+          ASPNETCORE_ENVIRONMENT: "E2E"
+        run: |
+          dotnet restore HRMS.sln --locked-mode
+          dotnet ef database update --project HRMS.Infrastructure/HRMS.Infrastructure.csproj --startup-project HRMS.API/HRMS.API.csproj
+          dotnet run --project HRMS.API/HRMS.API.csproj --urls "http://127.0.0.1:8080" &
+          sleep 15
+
+      - name: Prepare .env.e2e
+        # BUGFIX: this previously referenced .env.e2e.example, a filename that does
+        # not exist anywhere in the repo. Every other reference (docker-compose.e2e.yml's
+        # header comment, global-setup.ts's error messages) consistently uses
+        # .env.e2e.template - this step now matches, and the template file has been
+        # added at repo root. Without this fix the e2e CI job failed at this exact
+        # step (cp: cannot stat '.env.e2e.example': No such file or directory) before
+        # ever running a single Playwright test.
+        run: cp .env.e2e.template .env.e2e
+
+      - name: Run Playwright E2E suite
+        run: bun run e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: HRMS.SPA.Source/playwright-report/
+
+  docker-validate:
+    name: Docker configuration validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate docker-compose syntax (all compose files)
+        run: |
+          for f in docker-compose*.yml; do
+            echo "Validating $f"
+            docker compose -f "$f" config -q
+          done
+
+      - name: Confirm no SslMode=None in dev/E2E compose files
+        run: |
+          if grep -rl "SslMode=None" docker-compose.yml docker-compose.e2e.yml docker-compose.override.yml 2>/dev/null; then
+            echo "::error::SslMode=None found in a development/E2E compose file"
+            exit 1
+          fi
+          echo "No SslMode=None found."
+
+      - name: Confirm build/migrate Docker stages match global.json SDK version
+        run: |
+          EXPECTED=$(node -e "console.log(require('./global.json').sdk.version)")
+          if ! grep -q "sdk:${EXPECTED}" Dockerfile; then
+            echo "::error::Dockerfile build/migrate stage does not use SDK $EXPECTED from global.json"
+            exit 1
+          fi
+          echo "Dockerfile SDK stage matches global.json ($EXPECTED)."
+
+      - name: Build API image
+        run: docker build -t hrms-api:ci .
+
+      # RHR-003 regression test: monitoring/alertmanager.yml.template previously
+      # shipped with shell-style ${VAR:-default} placeholders that Alertmanager's
+      # own config parser cannot expand, causing the container to crash-loop in
+      # production ("too many colons in address"). `docker compose config` only
+      # validates compose YAML syntax and does NOT catch this class of bug because
+      # the failure only manifests once the container actually starts and parses
+      # the mounted config file. This step boots the real service and asserts it
+      # reaches a stable running state instead of restarting.
+      - name: Boot alertmanager and verify it does not crash-loop (RHR-003 regression)
+        run: |
+          set -euo pipefail
+          docker compose -f docker-compose.yml up -d alertmanager
+          echo "Waiting for alertmanager to stabilize..."
+          sleep 15
+          CID=$(docker compose -f docker-compose.yml ps -q alertmanager)
+          STATUS=$(docker inspect -f '{{.State.Status}}' "$CID")
+          RESTART_COUNT=$(docker inspect -f '{{.RestartCount}}' "$CID")
+          echo "Status: $STATUS / RestartCount: $RESTART_COUNT"
+          if [ "$STATUS" != "running" ] || [ "$RESTART_COUNT" -gt 0 ]; then
+            echo "::error::alertmanager container is not stable (status=$STATUS, restarts=$RESTART_COUNT). Check monitoring/alertmanager.yml.template and alertmanager-entrypoint.sh for unsubstituted placeholders."
+            docker compose -f docker-compose.yml logs alertmanager
+            exit 1
+          fi
+          echo "alertmanager is running with zero restarts — config templating is healthy."
+          docker compose -f docker-compose.yml down alertmanager
+

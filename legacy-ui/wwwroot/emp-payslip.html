@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <title>My Payslips – RatanHR</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/hrms.css" rel="stylesheet">
+  <style>
+    @media print {
+      .sidebar, .topnav, .no-print { display: none !important; }
+      .main-panel { margin-left: 0 !important; padding: 0 !important; }
+    }
+  </style>
+
+  <!-- Theme system -->
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+<div id="sidebarHolder"></div>
+<nav class="topnav">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="bi bi-list fs-5"></i></button>
+    <h6 class="mb-0 fw-semibold">My Payslips</h6>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="role-badge employee">Employee</span>
+    <div class="avatar-circle" id="navAvatar">E</div>
+    <button class="btn btn-sm btn-danger px-3" onclick="logout()">Logout</button>
+  </div>
+
+  <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+</nav>
+<div class="main-panel">
+
+  <!-- Summary cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-label">Total Payslips</div>
+        <div class="stat-value" id="statCount">–</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-label">Last Gross Pay</div>
+        <div class="stat-value" style="font-size:20px;" id="statGross">–</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-label">Last Net Pay</div>
+        <div class="stat-value text-success" style="font-size:20px;" id="statNet">–</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payslip List -->
+  <div class="card card-table">
+    <div class="card-header py-3 d-flex align-items-center justify-content-between fw-semibold">
+      <span>My Payslip History</span>
+      <button class="btn btn-sm btn-outline-secondary no-print" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Month / Year</th>
+              <th>Days Present</th>
+              <th>Basic Pay</th>
+              <th>Gross Pay</th>
+              <th>Deductions</th>
+              <th class="text-success">Net Pay</th>
+            </tr>
+          </thead>
+          <tbody id="payslipBody">
+            <tr><td colspan="6" class="text-center text-muted small py-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+if (!requireAuth(['employee'])) throw new Error('unauthorized');
+
+const months = ['January','February','March','April','May','June',
+                 'July','August','September','October','November','December'];
+
+function fmt(v) {
+  return '₹' + (Number(v) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+}
+
+async function loadPayslips() {
+  const res = await HrmsApi.myPayslips();
+  const slips = (res.data || []).sort((a, b) => b.year - a.year || b.month - a.month);
+
+  document.getElementById('statCount').textContent = slips.length || '—';
+  if (slips.length > 0) {
+    document.getElementById('statGross').textContent = fmt(slips[0].grossEarnings);
+    document.getElementById('statNet').textContent   = fmt(slips[0].netPay);
+  }
+
+  const body = document.getElementById('payslipBody');
+  body.innerHTML = slips.length
+    ? slips.map(s => `
+        <tr>
+          <td class="fw-semibold small">${months[(s.month || 1) - 1]} ${s.year}</td>
+          <td class="small">${s.daysPresent} / ${s.workingDays}</td>
+          <td class="small">${fmt(s.basicPay)}</td>
+          <td class="small">${fmt(s.grossEarnings)}</td>
+          <td class="small text-danger">${fmt(s.totalDeductions)}</td>
+          <td class="small text-success fw-bold">${fmt(s.netPay)}</td>
+        </tr>`).join('')
+    : '<tr><td colspan="6" class="text-center text-muted small py-4">No payslips found. Contact your HR admin.</td></tr>';
+}
+
+// Load sidebar
+fetch('includes/sidebar-employee.html').then(r => r.text()).then(html => {
+  document.getElementById('sidebarHolder').innerHTML = html;
+  document.querySelectorAll('#sidebar .sub-link').forEach(a => {
+    if (a.getAttribute('href') === 'emp-payslip.html') a.style.color = '#f7b731';
+  });
+});
+
+// Set avatar initials
+const name = localStorage.getItem('hrms_name') || sessionStorage.getItem('hrms_name') || '';
+const avatar = document.getElementById('navAvatar');
+if (name && avatar) avatar.textContent = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+
+loadPayslips();
+</script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

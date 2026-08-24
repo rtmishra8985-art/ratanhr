@@ -1,0 +1,15 @@
+// Add these DbSet properties to ApplicationDbContext.cs AFTER the existing DbSets
+// (around line 30-50, before the OnModelCreating method)
+
+public DbSet<DocumentTemplate> DocumentTemplates { get; set; } = null!;
+public DbSet<ComplianceChecklist> ComplianceChecklists { get; set; } = null!;
+public DbSet<ComplianceEvidence> ComplianceEvidences { get; set; } = null!;
+public DbSet<EmployeeSkill> EmployeeSkills { get; set; } = null!;
+public DbSet<ProjectAssignment> ProjectAssignments { get; set; } = null!;
+public DbSet<ExpensePolicy> ExpensePolicies { get; set; } = null!;
+public DbSet<BankAccountDetail> BankAccountDetails { get; set; } = null!;
+public DbSet<EmergencyContact> EmergencyContacts { get; set; } = null!;
+public DbSet<SalaryStructureComponent> SalaryStructureComponents { get; set; } = null!;
+public DbSet<AwardRecognition> AwardRecognitions { get; set; } = null!;
+public DbSet<ApiAuditLog> ApiAuditLogs { get; set; } = null!;
+public DbSet<SystemSetting> SystemSettings { get; set; } = null!;

@@ -1,0 +1,4 @@
+Command: docker / docker compose
+Date (UTC): Mon Aug 10 06:31:41 UTC 2026
+----
+Docker CLI NOT AVAILABLE in this environment -> Docker image build and 'docker compose config' NOT VERIFIED.

@@ -1,0 +1,4 @@
+Command: SELECT MigrationId FROM __EFMigrationsHistory
+Date (UTC): Mon Aug 10 06:31:41 UTC 2026
+----
+Migrations on disk: 16 ; applied: 15 ; failed: 20260807000001_AddCompanyIdToPayslips

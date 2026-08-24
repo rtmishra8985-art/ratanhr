@@ -1,0 +1,134 @@
+{
+  // ============================================================
+  // appsettings.Staging.json — TEMPLATE (no real secrets)
+  //
+  // INSTRUCTIONS:
+  //   1. Copy this file to appsettings.Staging.json
+  //   2. Replace every <PLACEHOLDER> with staging-only values
+  //   3. NEVER commit appsettings.Staging.json to version control
+  //   4. Add appsettings.Staging.json to .gitignore
+  //   5. All values here MUST differ from production values
+  // ============================================================
+
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+    }
+  },
+
+  // ── Database ────────────────────────────────────────────────
+  // Staging MySQL runs on port 3307 to avoid conflict with production (3306)
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=127.0.0.1;Port=3307;Database=hrms_staging;Uid=hrms_staging;Pwd=<STAGING_DB_PASSWORD>;CharSet=utf8mb4;",
+    "HangfireConnection": "Server=127.0.0.1;Port=3307;Database=hrms_staging_hangfire;Uid=hrms_staging;Pwd=<STAGING_DB_PASSWORD>;CharSet=utf8mb4;"
+  },
+
+  // ── Redis ───────────────────────────────────────────────────
+  // Staging Redis runs on port 6380; isolated namespace prefix
+  "Redis": {
+    "ConnectionString": "127.0.0.1:6380,password=<STAGING_REDIS_PASSWORD>,defaultDatabase=1",
+    "KeyPrefix": "hrms:staging:"
+  },
+
+  // ── JWT ─────────────────────────────────────────────────────
+  // MUST differ from production JWT secret
+  "JwtSettings": {
+    "Secret": "<STAGING_JWT_SECRET_MIN_64_CHARS>",
+    "Issuer": "hrms-staging",
+    "Audience": "hrms-staging-client",
+    "AccessTokenExpiryMinutes": 60,
+    "RefreshTokenExpiryDays": 7
+  },
+
+  // ── Encryption ──────────────────────────────────────────────
+  // MUST differ from production encryption key (32 bytes, base64)
+  "Encryption": {
+    "Key": "<STAGING_ENCRYPTION_KEY_32_BYTES_BASE64>"
+  },
+
+  // ── SMTP / Email ────────────────────────────────────────────
+  // MailHog is now included in docker-compose.staging.yml as hrms_staging_mailhog.
+  // No external SMTP credentials are required; all mail is captured in the
+  // MailHog web inbox at http://127.0.0.1:8025.
+  //
+  // When running outside Docker Compose (e.g., dotnet run locally), replace
+  // Host and Port with 127.0.0.1:1025 after starting MailHog separately.
+  //
+  // To use Mailtrap or another external service instead, replace Host/Port
+  // and supply Username/Password; set EnableSsl appropriately.
+  "EmailSettings": {
+    "Host": "hrms_staging_mailhog",
+    "Port": 1025,
+    "Username": "",
+    "Password": "",
+    "FromAddress": "noreply@hrms-staging.local",
+    "FromName": "RatanHR Staging",
+    "EnableSsl": false,
+    "UseSandbox": true
+  },
+
+  // ── CORS ────────────────────────────────────────────────────
+  // Only staging origins — NOT production domains
+  "AllowedOrigins": [
+    "http://localhost:3001",
+    "http://hrms-staging.internal"
+  ],
+
+  // ── File Storage ────────────────────────────────────────────
+  "FileStorage": {
+    "Provider": "Local",
+    "LocalPath": "/app/staging-uploads",
+    "MaxFileSizeMb": 30
+  },
+
+  // ── Migration ───────────────────────────────────────────────
+  // Auto-migrate is DISABLED in staging — run manually with dotnet ef
+  "Database": {
+    "AutoMigrate": false,
+    "SeedData": false
+  },
+
+  // ── Timezone ────────────────────────────────────────────────
+  "AppSettings": {
+    "Timezone": "Asia/Kolkata",
+    "Environment": "Staging",
+    "EnableSwagger": true,
+    "EnableHangfireDashboard": true
+  },
+
+  // ── Attendance ──────────────────────────────────────────────
+  "Attendance": {
+    "BackDateEditWindowDays": 7
+  },
+
+  // ── Biometric — ALL SYNC DISABLED IN STAGING ───────────────
+  "Biometric": {
+    "EnableLiveSync": false,
+    "AllowedVendors": [],
+    "SyncIntervalMinutes": 0
+  },
+
+  // ── Rate Limiting ───────────────────────────────────────────
+  "RateLimiting": {
+    "LoginWindowSeconds": 60,
+    "LoginMaxRequests": 5,
+    "SensitiveWindowSeconds": 60,
+    "SensitiveMaxRequests": 10
+  },
+
+  // ── Health Checks ───────────────────────────────────────────
+  "HealthChecks": {
+    "EnableDetailedResponse": true,
+    "DatabaseTimeoutSeconds": 5,
+    "RedisTimeoutSeconds": 3
+  },
+
+  // ── OpenTelemetry / Monitoring ──────────────────────────────
+  "OpenTelemetry": {
+    "Endpoint": "http://otel-collector-staging:4317",
+    "ServiceName": "hrms-api-staging",
+    "ServiceVersion": "2.0.0"
+  }
+}
